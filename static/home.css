@@ -1,0 +1,285 @@
+/* Base e reset */
+
+* , *::before, *::after{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    align-items: start;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    width: 100%;
+    background-color: rgba(220, 220, 180, 1);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+/* Resets genéricos */
+
+li {
+    list-style: none;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+a:visited,
+a:hover,
+a:active,
+a:focus {
+    color: inherit;
+}
+
+button {
+    border: none;
+    background-color: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+}
+
+input,
+textarea {
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    font-family: inherit;
+}
+
+textarea {
+    resize: none;
+}
+
+label {
+    display: block;
+}
+
+/* Tags genéricas */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Work Sans', sans-serif;
+}
+
+/* Containers principais */
+
+main {
+    align-items: start;
+    display: flex;
+    flex-direction: row;
+    height: 40rem;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 1);
+}
+
+main header {
+    align-items: center;
+    border-bottom-right-radius: 1rem;
+    display: flex;
+    flex-direction: row;
+    height: 12rem;
+    width: 45%;
+    background-color: rgba(220, 220, 180, 1);
+}
+
+/* Elementos do header */
+
+main header h1 {
+    color: rgba(10, 10, 190, 1);
+    margin: 0 8rem 0 8rem;
+}
+
+.manipulate-articles {
+    display: flex;
+    flex-direction: row;
+    width: 20rem;
+}
+
+/* Botões de ação */
+
+.manipulate-articles button {
+    align-items: center;
+    border: none;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 7rem;
+    padding: 1rem;
+    width: 8rem;
+}
+
+.manipulate-articles button:hover {
+    cursor: pointer;
+}
+
+#add-button {   
+    margin-right: auto;
+    color: rgba(40, 40, 220, 1);
+    transition: all 0.2s ease;
+}
+
+#add-button:hover {
+    background-color: rgba(40, 40, 220, 1);
+    color: rgba(255, 255, 255, 1);
+}
+
+#add-button:hover .add-icon path,
+#remove-button:hover .remove-icon path {
+    fill: #FFFFFF;
+}
+
+#remove-button {
+    color: rgba(40, 40, 220, 1);
+    transition: all 0.2s ease;
+}
+
+#remove-button:hover {
+    background-color: rgba(40, 40, 220, 1);
+    color: rgba(255, 255, 255, 1)
+}
+
+.add-icon, .remove-icon {
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+main header button path {
+    transition: all 0.2s ease;
+}
+
+/* Overlays e pop-ups */
+
+.popup-overlay {
+    align-items: center;
+    display: none;
+    height: 100%;
+    justify-content: center;
+    position: fixed;
+    width: 100%;
+    z-index: 99999;
+}
+
+.popup {
+    align-items: center;
+    border: 0.3rem solid rgba(0, 0, 0, 1);
+    border-radius: 1rem;
+    box-shadow: 0.5rem 0.5rem 4rem rgba(0, 0, 0, 1);
+    display: flex;
+    flex-direction: column;
+    height: 40%;
+    justify-content: start;
+    width: 20%;
+    background-color: rgba(180, 180, 180, 1);
+}
+
+/* Botões de cancelar */
+
+.cancel-button {
+    align-items: center;
+    display: flex;
+    height: 2rem;
+    justify-content: center;
+    margin: 0.5rem 0.5rem 0 auto;
+    width: 2rem;
+}
+
+.cancel-button:hover {
+    cursor: pointer;
+    transform: scale(0.95);
+}
+
+.cancel-icon {
+    height: auto;
+    width: auto;
+}
+
+/* Botão de pesquisar */
+
+.search-articles {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    height: 8rem;
+    margin: 2rem 0 0 8rem;
+    width: 32rem;
+}
+
+.search-icon {
+    height: 3rem;
+    width: 3rem;
+}
+
+/* Seção de lista de artigos */
+
+.articles-list-section {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+}
+
+.articles-list-section h2 {
+    font-size: 5rem;
+    margin: 4rem 0 4rem 0;
+    color: rgba(40, 40, 220, 1);
+}
+
+.articles-list-section h2 {
+    margin-top: 4rem;
+}
+
+#articles-list {
+    border: 0.5rem solid rgba(0, 0, 0, 1);
+    display: grid;
+    gap: 4rem;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+}
+
+#articles-list li {
+    align-items: center;
+    border: 0.1rem solid rgba(10, 10, 190, 1);  
+    border-radius: 2rem;
+    display: flex;
+    height: 35rem;
+    justify-content: center;
+    width: 28rem;
+    background-color: rgba(40, 40, 220, 1);
+}
+
+/* Estilos específicos dos pop-ups */
+
+.popup form button {
+    height: 3rem;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 1);
+    color: rgba(255, 255, 255, 1);
+}
+
+.popup form {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+/* Inputs */
+
+.add-inputs {
+    margin: auto;
+}
+
+.remove-input {
+    margin: auto;
+}
