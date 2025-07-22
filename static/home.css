@@ -16,7 +16,7 @@ body {
     flex-direction: column;
     min-height: 100dvh;
     width: 100%;
-    background-color: rgba(220, 220, 180, 1);
+    background-color: rgba(230, 230, 230, 1);
     font-family: 'Roboto', sans-serif;
     font-size: 1.6rem;
     font-weight: 500;
@@ -29,7 +29,7 @@ li {
 }
 
 a {
-    color: white;
+    color: #FFFFFF;
     text-decoration: none;
 }
 
@@ -41,14 +41,15 @@ a:focus {
 }
 
 button {
-    border: none;
     background-color: inherit;
     font-family: inherit;
     font-weight: inherit;
 }
 
 input,
-textarea {
+textarea,
+select,
+option {
     border-left: none;
     border-right: none;
     border-top: none;
@@ -74,60 +75,114 @@ h1, h2, h3, h4, h5, h6 {
 main {
     align-items: start;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     height: 40rem;
     width: 100%;
-    background-color: rgba(255, 255, 255, 1);
+    background-color: #FFFFFF;
 }
 
 main header {
     align-items: center;
-    border-bottom-right-radius: 1rem;
     display: flex;
     flex-direction: row;
     height: 12rem;
-    width: 45%;
-    background-color: rgba(220, 220, 180, 1);
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    background-color: rgba(230, 230, 230, 1);
 }
 
-/* Elementos do header */
+/* Elementos do main */
 
 main header h1 {
-    color: rgba(10, 10, 190, 1);
-    margin: 0 8rem 0 8rem;
+    color: rgba(70, 70, 250, 1);
+    font-size: 4rem;
+}
+
+.subtitle-styling {
+    align-items: center;
+    display: flex;
+    height: 5rem;
+    justify-content: center;
+    margin-bottom: auto;
+    width: 100%;
+    background-image: linear-gradient(to right, #FFFFFF, #FFD43B, #FFFFFF);
+}
+
+.subtitle-styling h3 {
+    margin-left: 4rem;
+    color: rgba(70, 70, 250, 1);
+    font-size: 3.5rem;
 }
 
 .manipulate-articles {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    margin: 0 auto;
     width: 20rem;
+}
+
+.search-articles {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin: 0 0 1rem 14rem;
+    width: 32rem;
+}
+
+#search-form {
+    margin-left: 5rem;
+    position: absolute;
+}
+
+#search-form input,
+#search-form select {
+    border-bottom: 0.15rem solid #A0A0A0;
+    border-radius: 1rem;
+    padding: 0 1rem;
+    background-color: rgba(230, 230, 230, 1);
+    color: rgba(100, 100, 100, 1);
+}
+
+.hide-search {
+    width: 100%;
+    transition: all 0.2s ease;
+    z-index: 9999;
+    background-color: #FFFFFF;
+}
+
+#search-button {
+    border: none;
+    border-radius: 0.5rem;
+    height: 4rem;
+    width: 4rem;
+    transition: all 0.2s ease;
+}
+
+#search-button:hover {
+    cursor: pointer;
+    background-color: #FFD43B;
+}
+
+.search-icon {
+    height: 3rem;
+    width: 3rem;
+}
+
+#search-button:hover .search-icon path {
+    fill: #FFFFFF;
 }
 
 /* Botões de ação */
 
-.manipulate-articles button {
-    align-items: center;
-    border: none;
-    border-radius: 1rem;
-    display: flex;
-    flex-direction: column;
-    height: 7rem;
-    padding: 1rem;
-    width: 8rem;
-}
-
-.manipulate-articles button:hover {
-    cursor: pointer;
-}
-
 #add-button {   
-    margin-right: auto;
-    color: rgba(40, 40, 220, 1);
+    color: rgba(70, 70, 250, 1);
     transition: all 0.2s ease;
 }
 
 #add-button:hover {
-    background-color: rgba(40, 40, 220, 1);
+    background-color: rgba(70, 70, 250, 1);
     color: rgba(255, 255, 255, 1);
 }
 
@@ -137,12 +192,12 @@ main header h1 {
 }
 
 #remove-button {
-    color: rgba(40, 40, 220, 1);
+    color: rgba(70, 70, 250, 1);
     transition: all 0.2s ease;
 }
 
 #remove-button:hover {
-    background-color: rgba(40, 40, 220, 1);
+    background-color: rgba(70, 70, 250, 1);
     color: rgba(255, 255, 255, 1)
 }
 
@@ -169,30 +224,31 @@ main header button path {
 
 .popup {
     align-items: center;
-    border: 0.3rem solid rgba(0, 0, 0, 1);
     border-radius: 1rem;
-    box-shadow: 0.5rem 0.5rem 4rem rgba(0, 0, 0, 1);
+    box-shadow: 0.3rem 0.3rem 1.5rem rgba(0, 0, 0, 1);
     display: flex;
     flex-direction: column;
     height: 40%;
     justify-content: start;
     width: 20%;
     background-color: rgba(180, 180, 180, 1);
+    overflow: hidden;
 }
 
 /* Botões de cancelar */
 
 .cancel-button {
     align-items: center;
+    border: none;
     display: flex;
     height: 2rem;
     justify-content: center;
     margin: 0.5rem 0.5rem 0 auto;
     width: 2rem;
+    cursor: pointer;
 }
 
 .cancel-button:hover {
-    cursor: pointer;
     transform: scale(0.95);
 }
 
@@ -201,60 +257,89 @@ main header button path {
     width: auto;
 }
 
-/* Botão de pesquisar */
-
-.search-articles {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    height: 8rem;
-    margin: 2rem 0 0 8rem;
-    width: 32rem;
-}
-
-.search-icon {
-    height: 3rem;
-    width: 3rem;
-}
-
 /* Seção de lista de artigos */
 
 .articles-list-section {
     align-items: center;
     display: flex;
     flex-direction: column;
-    height: 100%;
     justify-content: center;
     width: 100%;
 }
 
-.articles-list-section h2 {
-    font-size: 5rem;
-    margin: 4rem 0 4rem 0;
-    color: rgba(40, 40, 220, 1);
+.articles-section-header {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
 }
 
-.articles-list-section h2 {
-    margin-top: 4rem;
+.articles-section-header h2 {
+    font-size: 3.5rem;
+    margin: 4rem;
+    color: rgba(70, 70, 250, .9);
+}
+
+.articles-section-header button {
+    align-items: center;
+    border: none;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 7rem;
+    padding: 1rem;
+    width: 8rem;
+    cursor: pointer;
 }
 
 #articles-list {
-    border: 0.5rem solid rgba(0, 0, 0, 1);
     display: grid;
     gap: 4rem;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    margin-bottom: 4em;
 }
 
 #articles-list li {
     align-items: center;
-    border: 0.1rem solid rgba(10, 10, 190, 1);  
-    border-radius: 2rem;
+    border-top: 0.5rem solid rgba(40, 40, 220, 1);
+    border-bottom: 0.5rem solid rgba(40, 40, 220, 1);
+    border-radius: 1.5rem;
+    box-shadow: 1rem 0 2rem rgba(140, 140, 140, 1),
+    -1rem 0 2rem rgba(140, 140, 140, 1);
     display: flex;
-    height: 35rem;
-    justify-content: center;
+    flex-direction: column;
+    height: 20rem;
+    justify-content: space-between;
+    padding: 2rem 0;
+    text-align: center;
     width: 28rem;
-    background-color: rgba(40, 40, 220, 1);
+    background-color: rgba(70, 70, 250, .9);
+}
+
+.article-id {
+    border-radius: 1rem;
+    width: 5rem;
+    background-color: #FFD43B;
+}
+
+#articles-list li a {
+    color: rgba(0, 0, 0, .8);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+#articles-list li a h4 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+#articles-list li p {
+    font-weight: 500;
+    color: rgba(0, 0, 0, .9);
+}
+
+#articles-list li a:hover {
+    color: #000000;
 }
 
 /* Estilos específicos dos pop-ups */
@@ -264,6 +349,7 @@ main header button path {
     width: 100%;
     background-color: rgba(0, 0, 0, 1);
     color: rgba(255, 255, 255, 1);
+    cursor: pointer;
 }
 
 .popup form {
@@ -274,12 +360,55 @@ main header button path {
     width: 100%;
 }
 
-/* Inputs */
+.popup form input {
+    margin-bottom: 1rem;
+}
 
-.add-inputs {
+.add-inputs-div {
     margin: auto;
 }
 
-.remove-input {
+.remove-input-div {
     margin: auto;
+}
+
+.popup div input,
+.popup div textarea {
+    border-radius: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.paperclip-icon {
+    height: 4.5rem;
+    margin: 5rem auto 0.5rem auto;
+    width: 4.5rem;
+}
+
+.signature {
+    margin-bottom: 0.2rem;
+    font-weight: 200;
+}
+
+.signature a {
+    color: rgba(70, 70, 250, .9);
+    text-decoration: underline;
+    transition: all 0.1s ease;
+}
+
+.signature a:hover {
+    color: rgba(30, 30, 210, .9);
+}
+
+.article-content {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+}
+
+main {
+    border: 0.2rem solid blue;
+}
+
+main header {
+    border: 0.1rem solid red;
 }
