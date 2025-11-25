@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='article.css') }}">
 </head>
 <body>
     <main>
@@ -15,9 +15,11 @@
             <h1>{{ article['article-title'] }}</h1>
         </header>
         <section class="article-content">
-            <p>{{ article['article-content'] }}</p>
+            <pre>{{ article['article-content'] }}</pre>
         </section>
     </main>
+    <div class="flex-complete">
+    </div>
 <script src="{{ url_for('static', filename='article.js') }}"></script>
 </body>
 </html>

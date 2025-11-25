@@ -11,17 +11,17 @@
 </head>
 <body>
     <main>
-        <header>
+        <header class="main-header">
             <h1>Blog Pessoal</h1>
         </header>
-
-        <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 448 512"
-        class="paperclip-icon"><path 
-        fill="#FFD43B" 
-        d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
         
         <div class="subtitle-styling">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 448 512"
+            class="paperclip-icon"><path 
+            fill="#FFD43B" 
+            d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+
             <h3>Seu blog dedicado para publicação de artigos pessoais</h3>
         </div>
 
@@ -51,40 +51,30 @@
                 </button>
             </div>
         </section>
+
+        <section class="articles-list-section">
+            <header class="articles-section-header">
+                <button id="add-button">
+                    <svg class="add-icon"
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 512 512"><path 
+                    fill="rgba(70, 70, 250, 1)" 
+                    d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg>
+                    <p>Adicionar<br>artigo</p>
+                </button>
+                <h2>Seus Artigos</h2>
+            </header>   
+            <ul id="articles-list"></ul>
+            <footer class="signature">
+                Criado por <a href="https://github.com/AndreLucas23"
+                target="_blank noreferrer noopener">André Lucas</a>
+            </footer>
+        </section>
     </main>
 
-    <section class="articles-list-section">
-        <header class="articles-section-header">
-            <button id="add-button">
-                <svg class="add-icon"
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 512 512"><path 
-                fill="rgba(70, 70, 250, 1)" 
-                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg>
-                <p>Adicionar<br>artigo</p>
-            </button>
-            <h2>Seus Artigos</h2>
-            <button id="remove-button">
-                <svg class="remove-icon" 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 512 512"><path 
-                fill="rgba(70, 70, 250, 1)" 
-                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM184 232l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"/>
-                </svg>
-                <p>Remover<br>artigo</p>
-            </button>
-        </header>   
-        <ul id="articles-list"></ul>
-        <footer class="signature">
-            Criado por <a href="https://github.com/AndreLucas23"
-            target="_blank noreferrer noopener">André Lucas</a>
-        </footer>
-    </section>
-
-
-    <div id="add-popup-overlay" class="popup-overlay">
-        <div class="add-popup popup">
-            <button class="cancel-button">
+    <div id="add-popup-overlay">
+        <div class="add-popup">
+            <button id="cancel-button">
                 <svg class="remove-icon"
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 384 512"><path
@@ -106,34 +96,8 @@
                     <textarea name="new-content" 
                     id="new-content-input"
                     type="text"
-                    rows="4"></textarea>
-                </div>
-                <button type="submit">Confirmar</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="remove-popup-overlay" 
-    class="popup-overlay">
-        <div class="remove-popup popup">
-            <button class="cancel-button">
-                <svg class="remove-icon"
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 384 512"><path
-                fill="#000000" 
-                d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
-                </svg>
-            </button>
-            <h2>Remover artigo</h2>
-            <form id="remove-form">
-                <div class="remove-input-div">
-                    <label for="remove-input">ID do artigo</label>
-                    <input id="remove-input" 
-                    name="remove-id" 
-                    type="number" 
-                    required 
-                    autocomplete="off"
-                    min="0">
+                    rows="4"
+                    maxlength="2500"></textarea>
                 </div>
                 <button type="submit">Confirmar</button>
             </form>

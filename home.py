@@ -1,4 +1,4 @@
-from app import app, get_db_connection, tuple_to_dict
+from app import app, get_db_connection, tuple_to_dict, tuple_to_list
 from flask import render_template, jsonify, Response, request, redirect, url_for
 
 @app.route('/')
@@ -70,13 +70,13 @@ def search_by_id(search_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT ARTICLE_ID, ARTICLE_TITLE, ARTICLE_CONTENT, PUBLISH_DATE ' \
-    'FROM ARTICLES WHERE ARTICLE_ID = %s', (f'{search_id}%',))
-    search_article = cursor.fetchone()
+    'FROM ARTICLES WHERE ARTICLE_ID LIKE %s', (f'{search_id}%',))
+    search_articles = cursor.fetchall()
     conn.close()
 
-    article_dict = search_article
+    articles_list = tuple_to_list(search_articles)
 
-    return jsonify([article_dict]), 200
+    return jsonify(articles_list), 200
 
 @app.route('/articles/title/<string:search_title>', methods=['GET'])
 def search_by_title(search_title):
@@ -87,27 +87,7 @@ def search_by_title(search_title):
     search_articles = cursor.fetchall()
     conn.close()
 
-    articles_list = []
-
-    for article in search_articles:
-        article_dict = {'article-id': '',
-                       'article-title': '',
-                       'article-content': '',
-                       'publish-date': ''
-                        }
-
-        for i, attr in enumerate(article):
-            match i:
-                case 0:
-                    article_dict['article-id'] = attr
-                case 1:
-                    article_dict['article-title'] = attr
-                case 2:
-                    article_dict['article-content'] = attr
-                case 3:
-                    article_dict['publish-date'] = attr
-
-        articles_list.append(article_dict)
+    articles_list = tuple_to_list(search_articles)
 
     return jsonify(articles_list), 200
 
