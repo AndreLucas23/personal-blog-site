@@ -1,0 +1,71 @@
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    align-items: start;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 100%;
+    background-color: rgba(230, 230, 230, 1);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+pre {
+    font-family: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Work Sans', sans-serif;
+}
+
+main {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(230, 230, 230, 1);
+}
+
+main header {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 2rem 0;
+    width: 100%;
+    background-color: rgba(230, 230, 230, 1);
+}
+
+main header h1 {
+    color: rgba(70, 70, 250, 1);
+    font-size: 4rem;
+}
+
+.article-content {
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 3rem;
+    width: 95%;
+    background-color: #FFFFFF;
+    text-align: start;
+}
+
+.article-content pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 2rem;
+}
+
+.flex-complete {
+    width: 100%;
+}

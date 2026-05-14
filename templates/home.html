@@ -5,54 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">    
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
     <title>Blog Pessoal</title>
 </head>
 <body>
     <main>
-        <header>
-            <h1>BLOG Pessoal</h1>
-            <section class="manipulate-articles">
+        <header class="main-header">
+            <h1>Blog Pessoal</h1>
+        </header>
+        
+        <div class="subtitle-styling">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 448 512"
+            class="paperclip-icon"><path 
+            fill="#FFD43B" 
+            d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+
+            <h3>Seu blog dedicado para publicação de artigos pessoais</h3>
+        </div>
+
+        <section class="search-articles">
+            <form id="search-form">
+                <input id="search-input"
+                    name="search-content"
+                    type="text"
+                    placeholder="Filtrar artigos"
+                    autocomplete="off">
+                <select name="search-option">
+                    <option value="title">Título</option>
+                    <option value="id">ID</option>
+                </select>
+            </form>
+
+            <div class="hide-search"
+            style="margin-left: 0rem;">
+                <button id="search-button"
+                style="margin-left: 0rem">
+                    <svg class="search-icon"
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 512 512"><path 
+                    fill="#FFD43B" 
+                    d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <section class="articles-list-section">
+            <header class="articles-section-header">
                 <button id="add-button">
                     <svg class="add-icon"
                     xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 512 512"><path 
-                    fill="#2828dc" 
+                    fill="rgba(70, 70, 250, 1)" 
                     d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg>
                     <p>Adicionar<br>artigo</p>
                 </button>
-                <button id="remove-button">
-                    <svg class="remove-icon" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 512 512"><path 
-                    fill="#2828dc" 
-                    d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM184 232l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"/>
-                    </svg>
-                    <p>Remover<br>artigo</p>
-                </button>
-            </section>
-        </header>
-
-        <section class="search-articles">
-            <button>
-                <svg class="search-icon"
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 512 512"><path 
-                fill="#FFD43B" 
-                d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
-                </svg>
-            </button>
+                <h2>Seus Artigos</h2>
+            </header>   
+            <ul id="articles-list"></ul>
+            <footer class="signature">
+                Criado por <a href="https://github.com/AndreLucas23"
+                target="_blank noreferrer noopener">André Lucas</a>
+            </footer>
         </section>
     </main>
 
-    <section class="articles-list-section">
-        <h2>Seus Artigos</h2>
-        <ul id="articles-list"></ul>
-    </section>
-
-    <div id="add-popup-overlay" class="popup-overlay">
-        <div class="add-popup popup">
-            <button class="cancel-button">
+    <div id="add-popup-overlay">
+        <div class="add-popup">
+            <button id="cancel-button">
                 <svg class="remove-icon"
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 384 512"><path
@@ -62,44 +84,22 @@
             </button>
             <h2>Adicionar artigo</h2>
             <form id="add-form">
-                <div class="add-inputs">
-                    <label for="new-title-input">Titulo</p>
-                    <input name="new-title" id="new-title-input" type="text" required autocomplete="off">
-                    <label for="new-content-input">Conteúdo</p>
+                <div class="add-inputs-div">
+                    <label for="new-title-input">Titulo</label>
+                    <input name="new-title" 
+                    id="new-title-input" 
+                    type="text" 
+                    required 
+                    autocomplete="off"
+                    maxlength="30">
+                    <label for="new-content-input">Conteúdo</label>
                     <textarea name="new-content" 
                     id="new-content-input"
                     type="text"
-                    rows="4"></textarea>
+                    rows="4"
+                    maxlength="2500"></textarea>
                 </div>
-                <button id="add-confirm" 
-                type="submit">Confirmar</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="remove-popup-overlay" 
-    class="popup-overlay">
-        <div class="remove-popup popup">
-            <button class="cancel-button">
-                <svg class="remove-icon"
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 384 512"><path
-                fill="#000000" 
-                d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
-                </svg>
-            </button>
-            <h2>Remover artigo</h2>
-            <form id="remove-form">
-                <div class="remove-input">
-                    <p>ID do artigo</p>
-                    <input id="remove-input" 
-                    name="remove-id" 
-                    type="number" 
-                    required 
-                    autocomplete="off">
-                </div>
-                <button id="remove-confirm" 
-                type="submit">Confirmar</button>
+                <button type="submit">Confirmar</button>
             </form>
         </div>
     </div>
