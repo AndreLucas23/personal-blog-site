@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: blog_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root1234}
+      MYSQL_DATABASE: ${DB_NAME:-BLOG}
+      MYSQL_USER: ${DB_USER:-blog_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-1234}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./models.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1' 2>/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  web:
+    build: .
+    container_name: blog_flask
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=${DB_USER:-blog_user}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_NAME=${DB_NAME:-BLOG}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/venv
+
+volumes:
+  db_data:
