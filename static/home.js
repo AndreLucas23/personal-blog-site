@@ -12,26 +12,26 @@ function loadArticles(articles=[]) {
         articlesList.appendChild(noArticle);
     } else {
         articles.forEach(article => {
-            const localDate = new Date(article['publish-date']).toLocaleDateString()
+            const localDate = new Date(article['publish_date']).toLocaleDateString()
 
             const newArticle = document.createElement('li');
 
             const newId = document.createElement('p');
-            newId.textContent = `ID: ${article['article-id']}`;
+            newId.textContent = `ID: ${article['article_id']}`;
             newId.setAttribute('class', 'article-id');
 
             const removeButton = document.createElement('button');
             removeButton.setAttribute('class', 'remove-button');
 
             removeButton.addEventListener('click', () => {
-                const url = `articles/${article['article-id']}`
+                const url = `articles/${article['article_id']}`
 
                 fetch(url, {
                     method: 'DELETE'
                 })
                 .then(() => {
                     articles.forEach((deleteArticle, index) => {
-                        if (deleteArticle['article-id'] == article['article-id']) {
+                        if (deleteArticle['article_id'] == article['article_id']) {
                             articles.splice(index, 1);
                         }
                     })
@@ -67,11 +67,11 @@ function loadArticles(articles=[]) {
             removeSvg.appendChild(removePath);
 
             const newTitleLink = document.createElement('a');
-            const url = `/open/${article['article-id']}`;
+            const url = `/open/${article['article_id']}`;
             newTitleLink.setAttribute('href', url);
 
             const newTitle = document.createElement('h4');
-            newTitle.textContent = article['article-title'];
+            newTitle.textContent = article['article_title'];
             newTitleLink.appendChild(newTitle);
 
             const newDate = document.createElement('p');
@@ -104,7 +104,7 @@ function searchArticles(event, articles, searchForm) {
         }
 
         fetch(url, {
-                method: 'GET',
+            method: 'GET',
         })
         .then(res => res.json())
         .then(articlesRes => {

@@ -12,14 +12,14 @@
 <body>
     <main>
         <header>
-            <h1>{{ article['article-title'] }}</h1>
+            <h1>{{ article['article_title'] }}</h1>
         </header>
         <section class="article-content">
-            <pre>{{ article['article-content'] }}</pre>
+            <pre>{{ article['article_content'] }}</pre>
         </section>
     </main>
     <div class="flex-complete">
     </div>
-<script src="{{ url_for('static', filename='article.js') }}"></script>
+    <script src="{{ url_for('static', filename='article.js') }}"></script>
 </body>
 </html>
