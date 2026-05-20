@@ -1,11 +1,19 @@
-from app import app, get_db_connection
-from flask import render_template, jsonify, Response, request, redirect, url_for
+from flask import (
+    Blueprint,
+    render_template,
+    jsonify,
+    request,
+)
+    
+from db import get_db_connection
 
-@app.route('/')
+home_bp = Blueprint('home', __name__)
+
+@home_bp.route('/')
 def home():
     return render_template('home.html')
 
-@app.route('/articles', methods=['GET'])
+@home_bp.route('/articles', methods=['GET'])
 def get_articles():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -16,7 +24,7 @@ def get_articles():
 
     return jsonify(all_articles)
 
-@app.route('/articles', methods=['POST'])
+@home_bp.route('/articles', methods=['POST'])
 def add_article():
     data = request.get_json()
     article_title = data.get('new-title')
@@ -31,7 +39,7 @@ def add_article():
 
     return jsonify({'message': 'artigo criado com sucesso'}), 201
 
-@app.route('/articles/<int:remove_id>', methods=['DELETE'])
+@home_bp.route('/articles/<int:remove_id>', methods=['DELETE'])
 def remove_article(remove_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -42,7 +50,7 @@ def remove_article(remove_id):
 
     return jsonify({'message': 'artigo removido com sucesso'}), 200
 
-@app.route('/articles/id/<int:search_id>', methods=['GET'])
+@home_bp.route('/articles/id/<int:search_id>', methods=['GET'])
 def search_by_id(search_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -53,7 +61,7 @@ def search_by_id(search_id):
 
     return jsonify(search_articles), 200
 
-@app.route('/articles/title/<string:search_title>', methods=['GET'])
+@home_bp.route('/articles/title/<string:search_title>', methods=['GET'])
 def search_by_title(search_title):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -64,7 +72,7 @@ def search_by_title(search_title):
 
     return jsonify(search_articles), 200
 
-@app.route('/open/<int:article_id>')
+@home_bp.route('/open/<int:article_id>')
 def open_article(article_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
