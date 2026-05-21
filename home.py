@@ -17,6 +17,7 @@ def home():
 def get_articles():
     all_articles = []
 
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -28,16 +29,18 @@ def get_articles():
             'FROM ARTICLES')
         all_articles = cursor.fetchall()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return jsonify(all_articles)
 
 @home_bp.route('/articles', methods=['POST'])
 def add_article():
-    data = request.get_json()
+    data = request.get_json() or {}
     article_title = data.get('new_title')
     article_content = data.get('new_content')
 
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -45,12 +48,14 @@ def add_article():
         'VALUES (%s, %s)', (article_title, article_content))
         conn.commit()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return jsonify({'message': 'artigo criado com sucesso'}), 201
 
 @home_bp.route('/articles/<int:remove_id>', methods=['DELETE'])
 def remove_article(remove_id):
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -58,12 +63,14 @@ def remove_article(remove_id):
         'WHERE ARTICLE_ID = %s', (remove_id,))
         conn.commit()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return jsonify({'message': 'artigo removido com sucesso'}), 200
 
 @home_bp.route('/articles/id/<int:search_id>', methods=['GET'])
 def search_by_id(search_id):
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -74,12 +81,14 @@ def search_by_id(search_id):
         'FROM ARTICLES WHERE ARTICLE_ID LIKE %s', (f'{search_id}%',))
         search_articles = cursor.fetchall()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return jsonify(search_articles), 200
 
 @home_bp.route('/articles/title/<string:search_title>', methods=['GET'])
 def search_by_title(search_title):
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -90,12 +99,14 @@ def search_by_title(search_title):
         'FROM ARTICLES WHERE ARTICLE_TITLE LIKE %s', (f'{search_title}%',))
         search_articles = cursor.fetchall()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return jsonify(search_articles), 200
 
 @home_bp.route('/open/<int:article_id>')
 def open_article(article_id):
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -106,6 +117,7 @@ def open_article(article_id):
         'FROM ARTICLES WHERE ARTICLE_ID = %s', (article_id,))
         article = cursor.fetchone()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return render_template('article.html', article=article), 200

@@ -16,7 +16,8 @@ def handle_db_error(error):
 
     return jsonify({
         'status': 'error',
-        'message': 'Houve um erro interno ao processar os dados do banco'
+        'message': 'Houve um erro interno ao processar os dados do banco',
+        'debug_error': f'[{error.errno}] {error.msg}'
     }), 500
 
 if __name__ == '__main__':
