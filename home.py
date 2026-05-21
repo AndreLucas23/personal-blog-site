@@ -36,9 +36,9 @@ def get_articles():
 
 @home_bp.route('/articles', methods=['POST'])
 def add_article():
-    data = request.get_json() or {}
-    article_title = data.get('new_title')
-    article_content = data.get('new_content')
+    data = request.get_json()
+    article_title = data.get('new-title')
+    article_content = data.get('new-content')
 
     conn = None
     try:

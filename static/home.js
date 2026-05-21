@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         
         const addData = new FormData(addForm);
+        console.log(addData);
         const data = {};
         addData.forEach((value, key) => {
             data[key] = value;
