@@ -78,7 +78,7 @@ def search_by_id(search_id):
         'ARTICLE_TITLE as article_title, '
         'ARTICLE_CONTENT as article_content, '
         'PUBLISH_DATE as publish_date '
-        'FROM ARTICLES WHERE ARTICLE_ID LIKE %s', (f'{search_id}%',))
+        'FROM ARTICLES WHERE ARTICLE_ID LIKE %s', (f'%{search_id}%',))
         search_articles = cursor.fetchall()
     finally:
         if conn:
@@ -96,7 +96,7 @@ def search_by_title(search_title):
         'ARTICLE_TITLE as article_title, '
         'ARTICLE_CONTENT as article_content, '
         'PUBLISH_DATE as publish_date '
-        'FROM ARTICLES WHERE ARTICLE_TITLE LIKE %s', (f'{search_title}%',))
+        'FROM ARTICLES WHERE ARTICLE_TITLE LIKE %s', (f'%{search_title}%',))
         search_articles = cursor.fetchall()
     finally:
         if conn:

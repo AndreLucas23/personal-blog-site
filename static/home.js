@@ -94,7 +94,9 @@ function searchArticles(event, articles, searchForm) {
     const searchSelect = searchForm.querySelector('select').value;
     let url;
 
-    if (!searchContent.length) {
+    if (searchSelect === 'id' && isNaN(searchContent)) {
+        loadArticles([]);
+    } else  if ((!searchContent.length && !searchContent.trim())) {
         loadArticles(articles);
     } else {
         if (searchSelect === 'title') {
