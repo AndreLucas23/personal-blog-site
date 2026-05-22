@@ -5,95 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <title>Blog Pessoal</title>
 </head>
 <body>
     <main>
-        <header class="main-header">
-            <h1>Blog Pessoal</h1>
-        </header>
-        
-        <div class="subtitle-styling">
-            <svg xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 448 512"
-            class="paperclip-icon"><path 
-            fill="#FFD43B" 
-            d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+        <aside class="page-aside">
+            <nav class="page-nav">
+                <a href="#home">
+                    <svg class="home-icon aside-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z"/></svg>
+                </a>
+                <a href="#articles">
+                    <svg class="articles-icon aside-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M32 176C32 134.5 63.6 100.4 104 96.4L104 96L384 96C437 96 480 139 480 192L480 368L304 368C264.2 368 232 400.2 232 440L232 500C232 524.3 212.3 544 188 544C163.7 544 144 524.3 144 500L144 272L80 272C53.5 272 32 250.5 32 224L32 176zM268.8 544C275.9 530.9 280 515.9 280 500L280 440C280 426.7 290.7 416 304 416L552 416C565.3 416 576 426.7 576 440L576 464C576 508.2 540.2 544 496 544L268.8 544zM112 144C94.3 144 80 158.3 80 176L80 224L144 224L144 176C144 158.3 129.7 144 112 144z"/></svg>
+                </a>
+                <a href="#social">
+                    <svg class="social-icon aside-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M96 192C96 130.1 146.1 80 208 80C269.9 80 320 130.1 320 192C320 253.9 269.9 304 208 304C146.1 304 96 253.9 96 192zM32 528C32 430.8 110.8 352 208 352C305.2 352 384 430.8 384 528L384 534C384 557.2 365.2 576 342 576L74 576C50.8 576 32 557.2 32 534L32 528zM464 128C517 128 560 171 560 224C560 277 517 320 464 320C411 320 368 277 368 224C368 171 411 128 464 128zM464 368C543.5 368 608 432.5 608 512L608 534.4C608 557.4 589.4 576 566.4 576L421.6 576C428.2 563.5 432 549.2 432 534L432 528C432 476.5 414.6 429.1 385.5 391.3C408.1 376.6 435.1 368 464 368z"/></svg>
+                </a>
+            </nav>
+        </aside>
 
-            <h3>Seu blog dedicado para publicação de artigos pessoais</h3>
+        <div class="aside-fill"></div>
+
+        <div class="no-aside">
+            <section id="home" class="section main-bg">
+                <div class="main-text">
+                    <h1>Dê asas para<br>
+                        suas ideias</h1>
+
+                    <p>Aqui, você pode criar artigos de texto<br>
+                        para compartilhar com seus amigos.<br>
+                        Comece usando a criatividade na seção<br>
+                        abaixo e se prepare para ampliar a rede.</p>
+                </div>
+
+                <img src="{{ url_for('static', filename='imgs/main_img.svg') }}" 
+                class="main-img"
+                alt="Monitor de computador mostrando papel físico de artigo com pontos destacados">
+            </section>
+
+            <section id="articles" class="section">
+                <header class="articles-header">
+                    <button id="add-button">
+                        <svg class="add-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512">
+                            <path fill="rgba(70, 70, 250, 1)" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/>
+                        </svg>
+                        <p>Adicionar<br>artigo</p>
+                    </button>
+                    <h2>Seus Artigos</h2>
+                </header>
+
+                <section class="search-articles">
+                    <form id="search-form">
+                        <input id="search-input"
+                            name="search-content"
+                            type="text"
+                            placeholder="Filtrar artigos"
+                            autocomplete="off">
+                        <select name="search-option">
+                            <option value="title">Título</option>
+                            <option value="id">ID</option>
+                        </select>
+                    </form>
+
+                    <div class="hide-search"
+                    style="margin-left: 0rem;">
+                        <button id="search-button"
+                        style="margin-left: 0rem">
+                            <svg class="search-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 512 512">
+                                <path fill="#FFD43B" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </section>
+                
+                <ul id="articles-list"></ul>
+                <footer class="signature">
+                    Criado por <a href="https://github.com/AndreLucas23"
+                    target="_blank" rel="noopener noreferrer">André Lucas</a>
+                </footer>
+            </section>
+
+            <section id="social" class="section main-bg">
+
+            </section>
         </div>
-
-        <section class="search-articles">
-            <form id="search-form">
-                <input id="search-input"
-                    name="search-content"
-                    type="text"
-                    placeholder="Filtrar artigos"
-                    autocomplete="off">
-                <select name="search-option">
-                    <option value="title">Título</option>
-                    <option value="id">ID</option>
-                </select>
-            </form>
-
-            <div class="hide-search"
-            style="margin-left: 0rem;">
-                <button id="search-button"
-                style="margin-left: 0rem">
-                    <svg class="search-icon"
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 512 512"><path 
-                    fill="#FFD43B" 
-                    d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
-                    </svg>
-                </button>
-            </div>
-        </section>
-
-        <section class="articles-list-section">
-            <header class="articles-section-header">
-                <button id="add-button">
-                    <svg class="add-icon"
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 512 512"><path 
-                    fill="rgba(70, 70, 250, 1)" 
-                    d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg>
-                    <p>Adicionar<br>artigo</p>
-                </button>
-                <h2>Seus Artigos</h2>
-            </header>   
-            <ul id="articles-list"></ul>
-            <footer class="signature">
-                Criado por <a href="https://github.com/AndreLucas23"
-                target="_blank" rel="noopener noreferrer">André Lucas</a>
-            </footer>
-        </section>
     </main>
 
     <div id="add-popup-overlay">
         <div class="add-popup">
             <button id="cancel-button">
                 <svg class="remove-icon"
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 384 512"><path
-                fill="#000000" 
-                d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512">
+                    <path fill="#000000" d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
                 </svg>
             </button>
             <h2>Adicionar artigo</h2>
             <form id="add-form">
                 <div class="add-inputs-div">
                     <label for="new-title-input">Titulo</label>
-                    <input name="new-title" 
-                    id="new-title-input" 
-                    type="text" 
-                    required 
+                    <input name="new-title"
+                    id="new-title-input"
+                    type="text"
+                    required
                     autocomplete="off"
                     maxlength="30">
                     <label for="new-content-input">Conteúdo</label>
-                    <textarea name="new-content" 
+                    <textarea name="new-content"
                     id="new-content-input"
                     type="text"
                     rows="4"
@@ -103,6 +127,6 @@
             </form>
         </div>
     </div>
-<script src="{{ url_for('static', filename='home.js') }}"></script>
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
 </body>
 </html>
