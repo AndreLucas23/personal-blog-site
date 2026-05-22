@@ -24,7 +24,7 @@ function loadArticles(articles=[]) {
             removeButton.setAttribute('class', 'remove-button');
 
             removeButton.addEventListener('click', () => {
-                const url = `articles/${article['article_id']}`
+                const url = `/articles/${article['article_id']}`
 
                 fetch(url, {
                     method: 'DELETE'
@@ -94,9 +94,9 @@ function searchArticles(event, articles, searchForm) {
     const searchSelect = searchForm.querySelector('select').value;
     let url;
 
-    if (searchSelect === 'id' && isNaN(searchContent)) {
+    if (searchSelect === 'id' && isNaN(searchContent) ) {
         loadArticles([]);
-    } else  if ((!searchContent.length && !searchContent.trim())) {
+    } else if (!searchContent.trim()) {
         loadArticles(articles);
     } else {
         if (searchSelect === 'title') {
@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addButton = document.getElementById('add-button');
     const addOverlay = document.getElementById('add-popup-overlay');
     const addForm = document.getElementById('add-form');
-    const removeButtons = document.getElementsByClassName('remove-button');
     const searchForm = document.getElementById('search-form');
 
     const cancelButton = document.getElementById('cancel-button');
@@ -165,7 +164,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         
         const addData = new FormData(addForm);
-        console.log(addData);
         const data = {};
         addData.forEach((value, key) => {
             data[key] = value;
@@ -188,13 +186,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             addForm.reset();
             articles = await (await fetch('/articles')).json();
             loadArticles(articles);
+            addOverlay.style.display = 'none';
         })
         .catch(error => {
             console.error('Erro: ', error);
             alert('Erro ao enviar o formulário: ' + error.message);
         })
-
-        addOverlay.style.display = 'none';
     })
 
     searchForm.querySelector('input')

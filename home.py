@@ -3,6 +3,7 @@ from flask import (
     render_template,
     jsonify,
     request,
+    abort,
 )
     
 from db import get_db_connection
@@ -36,7 +37,7 @@ def get_articles():
 
 @home_bp.route('/articles', methods=['POST'])
 def add_article():
-    data = request.get_json()
+    data = request.get_json() or {}
     article_title = data.get('new-title')
     article_content = data.get('new-content')
 
@@ -119,5 +120,8 @@ def open_article(article_id):
     finally:
         if conn:
             conn.close()
+
+    if article is None:
+        abort(404)
 
     return render_template('article.html', article=article), 200
