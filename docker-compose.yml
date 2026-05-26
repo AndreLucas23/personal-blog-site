@@ -28,7 +28,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=db
+      - DB_HOST=${DB_HOST:-blog_mysql}
       - DB_USER=${DB_USER:-blog_user}
       - DB_PASSWORD=${DB_PASSWORD:-1234}
       - DB_NAME=${DB_NAME:-BLOG}

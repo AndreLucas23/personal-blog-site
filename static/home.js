@@ -46,7 +46,7 @@ function loadArticles(articles=[]) {
             removeButton.addEventListener('mouseover', () => {
                 const svgStyle = removeButton.querySelector('svg').style;
 
-                svgStyle.filter = 'drop-shadow(0 0 2rem #FF0000)';
+                svgStyle.filter = 'drop-shadow(0 0 2rem #F01010)';
                 svgStyle.transform = 'scale(1.05)';
             })
 
@@ -62,7 +62,7 @@ function loadArticles(articles=[]) {
             removeButton.appendChild(removeSvg);
 
             const removePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            removePath.setAttribute('fill', '#FF0000');
+            removePath.setAttribute('fill', '#F01010');
             removePath.setAttribute('d', 'M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z');
             removeSvg.appendChild(removePath);
 
@@ -87,22 +87,22 @@ function loadArticles(articles=[]) {
     }
 }
 
-function searchArticles(event, articles, searchForm) {
+function filterArticles(event, articles, filterForm) {
     event.preventDefault();
 
-    const searchContent = searchForm.querySelector('input').value;
-    const searchSelect = searchForm.querySelector('select').value;
+    const filterContent = filterForm.querySelector('input').value;
+    const filterSelect = filterForm.querySelector('select').value;
     let url;
 
-    if (searchSelect === 'id' && isNaN(searchContent) ) {
+    if (filterSelect === 'id' && isNaN(filterContent) ) {
         loadArticles([]);
-    } else if (!searchContent.trim()) {
+    } else if (!filterContent.trim()) {
         loadArticles(articles);
     } else {
-        if (searchSelect === 'title') {
-            url = `/articles/title/${searchContent}`
-        } else if (searchSelect === 'id') {
-            url = `/articles/id/${searchContent}`
+        if (filterSelect === 'title') {
+            url = `/articles/title/${filterContent}`
+        } else if (filterSelect === 'id') {
+            url = `/articles/id/${filterContent}`
         }
 
         fetch(url, {
@@ -129,34 +129,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadArticles(articles);
 
     const addButton = document.getElementById('add-button');
-    const addOverlay = document.getElementById('add-popup-overlay');
+    const addMenu = document.getElementById('add-menu');
     const addForm = document.getElementById('add-form');
-    const searchForm = document.getElementById('search-form');
+    const filterForm = document.getElementById('filter-form');
 
     const cancelButton = document.getElementById('cancel-button');
-    const searchButton = document.getElementById('search-button');
+    const filterButton = document.getElementById('filter-button');
 
-    // Função para abertura do pop-up de adição de artigo
+    // Função para abertura do menu de adição de artigo
     addButton.addEventListener('click', () => {
-        addOverlay.style.display = 'flex'
+        addMenu.style.opacity = '100';
+        addMenu.style.pointerEvents = 'all';
     });
 
     // Função para fechamento dos pop-ups
     cancelButton.addEventListener('click', () => {
-        addOverlay.style.display = 'none';
+        addMenu.style.opacity = '0';
+        addMenu.style.pointerEvents = 'none';
     })
 
     document.addEventListener('keydown', (event) => {
-        if (addOverlay.style.display == 'flex' && 
-            event.key === 'Escape') addOverlay.style.display = 'none';
-    })
-    
-    searchButton.addEventListener('click', () => {
-        if (searchButton.parentElement.style.marginLeft === '0rem') {
-            searchButton.parentElement.style.marginLeft = '33rem';
-        } else {
-            searchButton.parentElement.style.marginLeft = '0rem';
-        }
+        if (addMenu.style.display == 'flex' && 
+            event.key === 'Escape') addMenu.style.display = 'none';
     })
 
     // Função para adição de artigo no banco de dados
@@ -186,7 +180,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             addForm.reset();
             articles = await (await fetch('/articles')).json();
             loadArticles(articles);
-            addOverlay.style.display = 'none';
+            addMenu.style.transition = 'none';
+            addMenu.style.opacity = '0';
+            addMenu.style.transition = 'all 0.2s ease';
+            addMenu.style.pointerEvents = 'none';
         })
         .catch(error => {
             console.error('Erro: ', error);
@@ -194,8 +191,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
     })
 
-    searchForm.querySelector('input')
-    .addEventListener('input', (event) => searchArticles(event, articles, searchForm));
-    searchForm.querySelector('select')
-    .addEventListener('input', (event) => searchArticles(event, articles, searchForm));
+    filterForm.querySelector('input')
+    .addEventListener('input', (event) => filterArticles(event, articles, filterForm));
+    filterForm.querySelector('select')
+    .addEventListener('input', (event) => filterArticles(event, articles, filterForm));
 })
