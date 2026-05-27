@@ -31,6 +31,7 @@ def get_articles():
         all_articles = cursor.fetchall()
     finally:
         if conn:
+            cursor.close()
             conn.close()
 
     return jsonify(all_articles)
@@ -50,6 +51,7 @@ def add_article():
         conn.commit()
     finally:
         if conn:
+            cursor.close()
             conn.close()
 
     return jsonify({'message': 'artigo criado com sucesso'}), 201
@@ -65,6 +67,7 @@ def remove_article(remove_id):
         conn.commit()
     finally:
         if conn:
+            cursor.close()
             conn.close()
 
     return jsonify({'message': 'artigo removido com sucesso'}), 200
@@ -83,6 +86,7 @@ def search_by_id(search_id):
         search_articles = cursor.fetchall()
     finally:
         if conn:
+            cursor.close()
             conn.close()
 
     return jsonify(search_articles), 200
@@ -101,6 +105,7 @@ def search_by_title(search_title):
         search_articles = cursor.fetchall()
     finally:
         if conn:
+            cursor.close()
             conn.close()
 
     return jsonify(search_articles), 200
@@ -119,6 +124,7 @@ def open_article(article_id):
         article = cursor.fetchone()
     finally:
         if conn:
+            cursor.close()
             conn.close()
 
     if article is None:
