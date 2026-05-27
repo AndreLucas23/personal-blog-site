@@ -362,10 +362,6 @@ main {
     transform: scale(1.15);
 }
 
-#articles-list li a:hover {
-    color: #000000;
-}
-
 /* Botões de ação */
 
 #add-button:hover,
