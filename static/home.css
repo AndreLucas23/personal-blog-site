@@ -287,15 +287,15 @@ main {
 
 .mini {
     align-items: center;
-    border-radius: 0.8rem;
     box-shadow: inset 0.3rem 0.3rem 1.5rem var(--shadow);
     display: flex;
     flex-direction: column;
     position: relative;
+    border: 0.1rem solid var(--secondary-black);
+    border-radius: 0.8rem;
     height: 20rem;
     justify-content: space-between;
     text-align: center;
-    width: 28rem;
     background-position: center;
     background-size: cover;
 }
