@@ -11,14 +11,14 @@ function loadArticles(articles=[]) {
         articlesList.innerHTML = '';
         articlesList.appendChild(noArticle);
     } else {
-        articles.forEach(article => {
-            const localDate = new Date(article['publish_date']).toLocaleDateString()
+        let bgDef = 1;
 
+        articles.forEach(article => {
             const newArticle = document.createElement('li');
             newArticle.classList.add('mini');
-
-            const randomBg = Math.floor(Math.random() * 3) + 1
-            newArticle.style.backgroundImage = `url('./static/imgs/mini_${randomBg}.svg')`
+            
+            newArticle.style.backgroundImage = `url('./static/imgs/mini_${bgDef}.svg')`
+            bgDef == 3 ? bgDef = 1 : bgDef += 1;
 
             const newLink = document.createElement('a');
             const url = `/open/${article['article_id']}`;
@@ -70,10 +70,12 @@ function loadArticles(articles=[]) {
             const newTitle = document.createElement('h3');
             newTitle.textContent = article['article_title'];
             newTitle.classList.add('mini-title');
-            
+
+            const localDate = new Date(article['publish_date']).toLocaleDateString()
             const newDate = document.createElement('p');
             newDate.textContent = `Data de publicação: ${localDate}`;
-            
+            newDate.classList.add('mini-date');
+
             newArticle.appendChild(newLink);
             newArticle.appendChild(newRemove);
             newLink.appendChild(newId);
@@ -136,20 +138,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Função para abertura do menu de adição de artigo
     addButton.addEventListener('click', () => {
-        addMenu.style.opacity = '10';
+        addMenu.style.transform = 'translateY(0%)';
         addMenu.style.pointerEvents = 'all';
     });
 
     // Função para fechamento dos pop-ups
     cancelButton.addEventListener('click', () => {
-        addMenu.style.opacity = '0';
+        addMenu.style.transform = 'translateY(-100%)';
         addMenu.style.pointerEvents = 'none';
     })
 
     document.addEventListener('keydown', (event) => {
-        if (addMenu.style.opacity == '0' && 
+        if (addMenu.style.transform == 'translateY(0%)' && 
             event.key === 'Escape') {
-                addMenu.style.opacity = '0';
+                addMenu.style.transform = 'translateY(-100%)';
                 addMenu.style.pointerEvents = 'none';
             }
     })
