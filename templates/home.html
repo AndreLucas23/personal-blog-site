@@ -13,129 +13,154 @@
 <body>
     <noscript>O Javascript está desativado ou não é suportado no seu navegador. Para melhor experiência, por favor, ative-o</noscript>
 
-    <main>
-        <aside class="page-aside">
-            <nav class="page-nav">
-                <div>
-                    <a href="#home">
-                        <svg class="home-icon aside-icon" 
+    <main class="pg__main">
+        <aside class="pg__aside">
+            <nav class="aside__nav">
+                <div class="aside__item">
+                    <a class="aside__link"
+                    href="#home">
+                        <svg class="aside__icon" 
                         xmlns="http://www.w3.org/2000/svg" 
                         viewBox="0 0 640 640">
                             <path d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z"/>
                         </svg>
                     </a>
-                    <span>Início</span>
+                    
+                    <span class="aside__popup">Início</span>
                 </div>
 
-                <div>
-                    <a href="#articles">
-                        <svg class="articles-icon aside-icon" 
+                <div class="aside__item">
+                    <a class="aside__link"
+                    href="#articles">
+                        <svg class="aside__icon" 
                         xmlns="http://www.w3.org/2000/svg" 
                         viewBox="0 0 640 640">
                             <path d="M32 176C32 134.5 63.6 100.4 104 96.4L104 96L384 96C437 96 480 139 480 192L480 368L304 368C264.2 368 232 400.2 232 440L232 500C232 524.3 212.3 544 188 544C163.7 544 144 524.3 144 500L144 272L80 272C53.5 272 32 250.5 32 224L32 176zM268.8 544C275.9 530.9 280 515.9 280 500L280 440C280 426.7 290.7 416 304 416L552 416C565.3 416 576 426.7 576 440L576 464C576 508.2 540.2 544 496 544L268.8 544zM112 144C94.3 144 80 158.3 80 176L80 224L144 224L144 176C144 158.3 129.7 144 112 144z"/>
                         </svg>
                     </a>
-                    <span>Artigos</span>
+
+                    <span class="aside__popup">Artigos</span>
                 </div>
 
-                <div>
-                    <a href="#social">
-                        <svg class="social-icon aside-icon" 
+                <div class="aside__item">
+                    <a class="aside__link"
+                    href="#social">
+                        <svg class="aside__icon" 
                         xmlns="http://www.w3.org/2000/svg" 
                         viewBox="0 0 640 640">
                             <path d="M96 192C96 130.1 146.1 80 208 80C269.9 80 320 130.1 320 192C320 253.9 269.9 304 208 304C146.1 304 96 253.9 96 192zM32 528C32 430.8 110.8 352 208 352C305.2 352 384 430.8 384 528L384 534C384 557.2 365.2 576 342 576L74 576C50.8 576 32 557.2 32 534L32 528zM464 128C517 128 560 171 560 224C560 277 517 320 464 320C411 320 368 277 368 224C368 171 411 128 464 128zM464 368C543.5 368 608 432.5 608 512L608 534.4C608 557.4 589.4 576 566.4 576L421.6 576C428.2 563.5 432 549.2 432 534L432 528C432 476.5 414.6 429.1 385.5 391.3C408.1 376.6 435.1 368 464 368z"/>
                         </svg>
                     </a>
-                    <span>Social</span>
+
+                    <span class="aside__popup">Social</span>
                 </div>
             </nav>
         </aside>
 
-        <div class="aside-fill"></div>
+        <div class="aside__fill"></div>
 
         <div class="no-aside">
-            <section id="home" class="section main-bg">
-                <div id="add-menu">
-                    <button id="cancel-button">
-                        <svg class="cancel-icon"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 384 512">
-                            <path fill="#000000" 
-                            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
-                        </svg>
-                    </button>
+            <section id="home"
+            class="pg__home c-section u-main-bg-1">
+                <div id="add-menu"
+                class="pg__add-menu">
                     <h3>Adicionar artigo</h3>
-                    <form id="add-form">
-                        <div class="add-inputs">
-                            <label for="new-title-input">Titulo</label>
-                            <input name="new-title"
-                            id="new-title-input"
+                    <form id="add-form"
+                    class="add-menu__form">
+                        <div class="add-menu__inputs">
+                            <label for="add-menu__input-title">Titulo</label>
+                            <input id="add-input-title"
+                            class="add-menu__input"
+                            name="new-title"
                             type="text"
+                            placeholder="Seu Título"
                             required
                             autocomplete="off"
                             maxlength="30">
-                            <label for="new-content-input">Conteúdo</label>
-                            <textarea name="new-content"
-                            id="new-content-input"
+                            <label for="add-menu__input-content">Conteúdo</label>
+                            <textarea id="add-input-content"
+                            class="add-menu__input-content"
+                            name="new-content"
                             type="text"
+                            placeholder="Sua descrição"
                             rows="4"
                             maxlength="2500"></textarea>
                         </div>
-                        <button type="submit">Confirmar</button>
+
+                        <button class="add-menu__btn"
+                        type="submit">Confirmar</button>
                     </form>
+                    <button id="add-menu-hide-btn" 
+                    class="add-menu__hide-btn">
+                        <svg class="add-menu__hide-icon"
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 640 640">
+                            <path d="M342.6 105.4C330.1 92.9 309.8 92.9 297.3 105.4L137.3 265.4C124.8 277.9 124.8 298.2 137.3 310.7C149.8 323.2 170.1 323.2 182.6 310.7L320 173.3L457.4 310.6C469.9 323.1 490.2 323.1 502.7 310.6C515.2 298.1 515.2 277.8 502.7 265.3L342.7 105.3zM502.6 457.4L342.6 297.4C330.1 284.9 309.8 284.9 297.3 297.4L137.3 457.4C124.8 469.9 124.8 490.2 137.3 502.7C149.8 515.2 170.1 515.2 182.6 502.7L320 365.3L457.4 502.6C469.9 515.1 490.2 515.1 502.7 502.6C515.2 490.1 515.2 469.8 502.7 457.3z"/>
+                        </svg>
+                    </button>
                 </div>
 
-                <div class="home-text">
-                    <h1>Dê asas às<br>
-                        suas ideias</h1>
+                <div class="home__text">
+                    <h1 class="home__title">Dê asas às<br>
+                                            suas ideias</h1>
 
-                    <p>Aqui, você pode criar artigos variados<br>
-                        para compartilhar com seus amigos.<br>
-                        Comece usando a criatividade na seção<br>
-                        abaixo e se prepare para ampliar a rede.</p>
+                    <p class="home__subtitle">Aqui, você pode criar artigos variados<br>
+                                                para compartilhar com seus amigos.<br>
+                                                Comece usando a criatividade na seção<br>
+                                                abaixo e se prepare para ampliar a rede.</p>
                 </div>
 
                 <img src="{{ url_for('static', filename='imgs/home_img.svg') }}" 
-                class="home-img"
+                class="home__img"
                 alt="Um papel de texto entre um homem e uma mulher segurando seus celulares.">
             </section>
 
-            <section id="articles" class="section">
-                <header class="articles-header">
-                    <h2>Seus Artigos</h2>
+            <section id="articles"
+            class="pg__articles c-section u-main-bg-2">
+                <header class="articles__header">
+                    <h2 class="articles__title">Seus Artigos</h2>
 
-                    <div class="articles-buttons">
-                        <button id="add-button">
-                            <svg class="add-icon"
+                    <div class="articles__btns">
+                        <button id="add-btn"
+                        class="articles__add-btn">
+                            <svg class="articles__add-icon"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 512 512">
-                                <path fill="#4040C0" 
+                                <path class="articles__add-path"
+                                fill="#4040C0" 
                                 d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/>
                             </svg>
-                            <p>Adicionar<br>artigo</p>
+
+                            <p class="articles__add-title">Adicionar<br>artigo</p>
                         </button>
 
-                        <button id="filter-button">
-                            <svg class="filter-icon"
+                        <button id="filter-btn"
+                        class="articles__filter-btn">
+                            <svg class="articles__filter-icon"
                             xmlns="http://www.w3.org/2000/svg" 
                             viewBox="0 0 640 640">
-                                <path fill="#4040C0"
+                                <path class="articles__filter-path"
+                                fill="#4040C0"
                                 d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z"/>
                             </svg>
-                            <p>Filtrar<br>artigos</p>
+
+                            <p class="articles__filter-title">Filtrar<br>artigos</p>
                         </button>
                     </div>
                 </header>
                 
-                <ul id="articles-list"></ul>
+                <ul id="mini-grid"
+                class="articles__mini-grid"></ul>
                 <footer class="signature">
-                    Criado por <a href="https://github.com/AndreLucas23"
+                    Criado por <a class="signature__link"
+                    href="https://github.com/AndreLucas23"
                     target="_blank" 
                     rel="noopener noreferrer">André Lucas</a>
                 </footer>
             </section>
 
-            <section id="social" class="section main-bg">
+            <section id="social"
+            class="pg__social c-section u-main-bg-1">
 
             </section>
         </div>

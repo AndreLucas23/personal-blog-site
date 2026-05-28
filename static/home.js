@@ -1,6 +1,6 @@
 // Função para carregamento dos artigos armazenados
 function loadArticles(articles=[]) {
-    const articlesList = document.getElementById('articles-list');
+    const articlesList = document.getElementById('mini-grid');
     
     articlesList.innerHTML = '';
 
@@ -18,19 +18,19 @@ function loadArticles(articles=[]) {
             newArticle.classList.add('mini');
             
             newArticle.style.backgroundImage = `url('./static/imgs/mini_${bgDef}.svg')`
-            bgDef == 3 ? bgDef = 1 : bgDef += 1;
+            bgDef === 3 ? bgDef = 1 : bgDef += 1;
 
             const newLink = document.createElement('a');
             const url = `/open/${article['article_id']}`;
             newLink.setAttribute('href', url);
-            newLink.classList.add('mini-link');
+            newLink.classList.add('mini__link');
 
             const newId = document.createElement('p');
             newId.textContent = `ID: ${article['article_id']}`;
-            newId.classList.add('mini-id');
+            newId.classList.add('mini__id');
 
             const newRemove = document.createElement('button');
-            newRemove.classList.add('remove-button');
+            newRemove.classList.add('mini__rmv');
 
             newRemove.addEventListener('click', (event) => {
                 const url = `/articles/${article['article_id']}`
@@ -40,7 +40,7 @@ function loadArticles(articles=[]) {
                 })
                 .then(() => {
                     articles.forEach((deleteArticle, index) => {
-                        if (deleteArticle['article_id'] == article['article_id']) {
+                        if (deleteArticle['article_id'] === article['article_id']) {
                             articles.splice(index, 1);
                         }
                     })
@@ -69,12 +69,12 @@ function loadArticles(articles=[]) {
 
             const newTitle = document.createElement('h3');
             newTitle.textContent = article['article_title'];
-            newTitle.classList.add('mini-title');
+            newTitle.classList.add('mini__title');
 
             const localDate = new Date(article['publish_date']).toLocaleDateString()
             const newDate = document.createElement('p');
             newDate.textContent = `Data de publicação: ${localDate}`;
-            newDate.classList.add('mini-date');
+            newDate.classList.add('mini__date');
 
             newArticle.appendChild(newLink);
             newArticle.appendChild(newRemove);
@@ -87,6 +87,7 @@ function loadArticles(articles=[]) {
     }
 }
 
+// Função para filtragem de artigos
 function filterArticles(event, articles, filterForm) {
     event.preventDefault();
 
@@ -128,13 +129,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     articles = await articles.json();
     loadArticles(articles);
 
-    const addButton = document.getElementById('add-button');
+    const addButton = document.getElementById('add-btn');
     const addMenu = document.getElementById('add-menu');
     const addForm = document.getElementById('add-form');
     const filterForm = document.getElementById('filter-form');
 
-    const cancelButton = document.getElementById('cancel-button');
-    const filterButton = document.getElementById('filter-button');
+    const hideButton = document.getElementById('add-menu-hide-btn');
 
     // Função para abertura do menu de adição de artigo
     addButton.addEventListener('click', () => {
@@ -142,14 +142,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         addMenu.style.pointerEvents = 'all';
     });
 
-    // Função para fechamento dos pop-ups
-    cancelButton.addEventListener('click', () => {
+    // Função para fechamento do menu
+    hideButton.addEventListener('click', () => {
         addMenu.style.transform = 'translateY(-100%)';
         addMenu.style.pointerEvents = 'none';
     })
 
     document.addEventListener('keydown', (event) => {
-        if (addMenu.style.transform == 'translateY(0%)' && 
+        if (addMenu.style.transform === 'translateY(0%)' && 
             event.key === 'Escape') {
                 addMenu.style.transform = 'translateY(-100%)';
                 addMenu.style.pointerEvents = 'none';
