@@ -15,7 +15,7 @@ function loadArticles(articles=[]) {
 
         articles.forEach(article => {
             const newArticle = document.createElement('li');
-            newArticle.classList.add('mini');
+            newArticle.classList.add('mini', 'u-transition-02s-ease');
             
             newArticle.style.backgroundImage = `url('./static/imgs/mini_${bgDef}.svg')`
             bgDef === 3 ? bgDef = 1 : bgDef += 1;
@@ -23,11 +23,11 @@ function loadArticles(articles=[]) {
             const newLink = document.createElement('a');
             const url = `/open/${article['article_id']}`;
             newLink.setAttribute('href', url);
-            newLink.classList.add('mini__link');
+            newLink.classList.add('mini__link', 'u-flex-center', 'u-transition-02s-ease');
 
             const newId = document.createElement('p');
             newId.textContent = `ID: ${article['article_id']}`;
-            newId.classList.add('mini__id');
+            newId.classList.add('mini__id', 'u-accent-yellow-bg');
 
             const newRemove = document.createElement('button');
             newRemove.classList.add('mini__rmv');

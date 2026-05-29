@@ -1,0 +1,19 @@
+/* Classes utilitárias */
+
+.u-main-bg-1 { background-image: url('./imgs/main_bg.svg') }
+
+.u-primary-white-bg { background-color: var(--primary-white) }
+
+.u-secondary-black-bg { background-color: var(--secondary-black) }
+
+.u-secondary-grey-bg { background-color: var(--secondary-grey) }
+
+.u-accent-yellow-bg { background-color: var(--accent-yellow) }
+
+.u-flex-center {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.u-transition-02s-ease { transition: all 0.2s ease }

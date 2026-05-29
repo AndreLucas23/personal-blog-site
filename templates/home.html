@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='utilities.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+
     <title>Blog Pessoal</title>
 </head>
 <body>
@@ -17,7 +23,7 @@
         <aside class="pg__aside">
             <nav class="aside__nav">
                 <div class="aside__item">
-                    <a class="aside__link"
+                    <a class="aside__link u-flex-center u-transition-02s-ease"
                     href="#home">
                         <svg class="aside__icon" 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -26,11 +32,11 @@
                         </svg>
                     </a>
                     
-                    <span class="aside__popup">Início</span>
+                    <span class="aside__popup u-secondary-grey-bg u-flex-center">Início</span>
                 </div>
 
                 <div class="aside__item">
-                    <a class="aside__link"
+                    <a class="aside__link u-flex-center u-transition-02s-ease"
                     href="#articles">
                         <svg class="aside__icon" 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -39,11 +45,11 @@
                         </svg>
                     </a>
 
-                    <span class="aside__popup">Artigos</span>
+                    <span class="aside__popup u-secondary-grey-bg u-flex-center">Artigos</span>
                 </div>
 
                 <div class="aside__item">
-                    <a class="aside__link"
+                    <a class="aside__link u-flex-center u-transition-02s-ease"
                     href="#social">
                         <svg class="aside__icon" 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -52,7 +58,7 @@
                         </svg>
                     </a>
 
-                    <span class="aside__popup">Social</span>
+                    <span class="aside__popup u-secondary-grey-bg u-flex-center">Social</span>
                 </div>
             </nav>
         </aside>
@@ -61,9 +67,9 @@
 
         <div class="no-aside">
             <section id="home"
-            class="pg__home c-section u-main-bg-1">
+            class="pg__home c-section u-main-bg-1 u-flex-center u-transition-02s-ease">
                 <div id="add-menu"
-                class="pg__add-menu">
+                class="pg__add-menu u-secondary-grey-bg u-flex-center u-transition-02s-ease">
                     <h3>Adicionar artigo</h3>
                     <form id="add-form"
                     class="add-menu__form">
@@ -87,11 +93,11 @@
                             maxlength="2500"></textarea>
                         </div>
 
-                        <button class="add-menu__btn"
+                        <button class="add-menu__btn u-secondary-black-bg"
                         type="submit">Confirmar</button>
                     </form>
                     <button id="add-menu-hide-btn" 
-                    class="add-menu__hide-btn">
+                    class="add-menu__hide-btn u-flex-center">
                         <svg class="add-menu__hide-icon"
                         xmlns="http://www.w3.org/2000/svg" 
                         viewBox="0 0 640 640">
@@ -100,7 +106,7 @@
                     </button>
                 </div>
 
-                <div class="home__text">
+                <div class="home__text u-primary-white-bg">
                     <h1 class="home__title">Dê asas às<br>
                                             suas ideias</h1>
 
@@ -116,17 +122,17 @@
             </section>
 
             <section id="articles"
-            class="pg__articles c-section u-main-bg-2">
+            class="pg__articles c-section u-primary-white-bg">
                 <header class="articles__header">
                     <h2 class="articles__title">Seus Artigos</h2>
 
                     <div class="articles__btns">
                         <button id="add-btn"
-                        class="articles__add-btn">
+                        class="articles__add-btn u-transition-02s-ease">
                             <svg class="articles__add-icon"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 512 512">
-                                <path class="articles__add-path"
+                                <path class="articles__add-path u-transition-02s-ease"
                                 fill="#4040C0" 
                                 d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/>
                             </svg>
@@ -135,11 +141,11 @@
                         </button>
 
                         <button id="filter-btn"
-                        class="articles__filter-btn">
+                        class="articles__filter-btn u-transition-02s-ease">
                             <svg class="articles__filter-icon"
                             xmlns="http://www.w3.org/2000/svg" 
                             viewBox="0 0 640 640">
-                                <path class="articles__filter-path"
+                                <path class="articles__filter-path u-transition-02s-ease"
                                 fill="#4040C0"
                                 d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z"/>
                             </svg>
@@ -152,7 +158,7 @@
                 <ul id="mini-grid"
                 class="articles__mini-grid"></ul>
                 <footer class="signature">
-                    Criado por <a class="signature__link"
+                    Criado por <a class="signature__link u-transition-02s-ease"
                     href="https://github.com/AndreLucas23"
                     target="_blank" 
                     rel="noopener noreferrer">André Lucas</a>
