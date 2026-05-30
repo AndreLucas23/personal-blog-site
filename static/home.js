@@ -87,35 +87,7 @@ function loadArticles(articles=[]) {
     }
 }
 
-// Função para filtragem de artigos
-function filterArticles(event, articles, filterForm) {
-    event.preventDefault();
 
-    const filterContent = filterForm.querySelector('input').value;
-    const filterSelect = filterForm.querySelector('select').value;
-    let url;
-
-    if (filterSelect === 'id' && isNaN(filterContent) ) {
-        loadArticles([]);
-    } else if (!filterContent.trim()) {
-        loadArticles(articles);
-    } else {
-        if (filterSelect === 'title') {
-            url = `/articles/title/${filterContent}`
-        } else if (filterSelect === 'id') {
-            url = `/articles/id/${filterContent}`
-        }
-
-        fetch(url, {
-            method: 'GET',
-        })
-        .then(res => res.json())
-        .then(articlesRes => {
-            loadArticles(articlesRes);
-        })
-        .catch(error => console.error('Erro na filtragem dos artigos pelo ID: ', error));
-    }
-}
 
 // Procedimento a partir do carregamento do DOM
 document.addEventListener('DOMContentLoaded', async () => {
@@ -133,11 +105,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addMenu = document.getElementById('add-menu');
     const addOverlay = document.getElementById('add-menu-overlay');
     const addForm = document.getElementById('add-form');
-    const filterForm = document.getElementById('filter-form');
 
     const hideButton = document.getElementById('add-menu-hide-btn');
     const cancelButton = document.getElementById('add-menu-cancel-btn');
     const submitBtn = document.getElementById('add-submit-btn');
+
+    // Elementos do filter-menu
+    const filterButton = document.getElementById('filter-btn');
+    const filterMenu = document.getElementById('filter-menu');
+    const filterOverlay = document.getElementById('filter-menu-overlay');
+    const filterForm = document.getElementById('filter-form');
+    const filterInput = document.getElementById('filter-input');
+    const filterSelect = document.getElementById('filter-select');
+    const filterStatus = document.getElementById('filter-status');
+    const filterHideBtn = document.getElementById('filter-menu-hide-btn');
+    const filterClearBtn = document.getElementById('filter-clear-btn');
+    const filterClearInputBtn = document.getElementById('filter-clear-input-btn');
 
     // Contadores de caracteres
     const titleInput = document.getElementById('add-input-title');
@@ -211,7 +194,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Spinner de carregamento
         submitBtn.classList.add('is-loading');
         submitBtn.disabled = true;
 
@@ -252,8 +234,94 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     })
 
-    filterForm.querySelector('input')
-    .addEventListener('input', (event) => filterArticles(event, articles, filterForm));
-    filterForm.querySelector('select')
-    .addEventListener('input', (event) => filterArticles(event, articles, filterForm));
+    // Helpers de abertura / fechamento do filter-menu
+    function openFilterMenu() {
+        filterMenu.classList.add('is-open');
+        filterOverlay.classList.add('is-open');
+        filterInput.focus();
+    }
+
+    function closeFilterMenu() {
+        filterMenu.classList.remove('is-open');
+        filterOverlay.classList.remove('is-open');
+    }
+
+    // Função de filtragem ao vivo
+    function updateFilterStatus(count) {
+        filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
+        if (filterInput.value.trim() === '') return;
+
+        filterStatus.classList.add('is-visible');
+        if (count > 0) {
+            filterStatus.textContent = `${count} artigo${count > 1 ? 's' : ''} encontrado${count > 1 ? 's' : ''}.`;
+            filterStatus.classList.add('has-results');
+        } else {
+            filterStatus.textContent = 'Nenhum artigo encontrado.';
+            filterStatus.classList.add('no-results');
+        }
+    }
+
+    async function runFilter() {
+        const query = filterInput.value.trim();
+        const type = filterSelect.value;
+
+        if (!query) {
+            loadArticles(articles);
+            filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
+            return;
+        }
+
+        if (type === 'id' && isNaN(query)) {
+            loadArticles([]);
+            updateFilterStatus(0);
+            return;
+        }
+
+        const url = type === 'title'
+            ? `/articles/title/${encodeURIComponent(query)}`
+            : `/articles/id/${encodeURIComponent(query)}`;
+
+        try {
+            const res = await fetch(url, { method: 'GET' });
+            const filtered = await res.json();
+            loadArticles(filtered);
+            updateFilterStatus(filtered.length);
+        } catch (error) {
+            console.error('Erro na filtragem: ', error);
+        }
+    }
+
+    // Event listeners do filter-menu
+    filterButton.addEventListener('click', openFilterMenu);
+    filterHideBtn.addEventListener('click', closeFilterMenu);
+    filterOverlay.addEventListener('click', closeFilterMenu);
+
+    filterClearBtn.addEventListener('click', () => {
+        filterInput.value = '';
+        filterSelect.value = 'title';
+        filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
+        loadArticles(articles);
+        filterInput.focus();
+    });
+
+    filterInput.addEventListener('input', () => {
+        filterClearInputBtn.hidden = filterInput.value === '';
+        runFilter();
+    });
+    filterSelect.addEventListener('change', runFilter);
+
+    filterClearInputBtn.addEventListener('click', () => {
+        filterInput.value = '';
+        filterClearInputBtn.hidden = true;
+        filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
+        loadArticles(articles);
+        filterInput.focus();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (filterMenu.classList.contains('is-open') && event.key === 'Escape') {
+            event.preventDefault();
+            closeFilterMenu();
+        }
+    });
 })
