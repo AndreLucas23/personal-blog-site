@@ -131,35 +131,90 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const addButton = document.getElementById('add-btn');
     const addMenu = document.getElementById('add-menu');
+    const addOverlay = document.getElementById('add-menu-overlay');
     const addForm = document.getElementById('add-form');
     const filterForm = document.getElementById('filter-form');
 
     const hideButton = document.getElementById('add-menu-hide-btn');
+    const cancelButton = document.getElementById('add-menu-cancel-btn');
+    const submitBtn = document.getElementById('add-submit-btn');
+
+    // Contadores de caracteres
+    const titleInput = document.getElementById('add-input-title');
+    const contentInput = document.getElementById('add-input-content');
+    const titleCounter = document.getElementById('title-counter');
+    const contentCounter = document.getElementById('content-counter');
+    const titleError = document.getElementById('title-error');
+
+    function showError(el, wrap, msg) {
+        el.textContent = msg;
+        el.classList.add('is-visible');
+        wrap.classList.add('has-error');
+    }
+
+    function clearError(el, wrap) {
+        el.classList.remove('is-visible');
+        wrap.classList.remove('has-error');
+    }
+
+    function updateCounter(input, counter, max) {
+        const len = input.value.length;
+        counter.textContent = `${len} / ${max}`;
+        counter.classList.remove('is-near-limit', 'is-at-limit');
+        if (len >= max) {
+            counter.classList.add('is-at-limit');
+        } else if (len >= max * 0.8) {
+            counter.classList.add('is-near-limit');
+        }
+    }
+
+    titleInput.addEventListener('input', () => {
+        updateCounter(titleInput, titleCounter, 30);
+        clearError(titleError, titleInput.closest('.add-menu__input-wrap'));
+    });
+    contentInput.addEventListener('input', () => updateCounter(contentInput, contentCounter, 2500));
+
+    // Helpers de abertura / fechamento
+    function openMenu() {
+        addMenu.classList.add('is-open');
+        addOverlay.classList.add('is-open');
+        titleInput.focus();
+    }
+
+    function closeMenu() {
+        addMenu.classList.remove('is-open');
+        addOverlay.classList.remove('is-open');
+    }
 
     // Função para abertura do menu de adição de artigo
-    addButton.addEventListener('click', () => {
-        addMenu.style.transform = 'translateY(0%)';
-        addMenu.style.pointerEvents = 'all';
-    });
+    addButton.addEventListener('click', openMenu);
 
     // Função para fechamento do menu
-    hideButton.addEventListener('click', () => {
-        addMenu.style.transform = 'translateY(-100%)';
-        addMenu.style.pointerEvents = 'none';
-    })
+    hideButton.addEventListener('click', closeMenu);
+    cancelButton.addEventListener('click', closeMenu);
+    addOverlay.addEventListener('click', closeMenu);
 
     document.addEventListener('keydown', (event) => {
-        if (addMenu.style.transform === 'translateY(0%)' && 
-            event.key === 'Escape') {
-                addMenu.style.transform = 'translateY(-100%)';
-                addMenu.style.pointerEvents = 'none';
-            }
-    })
+        if (addMenu.classList.contains('is-open') && event.key === 'Escape') {
+            closeMenu();
+        }
+    });
 
     // Função para adição de artigo no banco de dados
     addForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        
+
+        const titleWrap = titleInput.closest('.add-menu__input-wrap');
+        if (!titleInput.value.trim()) {
+            showError(titleError, titleWrap, 'O título não pode ficar em branco.');
+            titleInput.focus();
+            return;
+        }
+
+        // Spinner de carregamento
+        submitBtn.classList.add('is-loading');
+        submitBtn.disabled = true;
+
         const addData = new FormData(addForm);
         const data = {};
         addData.forEach((value, key) => {
@@ -181,17 +236,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         .then(async data => {
             console.log('Sucesso: ', data);
             addForm.reset();
+            updateCounter(titleInput, titleCounter, 30);
+            updateCounter(contentInput, contentCounter, 2500);
             articles = await (await fetch('/articles')).json();
             loadArticles(articles);
-            addMenu.style.transition = 'none';
-            addMenu.style.opacity = '0';
-            addMenu.style.transition = 'all 0.2s ease';
-            addMenu.style.pointerEvents = 'none';
+            closeMenu();
         })
         .catch(error => {
             console.error('Erro: ', error);
             alert('Erro ao enviar o formulário: ' + error.message);
         })
+        .finally(() => {
+            submitBtn.classList.remove('is-loading');
+            submitBtn.disabled = false;
+        });
     })
 
     filterForm.querySelector('input')
