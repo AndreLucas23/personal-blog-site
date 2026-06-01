@@ -9,7 +9,13 @@
 }
 
 .pg__aside {
-    background-image: linear-gradient(to bottom, var(--primary-white), var(--secondary-grey));
+    background: rgba(239, 239, 239, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 0.1rem solid rgba(64, 64, 192, 0.12);
+    box-shadow:
+        0.4rem 0 2.4rem rgba(0, 0, 0, 0.06),
+        inset -0.1rem 0 0 rgba(255, 255, 255, 0.6);
     height: 100%;
     position: fixed;
     width: 7rem;

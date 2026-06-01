@@ -15,10 +15,10 @@
     align-items: center;
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+    gap: 2rem;
     height: 100%;
     justify-content: start;
-    padding-top: 4rem;
+    padding-top: 3.6rem;
 }
 
 .aside__item {
@@ -26,46 +26,78 @@
 }
 
 .aside__link {
-    border-radius: 2.5rem;
+    border-radius: 1.4rem;
     height: 5rem;
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     width: 5rem;
 }
 
+.aside__link:hover {
+    background: rgba(64, 64, 192, 0.09);
+    box-shadow:
+        0 0.4rem 1.4rem rgba(64, 64, 192, 0.16),
+        inset 0 0.1rem 0 rgba(255, 255, 255, 0.7);
+    transform: scale(1.08) translateY(-0.2rem);
+}
+
 .aside__icon {
-    fill: var(--secondary-black);
-    filter: drop-shadow(0.1rem 0.1rem 0.2rem var(--shadow-neutral));
+    fill: var(--secondary-dark-grey);
     height: auto;
-    width: 3.5rem;
+    transition: fill 0.25s ease, filter 0.25s ease;
+    width: 2.8rem;
+}
+
+.aside__link:hover .aside__icon {
+    fill: var(--accent-blue);
+    filter: drop-shadow(0 0.2rem 0.8rem rgba(64, 64, 192, 0.35));
 }
 
 .aside__popup {
-    border-radius: 1.5rem;
-    height: 3rem;
-    position: absolute;
-    top: 1.1rem;
-    margin-left: 7rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 0.1rem solid rgba(64, 64, 192, 0.14);
+    border-radius: 1rem;
+    box-shadow:
+        0 0.8rem 2.4rem rgba(0, 0, 0, 0.1),
+        0 0.2rem 0.6rem rgba(64, 64, 192, 0.08),
+        inset 0 0.1rem 0 rgba(255, 255, 255, 0.9);
+    color: var(--secondary-black);
+    font-size: 1.2rem;
+    font-weight: 600;
+    height: 3.4rem;
+    letter-spacing: 0.03rem;
+    left: calc(100% + 1.4rem);
     opacity: 0;
+    padding: 0 1.4rem;
     pointer-events: none;
-    transition: all 0.6s ease;
-    width: 6rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(-6px);
+    transition:
+        opacity 0.25s ease,
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    width: auto;
 }
 
 .aside__popup::before {
-    border-color: transparent var(--secondary-grey) transparent transparent;
+    border-color: transparent rgba(255, 255, 255, 0.92) transparent transparent;
     border-style: solid;
-    border-width: 1rem;
+    border-width: 0.7rem;
     content: '';
-    margin-left: -7.5rem;
     position: absolute;
-    top: 0.5rem;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-.aside__link:hover + span {
+.aside__link:hover + .aside__popup {
     opacity: 1;
-}
-
-.aside__link:hover{
-    background-color: var(--secondary-grey);
+    transform: translateY(-50%) translateX(0);
 }
 
 /* Componente: miniature */
