@@ -5,17 +5,21 @@ function loadArticles(articles=[]) {
     articlesList.innerHTML = '';
 
     if (!articles.length) {
-        const noArticle = document.createElement('p');
-        noArticle.textContent = 'Nenhum artigo encontrado!'
-
-        articlesList.innerHTML = '';
-        articlesList.appendChild(noArticle);
+        const emptyState = document.createElement('li');
+        emptyState.classList.add('articles__empty');
+        emptyState.innerHTML = `
+            <svg class="articles__empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+                <path d="M32 176C32 134.5 63.6 100.4 104 96.4L104 96L384 96C437 96 480 139 480 192L480 368L304 368C264.2 368 232 400.2 232 440L232 500C232 524.3 212.3 544 188 544C163.7 544 144 524.3 144 500L144 272L80 272C53.5 272 32 250.5 32 224L32 176zM268.8 544C275.9 530.9 280 515.9 280 500L280 440C280 426.7 290.7 416 304 416L552 416C565.3 416 576 426.7 576 440L576 464C576 508.2 540.2 544 496 544L268.8 544zM112 144C94.3 144 80 158.3 80 176L80 224L144 224L144 176C144 158.3 129.7 144 112 144z"/>
+            </svg>
+            <span>Nenhum artigo encontrado.</span>
+        `;
+        articlesList.appendChild(emptyState);
     } else {
         let bgDef = 1;
 
         articles.forEach(article => {
             const newArticle = document.createElement('li');
-            newArticle.classList.add('mini', 'u-transition-02s-ease');
+            newArticle.classList.add('mini');
             
             newArticle.style.backgroundImage = `url('./static/imgs/mini_${bgDef}.svg')`
             bgDef === 3 ? bgDef = 1 : bgDef += 1;
@@ -23,14 +27,15 @@ function loadArticles(articles=[]) {
             const newLink = document.createElement('a');
             const url = `/open/${article['article_id']}`;
             newLink.setAttribute('href', url);
-            newLink.classList.add('mini__link', 'u-flex-center', 'u-transition-02s-ease');
+            newLink.classList.add('mini__link', 'u-flex-center');
 
             const newId = document.createElement('p');
             newId.textContent = `ID: ${article['article_id']}`;
-            newId.classList.add('mini__id', 'u-accent-yellow-bg');
+            newId.classList.add('mini__id');
 
             const newRemove = document.createElement('button');
             newRemove.classList.add('mini__rmv');
+            newRemove.setAttribute('aria-label', 'Remover artigo');
 
             newRemove.addEventListener('click', (event) => {
                 const url = `/articles/${article['article_id']}`
@@ -52,18 +57,12 @@ function loadArticles(articles=[]) {
                 })
             })
 
-            newRemove.addEventListener('mouseout', () => {
-                const svgStyle = newRemove.querySelector('svg').style;
-
-                svgStyle.transform = 'scale(1)';
-            })
-
             const removeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             removeSvg.setAttribute('viewBox', '0 0 640 640');
+            removeSvg.classList.add('mini__rmv-icon');
             newRemove.appendChild(removeSvg);
 
             const removePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            removePath.setAttribute('fill', '#FF0000');
             removePath.setAttribute('d', 'M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z');
             removeSvg.appendChild(removePath);
 
@@ -73,7 +72,7 @@ function loadArticles(articles=[]) {
 
             const localDate = new Date(article['publish_date']).toLocaleDateString()
             const newDate = document.createElement('p');
-            newDate.textContent = `Data de publicação: ${localDate}`;
+            newDate.textContent = `Publicado em: ${localDate}`;
             newDate.classList.add('mini__date');
 
             newArticle.appendChild(newLink);
@@ -86,7 +85,6 @@ function loadArticles(articles=[]) {
         })
     }
 }
-
 
 
 // Procedimento a partir do carregamento do DOM
