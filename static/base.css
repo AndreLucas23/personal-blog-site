@@ -1,17 +1,73 @@
 /* Base e reset */
 
 :root {
+    /* ── Superfícies base ─────────────────────────── */
     --primary-white: #EFEFEF;
+    --pure-white: #ffffff;
 
+    /* ── Texto / Neutros ──────────────────────────── */
     --secondary-black: #151515;
     --secondary-dark-grey: #B0B0B0;
     --secondary-grey: #CACACA;
 
+    /* ── Paleta Azul ──────────────────────────────── */
     --accent-blue: #4040C0;
-    --accent-red: #FF0000;
+    --accent-blue-light: #5858d8;
+    --accent-blue-mid: #6060e0;
+    --accent-blue-input: #8080e8;
+
+    /* ── Paleta de Erro ───────────────────────────── */
+    --accent-error: #c02828;
+    --accent-error-light: #e05a5a;
+
+    /* ── Paleta de Aviso ──────────────────────────── */
+    --accent-warning: #e05a00;
+
+    /* ── Paleta de Sucesso ────────────────────────── */
+    --accent-success: #2d7a2d;
+
+    /* ── Amarelo ──────────────────────────────────── */
     --accent-yellow: #CCCC00;
-    
+
+    /* ── Azul Alpha (tints da paleta principal) ───── */
+    --blue-alpha-05: rgba(64, 64, 192, 0.05);
+    --blue-alpha-08: rgba(64, 64, 192, 0.08);
+    --blue-alpha-10: rgba(64, 64, 192, 0.10);
+    --blue-alpha-12: rgba(64, 64, 192, 0.12);
+    --blue-alpha-15: rgba(64, 64, 192, 0.15);
+    --blue-alpha-20: rgba(64, 64, 192, 0.20);
+    --blue-alpha-35: rgba(64, 64, 192, 0.35);
+    --blue-alpha-40: rgba(64, 64, 192, 0.40);
+    --blue-alpha-55: rgba(64, 64, 192, 0.55);
+
+    /* ── Vermelho Alpha (tints de erro) ───────────── */
+    --red-alpha-10: rgba(192, 40, 40, 0.10);
+    --red-alpha-12: rgba(192, 40, 40, 0.12);
+    --red-alpha-15: rgba(192, 40, 40, 0.15);
+    --red-alpha-40: rgba(192, 40, 40, 0.40);
+    --red-alpha-55: rgba(192, 40, 40, 0.55);
+
+    /* ── Sombras ──────────────────────────────────── */
     --shadow-neutral: rgba(0, 0, 0, 0.08);
+    --shadow-light: rgba(0, 0, 0, 0.04);
+    --shadow-medium: rgba(0, 0, 0, 0.10);
+
+    /* ── Vidro (Glass Surfaces) ───────────────────── */
+    --glass-bg: rgba(255, 255, 255, 0.60);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-highlight: rgba(255, 255, 255, 0.90);
+    --glass-popup-bg: rgba(255, 255, 255, 0.92);
+
+    /* ── Superfícies Especiais ────────────────────── */
+    --surface-overlay: rgba(10, 10, 20, 0.55);
+    --surface-menu-end: #f4f4fb;
+    --status-success-bg: rgba(64, 192, 64, 0.08);
+    --status-error-bg: rgba(192, 64, 64, 0.08);
+
+    /* ── Gradientes Reutilizáveis ─────────────────── */
+    --gradient-blue: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-light) 100%);
+    --gradient-menu-bg: linear-gradient(145deg, var(--pure-white) 0%, var(--surface-menu-end) 100%);
+    --gradient-divider: linear-gradient(to right, transparent, var(--blue-alpha-20), transparent);
 }
 
 * , *::before, *::after{

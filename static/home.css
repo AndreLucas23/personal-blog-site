@@ -12,10 +12,10 @@
     background: rgba(239, 239, 239, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-right: 0.1rem solid rgba(64, 64, 192, 0.12);
+    border-right: 0.1rem solid var(--blue-alpha-12);
     box-shadow:
         0.4rem 0 2.4rem rgba(0, 0, 0, 0.06),
-        inset -0.1rem 0 0 rgba(255, 255, 255, 0.6);
+        inset -0.1rem 0 0 var(--glass-bg);
     height: 100%;
     position: fixed;
     width: 7rem;
@@ -45,7 +45,7 @@
 /* Seção: add menu */
 
 .add-menu__overlay {
-    background: rgba(10, 10, 20, 0.55);
+    background: var(--surface-overlay);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     inset: 0;
@@ -62,13 +62,13 @@
 }
 
 .pg__add-menu {
-    background: linear-gradient(145deg, #ffffff 0%, #f4f4fb 100%);
-    border: 1px solid rgba(64, 64, 192, 0.12);
+    background: var(--gradient-menu-bg);
+    border: 1px solid var(--blue-alpha-12);
     border-radius: 2rem;
     box-shadow:
-        0 2.4rem 6rem rgba(64, 64, 192, 0.15),
-        0 0.8rem 2rem rgba(0, 0, 0, 0.08),
-        inset 0 0.1rem 0 rgba(255,255,255,0.9);
+        0 2.4rem 6rem var(--blue-alpha-15),
+        0 0.8rem 2rem var(--shadow-neutral),
+        inset 0 0.1rem 0 var(--glass-highlight);
     display: flex;
     flex-direction: column;
     gap: 2.4rem;
@@ -98,13 +98,13 @@
 /* Seção: filter menu */
 
 .pg__filter-menu {
-    background: linear-gradient(145deg, #ffffff 0%, #f4f4fb 100%);
-    border: 1px solid rgba(64, 64, 192, 0.12);
+    background: var(--gradient-menu-bg);
+    border: 1px solid var(--blue-alpha-12);
     border-radius: 2rem;
     box-shadow:
-        0 2.4rem 6rem rgba(64, 64, 192, 0.15),
-        0 0.8rem 2rem rgba(0, 0, 0, 0.08),
-        inset 0 0.1rem 0 rgba(255,255,255,0.9);
+        0 2.4rem 6rem var(--blue-alpha-15),
+        0 0.8rem 2rem var(--shadow-neutral),
+        inset 0 0.1rem 0 var(--glass-highlight);
     display: flex;
     flex-direction: column;
     gap: 2.4rem;
@@ -144,7 +144,7 @@
 }
 
 .filter-menu__header-icon svg {
-    fill: #ffffff;
+    fill: var(--pure-white);
     height: auto;
     width: 2rem;
 }
@@ -235,13 +235,13 @@
 }
 
 .filter-menu__status.has-results {
-    background: rgba(64, 192, 64, 0.08);
-    color: #2d7a2d;
+    background: var(--status-success-bg);
+    color: var(--accent-success);
 }
 
 .filter-menu__status.no-results {
-    background: rgba(192, 64, 64, 0.08);
-    color: #c02828;
+    background: var(--status-error-bg);
+    color: var(--accent-error);
 }
 
 .add-menu__header,
@@ -260,16 +260,16 @@
 }
 
 .add-menu__header-icon {
-    background: linear-gradient(135deg, var(--accent-blue), #6060e0);
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-mid));
     border-radius: 1.2rem;
-    box-shadow: 0 0.4rem 1.2rem rgba(64, 64, 192, 0.35);
+    box-shadow: 0 0.4rem 1.2rem var(--blue-alpha-35);
     flex-shrink: 0;
     height: 4.8rem;
     width: 4.8rem;
 }
 
 .add-menu__header-icon svg {
-    fill: #ffffff;
+    fill: var(--pure-white);
     height: auto;
     width: 2.2rem;
 }
@@ -314,8 +314,8 @@
 
 .add-menu__hide-btn:hover,
 .filter-menu__hide-btn:hover {
-    background: rgba(64, 64, 192, 0.08);
-    border-color: rgba(64, 64, 192, 0.2);
+    background: var(--blue-alpha-08);
+    border-color: var(--blue-alpha-20);
     transform: scale(1.05) rotate(5deg);
 }
 
@@ -326,7 +326,7 @@
 
 .add-menu__divider,
 .filter-menu__divider {
-    background: linear-gradient(to right, transparent, rgba(64, 64, 192, 0.2), transparent);
+    background: var(--gradient-divider);
     height: 0.1rem;
     width: 100%;
 }
@@ -376,7 +376,7 @@
 
 .add-menu__input-wrap::after,
 .filter-menu__input-wrap::after {
-    background: linear-gradient(90deg, var(--accent-blue), #8080e8);
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue-input));
     bottom: 0;
     content: '';
     height: 0.2rem;
@@ -390,8 +390,8 @@
 
 .add-menu__input-wrap:focus-within,
 .filter-menu__input-wrap:focus-within {
-    border-color: rgba(64, 64, 192, 0.4);
-    box-shadow: 0 0 0 0.3rem rgba(64, 64, 192, 0.1);
+    border-color: var(--blue-alpha-40);
+    box-shadow: 0 0 0 0.3rem var(--blue-alpha-10);
 }
 
 .add-menu__input-wrap:focus-within::after,
@@ -400,18 +400,18 @@
 }
 
 .add-menu__input-wrap.has-error {
-    border-color: rgba(192, 40, 40, 0.55);
-    box-shadow: 0 0 0 0.3rem rgba(192, 40, 40, 0.12);
+    border-color: var(--red-alpha-55);
+    box-shadow: 0 0 0 0.3rem var(--red-alpha-12);
 }
 
 .add-menu__input-wrap.has-error::after {
-    background: linear-gradient(90deg, #c02828, #e05a5a);
+    background: linear-gradient(90deg, var(--accent-error), var(--accent-error-light));
     transform: scaleX(1);
 }
 
 .add-menu__input,
 .filter-menu__input {
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--glass-bg);
     color: var(--secondary-black);
     font-size: 1.5rem;
     outline: none;
@@ -427,7 +427,7 @@
 
 .add-menu__input:focus,
 .filter-menu__input:focus {
-    background: #ffffff;
+    background: var(--pure-white);
 }
 
 .add-menu__textarea {
@@ -443,17 +443,17 @@
 }
 
 .add-menu__counter.is-near-limit {
-    color: #e05a00;
+    color: var(--accent-warning);
     font-weight: 600;
 }
 
 .add-menu__counter.is-at-limit {
-    color: var(--accent-red);
+    color: var(--accent-error);
     font-weight: 700;
 }
 
 .add-menu__error {
-    color: #c02828;
+    color: var(--accent-error);
     font-size: 1.2rem;
     font-weight: 500;
     max-height: 0;
@@ -499,11 +499,11 @@
 
 .add-menu__submit-btn {
     align-items: center;
-    background: linear-gradient(135deg, var(--accent-blue) 0%, #5858d8 100%);
+    background: var(--gradient-blue);
     border: none;
     border-radius: 1rem;
-    box-shadow: 0 0.4rem 1.4rem rgba(64, 64, 192, 0.4);
-    color: #ffffff;
+    box-shadow: 0 0.4rem 1.4rem var(--blue-alpha-40);
+    color: var(--pure-white);
     cursor: pointer;
     display: flex;
     font-size: 1.4rem;
@@ -516,7 +516,7 @@
 }
 
 .add-menu__submit-btn:hover {
-    box-shadow: 0 0.6rem 2rem rgba(64, 64, 192, 0.55);
+    box-shadow: 0 0.6rem 2rem var(--blue-alpha-55);
     transform: translateY(-0.2rem);
 }
 
@@ -536,7 +536,7 @@
     animation: spin 0.75s linear infinite;
     border: 0.22rem solid rgba(255,255,255,0.35);
     border-radius: 50%;
-    border-top-color: #ffffff;
+    border-top-color: var(--pure-white);
     display: none;
     height: 1.6rem;
     position: absolute;
@@ -614,8 +614,8 @@
 .articles__add-btn,
 .articles__filter-btn {
     align-items: center;
-    background: rgba(64, 64, 192, 0.05);
-    border: 0.15rem solid rgba(64, 64, 192, 0.15);
+    background: var(--blue-alpha-05);
+    border: 0.15rem solid var(--blue-alpha-15);
     border-radius: 1.4rem;
     color: var(--accent-blue);
     cursor: pointer;
@@ -634,12 +634,12 @@
 
 .articles__add-btn:hover,
 .articles__filter-btn:hover {
-    background: linear-gradient(135deg, var(--accent-blue) 0%, #5858d8 100%);
+    background: var(--gradient-blue);
     border-color: transparent;
     box-shadow:
-        0 0.6rem 2rem rgba(64, 64, 192, 0.4),
-        0 0.2rem 0.8rem rgba(0, 0, 0, 0.1);
-    color: #ffffff;
+        0 0.6rem 2rem var(--blue-alpha-40),
+        0 0.2rem 0.8rem var(--shadow-neutral);
+    color: var(--pure-white);
     transform: translateY(-0.3rem);
 }
 
@@ -707,6 +707,6 @@
 }
 
 .signature__link:hover {
-    color: #5858d8;
+    color: var(--accent-blue-light);
 }
 
