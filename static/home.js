@@ -1,325 +1,385 @@
-// Função para carregamento dos artigos armazenados
-function loadArticles(articles=[]) {
-    const articlesList = document.getElementById('mini-grid');
-    
-    articlesList.innerHTML = '';
+const articlesAPI = {
+    async fetchAll() {
+        const res = await fetch('/articles', { method: 'GET' });
+        if (!res.ok) throw new Error(`Erro ao carregar artigos: ${res.statusText}`);
+        return res.json();
+    },
 
-    if (!articles.length) {
-        const emptyState = document.createElement('li');
-        emptyState.classList.add('articles__empty');
-        emptyState.innerHTML = `
+    async add(data) {
+        const res = await fetch('/articles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(`Erro ao adicionar artigo: ${res.statusText}`);
+        return res.json();
+    },
+
+    async remove(articleId) {
+        const res = await fetch(`/articles/${articleId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`Erro ao remover artigo: ${res.statusText}`);
+        return res.json();
+    },
+
+    async searchByTitle(query) {
+        const res = await fetch(`/articles/title/${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error(`Erro na busca por título: ${res.statusText}`);
+        return res.json();
+    },
+
+    async searchById(query) {
+        const res = await fetch(`/articles/id/${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error(`Erro na busca por ID: ${res.statusText}`);
+        return res.json();
+    },
+};
+
+const articlesUI = {
+    listEl: null,
+
+    init(listElement) {
+        this.listEl = listElement;
+    },
+
+    render(articles) {
+        this.listEl.innerHTML = '';
+
+        if (!articles.length) {
+            this.listEl.appendChild(this._buildEmptyState());
+            return;
+        }
+
+        let bgIndex = 1;
+        articles.forEach(article => {
+            const card = this._buildCard(article, bgIndex);
+            bgIndex = bgIndex === 3 ? 1 : bgIndex + 1;
+            this.listEl.appendChild(card);
+        });
+    },
+
+    _buildEmptyState() {
+        const li = document.createElement('li');
+        li.classList.add('articles__empty');
+        li.innerHTML = `
             <svg class="articles__empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
                 <path d="M32 176C32 134.5 63.6 100.4 104 96.4L104 96L384 96C437 96 480 139 480 192L480 368L304 368C264.2 368 232 400.2 232 440L232 500C232 524.3 212.3 544 188 544C163.7 544 144 524.3 144 500L144 272L80 272C53.5 272 32 250.5 32 224L32 176zM268.8 544C275.9 530.9 280 515.9 280 500L280 440C280 426.7 290.7 416 304 416L552 416C565.3 416 576 426.7 576 440L576 464C576 508.2 540.2 544 496 544L268.8 544zM112 144C94.3 144 80 158.3 80 176L80 224L144 224L144 176C144 158.3 129.7 144 112 144z"/>
             </svg>
             <span>Nenhum artigo encontrado.</span>
         `;
-        articlesList.appendChild(emptyState);
-    } else {
-        let bgDef = 1;
 
-        articles.forEach(article => {
-            const newArticle = document.createElement('li');
-            newArticle.classList.add('mini');
-            
-            newArticle.style.backgroundImage = `url('./static/imgs/mini_${bgDef}.svg')`
-            bgDef === 3 ? bgDef = 1 : bgDef += 1;
+        return li;
+    },
 
-            const newLink = document.createElement('a');
-            const url = `/open/${article['article_id']}`;
-            newLink.setAttribute('href', url);
-            newLink.classList.add('mini__link', 'u-flex-center');
+    _buildErrorState() {
+        const li = document.createElement('li');
+        li.classList.add('articles__empty');
+        li.innerHTML = `
+            <svg class="articles__empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+                <path d="M32 176C32 134.5 63.6 100.4 104 96.4L104 96L384 96C437 96 480 139 480 192L480 368L304 368C264.2 368 232 400.2 232 440L232 500C232 524.3 212.3 544 188 544C163.7 544 144 524.3 144 500L144 272L80 272C53.5 272 32 250.5 32 224L32 176zM268.8 544C275.9 530.9 280 515.9 280 500L280 440C280 426.7 290.7 416 304 416L552 416C565.3 416 576 426.7 576 440L576 464C576 508.2 540.2 544 496 544L268.8 544zM112 144C94.3 144 80 158.3 80 176L80 224L144 224L144 176C144 158.3 129.7 144 112 144z"/>
+            </svg>
+            <span>Não foi possível carregar os artigos.<br>Verifique sua conexão e recarregue a página.</span>
+        `;
 
-            const newId = document.createElement('p');
-            newId.textContent = `ID: ${article['article_id']}`;
-            newId.classList.add('mini__id');
+        return li;
+    },
 
-            const newRemove = document.createElement('button');
-            newRemove.classList.add('mini__rmv');
-            newRemove.setAttribute('aria-label', 'Remover artigo');
+    _buildCard(article, bgIndex) {
+        const li = document.createElement('li');
+        li.classList.add('mini');
+        li.style.backgroundImage = `url('./static/imgs/mini_${bgIndex}.svg')`;
 
-            newRemove.addEventListener('click', (event) => {
-                const url = `/articles/${article['article_id']}`
+        const link = document.createElement('a');
+        link.href = `/open/${article.article_id}`;
+        link.classList.add('mini__link', 'u-flex-center');
 
-                fetch(url, {
-                    method: 'DELETE'
-                })
+        const idBadge = document.createElement('p');
+        idBadge.textContent = `ID: ${article.article_id}`;
+        idBadge.classList.add('mini__id');
+
+        const title = document.createElement('h3');
+        title.textContent = article.article_title;
+        title.classList.add('mini__title');
+
+        const date = document.createElement('p');
+        date.textContent = `Publicado em: ${new Date(article.publish_date).toLocaleDateString()}`;
+        date.classList.add('mini__date');
+
+        link.append(idBadge, title, date);
+
+        const removeBtn = this._buildRemoveButton(article);
+
+        li.append(link, removeBtn);
+        return li;
+    },
+
+    _buildRemoveButton(article) {
+        const btn = document.createElement('button');
+        btn.classList.add('mini__rmv');
+        btn.setAttribute('aria-label', 'Remover artigo');
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 640 640');
+        svg.classList.add('mini__rmv-icon');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z');
+        svg.appendChild(path);
+        btn.appendChild(svg);
+
+        btn.addEventListener('click', () => {
+            articlesAPI.remove(article.article_id)
                 .then(() => {
-                    articles.forEach((deleteArticle, index) => {
-                        if (deleteArticle['article_id'] === article['article_id']) {
-                            articles.splice(index, 1);
-                        }
-                    })
-
-                    loadArticles(articles);
+                    const idx = appState.articles.findIndex(a => a.article_id === article.article_id);
+                    if (idx !== -1) appState.articles.splice(idx, 1);
+                    articlesUI.render(appState.articles);
                 })
-                .catch(error => {
-                    console.log('Erro na exclusão de artigo: ', error);
-                })
-            })
+                .catch(err => console.error(err));
+        });
 
-            const removeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            removeSvg.setAttribute('viewBox', '0 0 640 640');
-            removeSvg.classList.add('mini__rmv-icon');
-            newRemove.appendChild(removeSvg);
+        return btn;
+    },
+};
 
-            const removePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            removePath.setAttribute('d', 'M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z');
-            removeSvg.appendChild(removePath);
+const appState = {
+    articles: [],
+};
 
-            const newTitle = document.createElement('h3');
-            newTitle.textContent = article['article_title'];
-            newTitle.classList.add('mini__title');
+const addMenuModule = {
+    menu: null,
+    overlay: null,
+    form: null,
+    titleInput: null,
+    contentInput: null,
+    titleCounter: null,
+    contentCounter: null,
+    titleError: null,
+    submitBtn: null,
 
-            const localDate = new Date(article['publish_date']).toLocaleDateString()
-            const newDate = document.createElement('p');
-            newDate.textContent = `Publicado em: ${localDate}`;
-            newDate.classList.add('mini__date');
+    init() {
+        this.menu           = document.getElementById('add-menu');
+        this.overlay        = document.getElementById('add-menu-overlay');
+        this.form           = document.getElementById('add-form');
+        this.titleInput     = document.getElementById('add-input-title');
+        this.contentInput   = document.getElementById('add-input-content');
+        this.titleCounter   = document.getElementById('title-counter');
+        this.contentCounter = document.getElementById('content-counter');
+        this.titleError     = document.getElementById('title-error');
+        this.submitBtn      = document.getElementById('add-submit-btn');
 
-            newArticle.appendChild(newLink);
-            newArticle.appendChild(newRemove);
-            newLink.appendChild(newId);
-            newLink.appendChild(newTitle);
-            newLink.appendChild(newDate);
+        const openBtn   = document.getElementById('add-btn');
+        const hideBtn   = document.getElementById('add-menu-hide-btn');
+        const cancelBtn = document.getElementById('add-menu-cancel-btn');
 
-            articlesList.appendChild(newArticle);
-        })
-    }
-}
+        openBtn.addEventListener('click', () => this.open());
+        hideBtn.addEventListener('click', () => this.close());
+        cancelBtn.addEventListener('click', () => this.close());
+        this.overlay.addEventListener('click', () => this.close());
 
+        this.titleInput.addEventListener('input', () => {
+            this._updateCounter(this.titleInput, this.titleCounter, 30);
+            this._clearError(this.titleError, this.titleInput.closest('.add-menu__input-wrap'));
+        });
 
-// Procedimento a partir do carregamento do DOM
-document.addEventListener('DOMContentLoaded', async () => {
-    let articles = await fetch('/articles', {
-        method: 'GET',
-    })
-    .catch(error => {
-        console.error('Erro no carregamento dos artigos: ', error)
-    })
+        this.contentInput.addEventListener('input', () => {
+            this._updateCounter(this.contentInput, this.contentCounter, 2500);
+        });
 
-    articles = await articles.json();
-    loadArticles(articles);
+        this.form.addEventListener('submit', (e) => this._handleSubmit(e));
+    },
 
-    const addButton = document.getElementById('add-btn');
-    const addMenu = document.getElementById('add-menu');
-    const addOverlay = document.getElementById('add-menu-overlay');
-    const addForm = document.getElementById('add-form');
+    open() {
+        this.menu.classList.add('is-open');
+        this.overlay.classList.add('is-open');
+        this.titleInput.focus();
+    },
 
-    const hideButton = document.getElementById('add-menu-hide-btn');
-    const cancelButton = document.getElementById('add-menu-cancel-btn');
-    const submitBtn = document.getElementById('add-submit-btn');
+    close() {
+        this.menu.classList.remove('is-open');
+        this.overlay.classList.remove('is-open');
+    },
 
-    // Elementos do filter-menu
-    const filterButton = document.getElementById('filter-btn');
-    const filterMenu = document.getElementById('filter-menu');
-    const filterOverlay = document.getElementById('filter-menu-overlay');
-    const filterForm = document.getElementById('filter-form');
-    const filterInput = document.getElementById('filter-input');
-    const filterSelect = document.getElementById('filter-select');
-    const filterStatus = document.getElementById('filter-status');
-    const filterHideBtn = document.getElementById('filter-menu-hide-btn');
-    const filterClearBtn = document.getElementById('filter-clear-btn');
-    const filterClearInputBtn = document.getElementById('filter-clear-input-btn');
-
-    // Contadores de caracteres
-    const titleInput = document.getElementById('add-input-title');
-    const contentInput = document.getElementById('add-input-content');
-    const titleCounter = document.getElementById('title-counter');
-    const contentCounter = document.getElementById('content-counter');
-    const titleError = document.getElementById('title-error');
-
-    function showError(el, wrap, msg) {
-        el.textContent = msg;
-        el.classList.add('is-visible');
-        wrap.classList.add('has-error');
-    }
-
-    function clearError(el, wrap) {
-        el.classList.remove('is-visible');
-        wrap.classList.remove('has-error');
-    }
-
-    function updateCounter(input, counter, max) {
+    _updateCounter(input, counter, max) {
         const len = input.value.length;
         counter.textContent = `${len} / ${max}`;
         counter.classList.remove('is-near-limit', 'is-at-limit');
-        if (len >= max) {
-            counter.classList.add('is-at-limit');
-        } else if (len >= max * 0.8) {
-            counter.classList.add('is-near-limit');
-        }
-    }
+        if (len >= max)            counter.classList.add('is-at-limit');
+        else if (len >= max * 0.8) counter.classList.add('is-near-limit');
+    },
 
-    titleInput.addEventListener('input', () => {
-        updateCounter(titleInput, titleCounter, 30);
-        clearError(titleError, titleInput.closest('.add-menu__input-wrap'));
-    });
-    contentInput.addEventListener('input', () => updateCounter(contentInput, contentCounter, 2500));
+    _showError(el, wrap, msg) {
+        el.textContent = msg;
+        el.classList.add('is-visible');
+        wrap.classList.add('has-error');
+    },
 
-    // Helpers de abertura / fechamento
-    function openMenu() {
-        addMenu.classList.add('is-open');
-        addOverlay.classList.add('is-open');
-        titleInput.focus();
-    }
+    _clearError(el, wrap) {
+        el.classList.remove('is-visible');
+        wrap.classList.remove('has-error');
+    },
 
-    function closeMenu() {
-        addMenu.classList.remove('is-open');
-        addOverlay.classList.remove('is-open');
-    }
+    async _handleSubmit(e) {
+        e.preventDefault();
 
-    // Função para abertura do menu de adição de artigo
-    addButton.addEventListener('click', openMenu);
-
-    // Função para fechamento do menu
-    hideButton.addEventListener('click', closeMenu);
-    cancelButton.addEventListener('click', closeMenu);
-    addOverlay.addEventListener('click', closeMenu);
-
-    document.addEventListener('keydown', (event) => {
-        if (addMenu.classList.contains('is-open') && event.key === 'Escape') {
-            closeMenu();
-        }
-    });
-
-    // Função para adição de artigo no banco de dados
-    addForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const titleWrap = titleInput.closest('.add-menu__input-wrap');
-        if (!titleInput.value.trim()) {
-            showError(titleError, titleWrap, 'O título não pode ficar em branco.');
-            titleInput.focus();
+        const titleWrap = this.titleInput.closest('.add-menu__input-wrap');
+        if (!this.titleInput.value.trim()) {
+            this._showError(this.titleError, titleWrap, 'O título não pode ficar em branco.');
+            this.titleInput.focus();
             return;
         }
 
-        submitBtn.classList.add('is-loading');
-        submitBtn.disabled = true;
+        this.submitBtn.classList.add('is-loading');
+        this.submitBtn.disabled = true;
 
-        const addData = new FormData(addForm);
-        const data = {};
-        addData.forEach((value, key) => {
-            data[key] = value;
-        })
+        const data = Object.fromEntries(new FormData(this.form).entries());
 
-        await fetch('/articles', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => {
-            if (!res.ok) throw new Error('Erro na adição de artigo: ' + res.statusText);
-
-            return res.json();
-        })
-        .then(async data => {
-            console.log('Sucesso: ', data);
-            addForm.reset();
-            updateCounter(titleInput, titleCounter, 30);
-            updateCounter(contentInput, contentCounter, 2500);
-            articles = await (await fetch('/articles')).json();
-            loadArticles(articles);
-            closeMenu();
-        })
-        .catch(error => {
-            console.error('Erro: ', error);
-            alert('Erro ao enviar o formulário: ' + error.message);
-        })
-        .finally(() => {
-            submitBtn.classList.remove('is-loading');
-            submitBtn.disabled = false;
-        });
-    })
-
-    // Helpers de abertura / fechamento do filter-menu
-    function openFilterMenu() {
-        filterMenu.classList.add('is-open');
-        filterOverlay.classList.add('is-open');
-        filterInput.focus();
-    }
-
-    function closeFilterMenu() {
-        filterMenu.classList.remove('is-open');
-        filterOverlay.classList.remove('is-open');
-    }
-
-    // Função de filtragem ao vivo
-    function updateFilterStatus(count) {
-        filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
-        if (filterInput.value.trim() === '') return;
-
-        filterStatus.classList.add('is-visible');
-        if (count > 0) {
-            filterStatus.textContent = `${count} artigo${count > 1 ? 's' : ''} encontrado${count > 1 ? 's' : ''}.`;
-            filterStatus.classList.add('has-results');
-        } else {
-            filterStatus.textContent = 'Nenhum artigo encontrado.';
-            filterStatus.classList.add('no-results');
+        try {
+            await articlesAPI.add(data);
+            this.form.reset();
+            this._updateCounter(this.titleInput, this.titleCounter, 30);
+            this._updateCounter(this.contentInput, this.contentCounter, 2500);
+            appState.articles = await articlesAPI.fetchAll();
+            articlesUI.render(appState.articles);
+            this.close();
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao publicar o artigo: ' + err.message);
+        } finally {
+            this.submitBtn.classList.remove('is-loading');
+            this.submitBtn.disabled = false;
         }
-    }
+    },
+};
 
-    async function runFilter() {
-        const query = filterInput.value.trim();
-        const type = filterSelect.value;
+const filterMenuModule = {
+    menu: null,
+    overlay: null,
+    input: null,
+    select: null,
+    statusEl: null,
+
+    init() {
+        this.menu     = document.getElementById('filter-menu');
+        this.overlay  = document.getElementById('filter-menu-overlay');
+        this.input    = document.getElementById('filter-input');
+        this.select   = document.getElementById('filter-select');
+        this.statusEl = document.getElementById('filter-status');
+
+        const openBtn       = document.getElementById('filter-btn');
+        const hideBtn       = document.getElementById('filter-menu-hide-btn');
+        const clearBtn      = document.getElementById('filter-clear-btn');
+        const clearInputBtn = document.getElementById('filter-clear-input-btn');
+
+        openBtn.addEventListener('click', () => this.open());
+        hideBtn.addEventListener('click', () => this.close());
+        this.overlay.addEventListener('click', () => this.close());
+
+        clearBtn.addEventListener('click', () => {
+            this.input.value = '';
+            this.select.value = 'title';
+            this._hideStatus();
+            articlesUI.render(appState.articles);
+            this.input.focus();
+        });
+
+        this.input.addEventListener('input', () => {
+            clearInputBtn.hidden = this.input.value === '';
+            this._runFilter();
+        });
+
+        this.select.addEventListener('change', () => this._runFilter());
+
+        clearInputBtn.addEventListener('click', () => {
+            this.input.value = '';
+            clearInputBtn.hidden = true;
+            this._hideStatus();
+            articlesUI.render(appState.articles);
+            this.input.focus();
+        });
+    },
+
+    open() {
+        this.menu.classList.add('is-open');
+        this.overlay.classList.add('is-open');
+        this.input.focus();
+    },
+
+    close() {
+        this.menu.classList.remove('is-open');
+        this.overlay.classList.remove('is-open');
+    },
+
+    _hideStatus() {
+        this.statusEl.classList.remove('is-visible', 'has-results', 'no-results');
+    },
+
+    _updateStatus(count) {
+        this._hideStatus();
+        if (this.input.value.trim() === '') return;
+
+        this.statusEl.classList.add('is-visible');
+        if (count > 0) {
+            this.statusEl.textContent = `${count} artigo${count > 1 ? 's' : ''} encontrado${count > 1 ? 's' : ''}.`;
+            this.statusEl.classList.add('has-results');
+        } else {
+            this.statusEl.textContent = 'Nenhum artigo encontrado.';
+            this.statusEl.classList.add('no-results');
+        }
+    },
+
+    async _runFilter() {
+        const query = this.input.value.trim();
+        const type  = this.select.value;
 
         if (!query) {
-            loadArticles(articles);
-            filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
+            articlesUI.render(appState.articles);
+            this._hideStatus();
             return;
         }
 
         if (type === 'id' && isNaN(query)) {
-            loadArticles([]);
-            updateFilterStatus(0);
+            articlesUI.render([]);
+            this._updateStatus(0);
             return;
         }
 
-        const url = type === 'title'
-            ? `/articles/title/${encodeURIComponent(query)}`
-            : `/articles/id/${encodeURIComponent(query)}`;
-
         try {
-            const res = await fetch(url, { method: 'GET' });
-            const filtered = await res.json();
-            loadArticles(filtered);
-            updateFilterStatus(filtered.length);
-        } catch (error) {
-            console.error('Erro na filtragem: ', error);
+            const results = type === 'title'
+                ? await articlesAPI.searchByTitle(query)
+                : await articlesAPI.searchById(query);
+            articlesUI.render(results);
+            this._updateStatus(results.length);
+        } catch (err) {
+            console.error(err);
         }
+    },
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const listEl = document.getElementById('mini-grid');
+    articlesUI.init(listEl);
+
+    try {
+        appState.articles = await articlesAPI.fetchAll();
+        articlesUI.render(appState.articles);
+    } catch (err) {
+        console.error(err);
+        listEl.innerHTML = '';
+        listEl.appendChild(articlesUI._buildErrorState());
     }
 
-    // Event listeners do filter-menu
-    filterButton.addEventListener('click', openFilterMenu);
-    filterHideBtn.addEventListener('click', closeFilterMenu);
-    filterOverlay.addEventListener('click', closeFilterMenu);
+    addMenuModule.init();
+    filterMenuModule.init();
 
-    filterClearBtn.addEventListener('click', () => {
-        filterInput.value = '';
-        filterSelect.value = 'title';
-        filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
-        loadArticles(articles);
-        filterInput.focus();
-    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
 
-    filterInput.addEventListener('input', () => {
-        filterClearInputBtn.hidden = filterInput.value === '';
-        runFilter();
-    });
-    filterSelect.addEventListener('change', runFilter);
+        if (addMenuModule.menu.classList.contains('is-open')) {
+            addMenuModule.close();
+        }
 
-    filterClearInputBtn.addEventListener('click', () => {
-        filterInput.value = '';
-        filterClearInputBtn.hidden = true;
-        filterStatus.classList.remove('is-visible', 'has-results', 'no-results');
-        loadArticles(articles);
-        filterInput.focus();
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (filterMenu.classList.contains('is-open') && event.key === 'Escape') {
-            event.preventDefault();
-            closeFilterMenu();
+        if (filterMenuModule.menu.classList.contains('is-open')) {
+            e.preventDefault();
+            filterMenuModule.close();
         }
     });
-})
+});

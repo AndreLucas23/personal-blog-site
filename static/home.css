@@ -3,10 +3,10 @@
 /* Seções principais */
 
 .pg__main {
-    display: grid;
-    grid-template-columns: 7rem 1fr;
+    display: block;
     width: 100%;
 }
+
 
 .pg__aside {
     background: rgba(239, 239, 239, 0.75);
@@ -24,10 +24,12 @@
 
 .pg__home {
     flex-direction: row;
-    gap: 12rem;
+    gap: clamp(4rem, 6vw, 10rem);
     max-width: 100%;
+    padding: 4rem clamp(3rem, 5vw, 8rem);
     width: 100%;
 }
+
 
 .pg__articles {
     align-items: center;
@@ -549,33 +551,85 @@
 
 /* Seção: home */
 
+@keyframes homeFadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(2.4rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes homeImgFade {
+    from {
+        opacity: 0;
+        transform: translateX(3rem) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.no-aside {
+    margin-left: 7rem;
+}
+
 .home__text {
-    border-radius: 1rem;
-    box-shadow: 0.3rem 0.3rem 1.5rem var(--shadow-neutral);
+    animation: homeFadeSlide 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 0.1s;
+    background: var(--gradient-menu-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 0.1rem solid var(--blue-alpha-12);
+    border-radius: 2rem;
+    box-shadow:
+        0 0.8rem 3.2rem var(--blue-alpha-10),
+        0 0.2rem 0.8rem var(--shadow-neutral),
+        inset 0 0.1rem 0 var(--glass-highlight);
     display: flex;
     flex: 0 1 auto;
-    flex-flow: column wrap;
-    gap: 1rem;
-    padding: 4rem;
-    max-width: 100%;
+    flex-direction: column;
+    gap: 1.6rem;
+    max-width: 42rem;
+    padding: 4rem 4.4rem;
 }
 
 .home__title {
-    margin-bottom: 1rem;
+    color: var(--accent-blue);
+    letter-spacing: -0.12rem;
+    line-height: 1.08;
+    position: relative;
+}
+
+.home__title::after {
+    background: var(--gradient-divider);
+    bottom: -1rem;
+    content: '';
+    height: 0.15rem;
+    left: 0;
+    position: absolute;
+    width: 100%;
 }
 
 .home__subtitle {
-    font-weight: 500;
-    letter-spacing: 0.1rem;
-    line-height: 2.24rem;
+    color: var(--secondary-black);
+    font-size: 1.5rem;
+    font-weight: 450;
+    letter-spacing: 0.02rem;
+    line-height: 1.7;
+    margin-top: 0.4rem;
 }
 
 .home__img {
+    animation: homeImgFade 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 0.25s;
     flex: 0 1 auto;
     height: auto;
-    max-width: 100%;
-    padding: 2rem;
-    width: 50rem;
+    max-width: clamp(28rem, 38vw, 48rem);
+    width: 100%;
 }
 
 /* Seção: articles */
