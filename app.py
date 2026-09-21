@@ -5,10 +5,12 @@ import mysql.connector
 import logging
 
 from home import home_bp
+from article import article_bp
 
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(home_bp)
+app.register_blueprint(article_bp)
 
 @app.errorhandler(mysql.connector.Error)
 def handle_db_error(error):
