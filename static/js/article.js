@@ -1,14 +1,5 @@
-const articleAPI = {
-    async update(articleId, data) {
-        const res = await fetch(`/api/articles/${articleId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error(`Erro ao salvar: ${res.statusText}`);
-        return res.json();
-    },
-};
+import { API } from "./api.js";
+
 
 const editPanelModule = {
     panel: null,
@@ -113,7 +104,7 @@ const editPanelModule = {
         };
 
         try {
-            await articleAPI.update(this.articleId, payload);
+            await API.update(this.articleId, payload);
             document.getElementById('view-title').textContent   = payload.title;
             document.getElementById('view-content').textContent = payload.content;
             document.title = `${payload.title} — Blog Pessoal`;

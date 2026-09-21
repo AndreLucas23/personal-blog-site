@@ -1,38 +1,5 @@
-const articlesAPI = {
-    async fetchAll() {
-        const res = await fetch('/api/articles', { method: 'GET' });
-        if (!res.ok) throw new Error(`Erro ao carregar artigos: ${res.statusText}`);
-        return res.json();
-    },
+import { API } from "./api.js";
 
-    async add(data) {
-        const res = await fetch('/api/articles', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error(`Erro ao adicionar artigo: ${res.statusText}`);
-        return res.json();
-    },
-
-    async remove(articleId) {
-        const res = await fetch(`/api/articles/${articleId}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error(`Erro ao remover artigo: ${res.statusText}`);
-        return res.json();
-    },
-
-    async searchByTitle(query) {
-        const res = await fetch(`/api/articles/title/${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error(`Erro na busca por título: ${res.statusText}`);
-        return res.json();
-    },
-
-    async searchById(query) {
-        const res = await fetch(`/api/articles/id/${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error(`Erro na busca por ID: ${res.statusText}`);
-        return res.json();
-    },
-};
 
 const articlesUI = {
     listEl: null,
@@ -133,7 +100,7 @@ const articlesUI = {
         btn.appendChild(svg);
 
         btn.addEventListener('click', () => {
-            articlesAPI.remove(article.article_id)
+            API.remove(article.article_id)
                 .then(() => {
                     const idx = appState.articles.findIndex(a => a.article_id === article.article_id);
                     if (idx !== -1) appState.articles.splice(idx, 1);
@@ -239,11 +206,11 @@ const addMenuModule = {
         const data = Object.fromEntries(new FormData(this.form).entries());
 
         try {
-            await articlesAPI.add(data);
+            await API.add(data);
             this.form.reset();
             this._updateCounter(this.titleInput, this.titleCounter, 30);
             this._updateCounter(this.contentInput, this.contentCounter, 2500);
-            appState.articles = await articlesAPI.fetchAll();
+            appState.articles = await API.fetchAll();
             articlesUI.render(appState.articles);
             this.close();
         } catch (err) {
@@ -350,8 +317,8 @@ const filterMenuModule = {
 
         try {
             const results = type === 'title'
-                ? await articlesAPI.searchByTitle(query)
-                : await articlesAPI.searchById(query);
+                ? await API.searchByTitle(query)
+                : await API.searchById(query);
             articlesUI.render(results);
             this._updateStatus(results.length);
         } catch (err) {
@@ -365,7 +332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     articlesUI.init(listEl);
 
     try {
-        appState.articles = await articlesAPI.fetchAll();
+        appState.articles = await API.fetchAll();
         articlesUI.render(appState.articles);
     } catch (err) {
         console.error(err);
