@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, abort
-from db import get_db_connection
+from repositories import article_repository
 
 views_bp = Blueprint('views', __name__)
 
@@ -9,25 +9,7 @@ def home():
 
 @views_bp.route('/open/<int:article_id>')
 def open_article(article_id):
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            'SELECT ARTICLE_ID as article_id, '
-            'ARTICLE_TITLE as article_title, '
-            'ARTICLE_CONTENT as article_content, '
-            'PUBLISH_DATE as publish_date '
-            'FROM ARTICLES WHERE ARTICLE_ID = %s',
-            (article_id,)
-        )
-        article = cursor.fetchone()
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+    article = article_repository.get_by_id(article_id)
 
     if article is None:
         abort(404)
