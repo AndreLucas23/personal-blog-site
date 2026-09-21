@@ -1,12 +1,12 @@
 const articlesAPI = {
     async fetchAll() {
-        const res = await fetch('/articles', { method: 'GET' });
+        const res = await fetch('/api/articles', { method: 'GET' });
         if (!res.ok) throw new Error(`Erro ao carregar artigos: ${res.statusText}`);
         return res.json();
     },
 
     async add(data) {
-        const res = await fetch('/articles', {
+        const res = await fetch('/api/articles', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -16,19 +16,19 @@ const articlesAPI = {
     },
 
     async remove(articleId) {
-        const res = await fetch(`/articles/${articleId}`, { method: 'DELETE' });
+        const res = await fetch(`/api/articles/${articleId}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(`Erro ao remover artigo: ${res.statusText}`);
         return res.json();
     },
 
     async searchByTitle(query) {
-        const res = await fetch(`/articles/title/${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/articles/title/${encodeURIComponent(query)}`);
         if (!res.ok) throw new Error(`Erro na busca por título: ${res.statusText}`);
         return res.json();
     },
 
     async searchById(query) {
-        const res = await fetch(`/articles/id/${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/articles/id/${encodeURIComponent(query)}`);
         if (!res.ok) throw new Error(`Erro na busca por ID: ${res.statusText}`);
         return res.json();
     },

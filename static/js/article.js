@@ -1,6 +1,6 @@
 const articleAPI = {
     async update(articleId, data) {
-        const res = await fetch(`/articles/${articleId}`, {
+        const res = await fetch(`/api/articles/${articleId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
