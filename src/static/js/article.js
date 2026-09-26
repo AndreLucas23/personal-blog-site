@@ -14,19 +14,19 @@ const editPanelModule = {
     articleId: null,
 
     init() {
-        this.panel          = document.getElementById('edit-panel');
-        this.overlay        = document.getElementById('edit-overlay');
-        this.form           = document.getElementById('edit-form');
-        this.titleInput     = document.getElementById('edit-input-title');
-        this.contentInput   = document.getElementById('edit-input-content');
-        this.titleCounter   = document.getElementById('edit-title-counter');
+        this.panel = document.getElementById('edit-panel');
+        this.overlay = document.getElementById('edit-overlay');
+        this.form = document.getElementById('edit-form');
+        this.titleInput = document.getElementById('edit-input-title');
+        this.contentInput = document.getElementById('edit-input-content');
+        this.titleCounter = document.getElementById('edit-title-counter');
         this.contentCounter = document.getElementById('edit-content-counter');
-        this.titleError     = document.getElementById('edit-title-error');
-        this.submitBtn      = document.getElementById('edit-submit-btn');
-        this.articleId      = document.querySelector('.art__main').dataset.articleId;
+        this.titleError = document.getElementById('edit-title-error');
+        this.submitBtn = document.getElementById('edit-submit-btn');
+        this.articleId = document.querySelector('.art__main').dataset.articleId;
 
-        const openBtn   = document.getElementById('edit-btn');
-        const hideBtn   = document.getElementById('edit-panel-hide-btn');
+        const openBtn = document.getElementById('edit-btn');
+        const hideBtn = document.getElementById('edit-panel-hide-btn');
         const cancelBtn = document.getElementById('edit-cancel-btn');
 
         openBtn.addEventListener('click', () => this.open());
@@ -47,10 +47,10 @@ const editPanelModule = {
     },
 
     open() {
-        const currentTitle   = document.getElementById('view-title').textContent;
+        const currentTitle = document.getElementById('view-title').textContent;
         const currentContent = document.getElementById('view-content').textContent;
 
-        this.titleInput.value   = currentTitle;
+        this.titleInput.value = currentTitle;
         this.contentInput.value = currentContent;
 
         this._updateCounter(this.titleInput, this.titleCounter, 30);
@@ -70,7 +70,7 @@ const editPanelModule = {
         const len = input.value.length;
         counter.textContent = `${len} / ${max}`;
         counter.classList.remove('is-near-limit', 'is-at-limit');
-        if (len >= max)            counter.classList.add('is-at-limit');
+        if (len >= max) counter.classList.add('is-at-limit');
         else if (len >= max * 0.8) counter.classList.add('is-near-limit');
     },
 
@@ -99,13 +99,13 @@ const editPanelModule = {
         this.submitBtn.disabled = true;
 
         const payload = {
-            title:   this.titleInput.value.trim(),
+            title: this.titleInput.value.trim(),
             content: this.contentInput.value,
         };
 
         try {
             await API.update(this.articleId, payload);
-            document.getElementById('view-title').textContent   = payload.title;
+            document.getElementById('view-title').textContent = payload.title;
             document.getElementById('view-content').textContent = payload.content;
             document.title = `${payload.title} — Blog Pessoal`;
             this.close();

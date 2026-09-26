@@ -129,18 +129,18 @@ const addMenuModule = {
     submitBtn: null,
 
     init() {
-        this.menu           = document.getElementById('add-menu');
-        this.overlay        = document.getElementById('add-menu-overlay');
-        this.form           = document.getElementById('add-form');
-        this.titleInput     = document.getElementById('add-input-title');
-        this.contentInput   = document.getElementById('add-input-content');
-        this.titleCounter   = document.getElementById('title-counter');
+        this.menu = document.getElementById('add-menu');
+        this.overlay = document.getElementById('add-menu-overlay');
+        this.form = document.getElementById('add-form');
+        this.titleInput = document.getElementById('add-input-title');
+        this.contentInput = document.getElementById('add-input-content');
+        this.titleCounter = document.getElementById('title-counter');
         this.contentCounter = document.getElementById('content-counter');
-        this.titleError     = document.getElementById('title-error');
-        this.submitBtn      = document.getElementById('add-submit-btn');
+        this.titleError = document.getElementById('title-error');
+        this.submitBtn = document.getElementById('add-submit-btn');
 
-        const openBtn   = document.getElementById('add-btn');
-        const hideBtn   = document.getElementById('add-menu-hide-btn');
+        const openBtn = document.getElementById('add-btn');
+        const hideBtn = document.getElementById('add-menu-hide-btn');
         const cancelBtn = document.getElementById('add-menu-cancel-btn');
 
         openBtn.addEventListener('click', () => this.open());
@@ -175,7 +175,7 @@ const addMenuModule = {
         const len = input.value.length;
         counter.textContent = `${len} / ${max}`;
         counter.classList.remove('is-near-limit', 'is-at-limit');
-        if (len >= max)            counter.classList.add('is-at-limit');
+        if (len >= max) counter.classList.add('is-at-limit');
         else if (len >= max * 0.8) counter.classList.add('is-near-limit');
     },
 
@@ -231,15 +231,15 @@ const filterMenuModule = {
     statusEl: null,
 
     init() {
-        this.menu     = document.getElementById('filter-menu');
-        this.overlay  = document.getElementById('filter-menu-overlay');
-        this.input    = document.getElementById('filter-input');
-        this.select   = document.getElementById('filter-select');
+        this.menu = document.getElementById('filter-menu');
+        this.overlay = document.getElementById('filter-menu-overlay');
+        this.input = document.getElementById('filter-input');
+        this.select = document.getElementById('filter-select');
         this.statusEl = document.getElementById('filter-status');
 
-        const openBtn       = document.getElementById('filter-btn');
-        const hideBtn       = document.getElementById('filter-menu-hide-btn');
-        const clearBtn      = document.getElementById('filter-clear-btn');
+        const openBtn = document.getElementById('filter-btn');
+        const hideBtn = document.getElementById('filter-menu-hide-btn');
+        const clearBtn = document.getElementById('filter-clear-btn');
         const clearInputBtn = document.getElementById('filter-clear-input-btn');
 
         openBtn.addEventListener('click', () => this.open());
@@ -301,7 +301,7 @@ const filterMenuModule = {
 
     async _runFilter() {
         const query = this.input.value.trim();
-        const type  = this.select.value;
+        const type = this.select.value;
 
         if (!query) {
             articlesUI.render(appState.articles);
