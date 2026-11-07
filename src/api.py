@@ -19,6 +19,9 @@ def add_article():
     if not article_title or len(article_title) > 30:
         return jsonify({'message': 'Invalid title'}), 400
 
+    if not article_content:
+        return jsonify({'message': 'Invalid content'}), 400
+
     article_repository.create(article_title, article_content, current_user.user_id)
     return jsonify({'message': 'artigo criado com sucesso'}), 201
 
