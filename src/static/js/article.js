@@ -120,6 +120,8 @@ const editPanelModule = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('edit-btn')) return;
+
     editPanelModule.init();
 
     document.addEventListener('keydown', (e) => {
