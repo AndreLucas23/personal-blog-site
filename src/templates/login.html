@@ -1,30 +1,93 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'partials/head.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 
     <title>Entrar | Blog Pessoal</title>
 </head>
-<body>
-    <main>
-        <h1>Entrar</h1>
+<body class="auth u-main-bg-1">
+    <main class="auth__card">
+        <header class="auth__header">
+            <div class="auth__header-icon u-flex-center">
+                <svg aria-hidden="true"
+                viewBox="0 0 640 640"
+                xmlns="http://www.w3.org/2000/svg">
+                    <path d="M384 96L480 96C524.2 96 560 131.8 560 176L560 464C560 508.2 524.2 544 480 544L384 544C366.3 544 352 529.7 352 512C352 494.3 366.3 480 384 480L480 480C488.8 480 496 472.8 496 464L496 176C496 167.2 488.8 160 480 160L384 160C366.3 160 352 145.7 352 128C352 110.3 366.3 96 384 96z"/>
+                    <path d="M246.6 169.4C234.1 156.9 213.8 156.9 201.3 169.4C188.8 181.9 188.8 202.2 201.3 214.7L274.6 288L96 288C78.3 288 64 302.3 64 320C64 337.7 78.3 352 96 352L274.7 352L201.4 425.4C188.9 437.9 188.9 458.2 201.4 470.7C213.9 483.2 234.2 483.2 246.7 470.7L374.7 342.7C387.2 330.2 387.2 309.9 374.7 297.4L246.7 169.4z"/>
+                </svg>
+            </div>
+
+            <div>
+                <h1 class="auth__title">Entrar</h1>
+                <p class="auth__subtitle">Acesse sua conta para continuar</p>
+            </div>
+        </header>
+
+        <div class="auth__divider"></div>
 
         {% for message in get_flashed_messages() %}
-        <p role="alert">{{ message }}</p>
+        <p class="auth__alert" role="alert">{{ message }}</p>
         {% endfor %}
 
-        <form method="post" action="{{ url_for('auth.login') }}">
-            <label for="email">E-mail</label>
-            <input id="email" name="email" type="email" required autofocus>
+        <form class="auth__form"
+        method="post"
+        action="{{ url_for('auth.login') }}">
+            <div class="auth__field">
+                <label class="auth__label" for="email">
+                    <svg class="auth__label-icon"
+                    aria-hidden="true"
+                    viewBox="0 0 640 640"
+                    xmlns="http://www.w3.org/2000/svg">
+                        <path d="M112 128L528 128C563.3 128 592 156.7 592 192L592 448C592 483.3 563.3 512 528 512L112 512C76.7 512 48 483.3 48 448L48 192C48 156.7 76.7 128 112 128zM112 192L112 200L320 336L528 200L528 192L112 192zM528 276L338.5 400.2C327.2 407.6 312.8 407.6 301.5 400.2L112 276L112 448L528 448L528 276z"/>
+                    </svg>
+                    E-mail
+                </label>
 
-            <label for="password">Senha</label>
-            <input id="password" name="password" type="password" required>
+                <div class="auth__input-wrap">
+                    <input class="auth__input"
+                    id="email"
+                    name="email"
+                    type="email"
+                    value="{{ email or '' }}"
+                    placeholder="voce@exemplo.com"
+                    autocomplete="email"
+                    maxlength="255"
+                    required
+                    {% if not email %}autofocus{% endif %}>
+                </div>
+            </div>
 
-            <button type="submit">Entrar</button>
+            <div class="auth__field">
+                <label class="auth__label" for="password">
+                    <svg class="auth__label-icon"
+                    aria-hidden="true"
+                    viewBox="0 0 640 640"
+                    xmlns="http://www.w3.org/2000/svg">
+                        <path d="M224 192L224 256L416 256L416 192C416 139 373 96 320 96C267 96 224 139 224 192zM160 256L160 192C160 103.6 231.6 32 320 32C408.4 32 480 103.6 480 192L480 256C515.3 256 544 284.7 544 320L544 544C544 579.3 515.3 608 480 608L160 608C124.7 608 96 579.3 96 544L96 320C96 284.7 124.7 256 160 256z"/>
+                    </svg>
+                    Senha
+                </label>
+
+                <div class="auth__input-wrap">
+                    <input class="auth__input"
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Sua senha"
+                    autocomplete="current-password"
+                    required
+                    {% if email %}autofocus{% endif %}>
+                </div>
+            </div>
+
+            <button class="auth__submit" type="submit">Entrar</button>
         </form>
 
-        <a href="{{ url_for('views.home') }}">Voltar ao blog</a>
+        <footer class="auth__links">
+            <a class="auth__link" href="{{ url_for('views.home') }}">Voltar ao blog</a>
+        </footer>
     </main>
 </body>
 </html>

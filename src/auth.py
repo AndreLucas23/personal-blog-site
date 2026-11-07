@@ -56,7 +56,7 @@ def login():
 
     if not is_valid:
         flash('E-mail ou senha inválidos.')
-        return render_template('login.html'), 401
+        return render_template('login.html', email=email), 401
 
     login_user(AuthUser(user))
     return redirect(url_for('views.home'))
