@@ -2,13 +2,11 @@ import argparse
 import getpass
 import sys
 
-import mysql.connector
 from werkzeug.security import generate_password_hash
 
 from repositories import user_repository
 
 MIN_PASSWORD_LENGTH = 8
-DUPLICATE_ENTRY_ERROR = 1062
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,9 +40,7 @@ def main() -> None:
 
     try:
         user_id = user_repository.create(username, email, password_hash, args.admin)
-    except mysql.connector.IntegrityError as error:
-        if error.errno != DUPLICATE_ENTRY_ERROR:
-            raise
+    except user_repository.DuplicateEmailError:
         sys.exit(f'A user with the email {email} already exists.')
 
     role = 'admin' if args.admin else 'regular user'
