@@ -1,6 +1,6 @@
 # Authentication
 
-Readers browse the blog without an account. Creating, editing and removing articles requires a signed-in user.
+Readers browse the blog without an account. Creating, editing and removing articles requires an admin user.
 
 ## Configuration
 
@@ -26,14 +26,15 @@ The session cookie is `HttpOnly` and `SameSite=Lax`.
 
 ## Access rules
 
-| Endpoint | Anonymous | Signed in |
-| --- | --- | --- |
-| `GET /api/articles` and the search endpoints | Allowed | Allowed |
-| `POST`, `PATCH` and `DELETE` under `/api/articles` | `401` with `{"message": "Authentication required"}` | Allowed |
+| Endpoint | Anonymous | Signed-in user | Admin |
+| --- | --- | --- | --- |
+| `GET /api/articles` and the search endpoints | Allowed | Allowed | Allowed |
+| `POST`, `PATCH` and `DELETE` under `/api/articles` | `401` with `{"message": "Authentication required"}` | `403` with `{"message": "Admin privileges required"}` | Allowed |
+| `GET /admin` | Redirects to `/auth/login` | `403` | Allowed |
 
-New articles are stored with the signed-in user as author. Any signed-in user can write for now, and a later change restricts writing to admin users.
+New articles are stored with the admin who created them as author. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
 
-Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation.
+Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. The `/admin` page is a placeholder until the admin panel interface is delivered.
 
 ## Trying it
 
