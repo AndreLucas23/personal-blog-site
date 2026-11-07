@@ -136,6 +136,9 @@
 
             <div class="art__header-meta">
                 <span class="art__id-badge">ID: {{ article['article_id'] }}</span>
+                {% if article['author'] %}
+                <span class="art__author">por {{ article['author'] }}</span>
+                {% endif %}
                 <time class="art__date" datetime="{{ article['publish_date'] }}">
                     {{ article['publish_date'].strftime('%d/%m/%Y') }}
                 </time>

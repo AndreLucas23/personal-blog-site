@@ -175,6 +175,12 @@
     word-break: break-word;
 }
 
+.mini__author {
+    color: rgba(21, 21, 21, 0.72);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
 .mini__date {
     bottom: 1.5rem;
     color: var(--pure-white-alpha-75);
