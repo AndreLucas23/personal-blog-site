@@ -1,4 +1,6 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from functools import wraps
+
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash
 
@@ -6,6 +8,17 @@ from auth_user import AuthUser
 from repositories import user_repository
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+
+def admin_required(view):
+    @wraps(view)
+    @login_required
+    def wrapped(*args, **kwargs):
+        if not current_user.is_admin:
+            abort(403)
+        return view(*args, **kwargs)
+
+    return wrapped
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
