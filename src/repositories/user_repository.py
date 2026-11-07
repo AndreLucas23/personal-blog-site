@@ -45,7 +45,9 @@ def get_by_email(email: str) -> dict | None:
         if conn:
             conn.close()
 
-def create(username: str, email: str, password_hash: str, is_admin: bool = False) -> int:
+def create(
+    username: str, email: str, password_hash: str, is_admin: bool = False
+) -> int:
     conn = None
     cursor = None
     try:
