@@ -1,34 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'partials/head.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 
     <title>Criar conta | Blog Pessoal</title>
 </head>
-<body>
-    <main>
-        <h1>Criar conta</h1>
+<body class="auth u-main-bg-1">
+    <main class="auth__card">
+        <header class="auth__header">
+            <div class="auth__header-icon u-flex-center">
+                <svg aria-hidden="true"
+                viewBox="0 0 640 640"
+                xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="256" cy="200" r="104"/>
+                    <path d="M64 544C64 437.9 150 352 256 352C362 352 448 437.9 448 544Z"/>
+                    <rect x="496" y="208" width="48" height="176" rx="24"/>
+                    <rect x="432" y="272" width="176" height="48" rx="24"/>
+                </svg>
+            </div>
+
+            <div>
+                <h1 class="auth__title">Criar conta</h1>
+                <p class="auth__subtitle">Cadastre-se para participar do blog</p>
+            </div>
+        </header>
+
+        <div class="auth__divider"></div>
 
         {% for message in get_flashed_messages() %}
-        <p role="alert">{{ message }}</p>
+        <p class="auth__alert" role="alert">{{ message }}</p>
         {% endfor %}
 
-        <form method="post" action="{{ url_for('auth.register') }}">
-            <label for="username">Nome de usuário</label>
-            <input id="username" name="username" type="text" maxlength="50" required autofocus>
+        <form class="auth__form"
+        method="post"
+        action="{{ url_for('auth.register') }}">
+            <div class="auth__field">
+                <label class="auth__label" for="username">
+                    <svg class="auth__label-icon"
+                    aria-hidden="true"
+                    viewBox="0 0 640 640"
+                    xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="320" cy="200" r="120"/>
+                        <path d="M96 576C96 452.3 196.3 352 320 352C443.7 352 544 452.3 544 576Z"/>
+                    </svg>
+                    Nome de usuário
+                </label>
 
-            <label for="email">E-mail</label>
-            <input id="email" name="email" type="email" maxlength="255" required>
+                <div class="auth__input-wrap">
+                    <input class="auth__input"
+                    id="username"
+                    name="username"
+                    type="text"
+                    value="{{ username or '' }}"
+                    placeholder="Como você quer ser chamado"
+                    autocomplete="username"
+                    maxlength="50"
+                    required
+                    autofocus>
+                </div>
+            </div>
 
-            <label for="password">Senha</label>
-            <input id="password" name="password" type="password" minlength="8" maxlength="128" required>
+            <div class="auth__field">
+                <label class="auth__label" for="email">
+                    <svg class="auth__label-icon"
+                    aria-hidden="true"
+                    viewBox="0 0 640 640"
+                    xmlns="http://www.w3.org/2000/svg">
+                        <path d="M112 128L528 128C563.3 128 592 156.7 592 192L592 448C592 483.3 563.3 512 528 512L112 512C76.7 512 48 483.3 48 448L48 192C48 156.7 76.7 128 112 128zM112 192L112 200L320 336L528 200L528 192L112 192zM528 276L338.5 400.2C327.2 407.6 312.8 407.6 301.5 400.2L112 276L112 448L528 448L528 276z"/>
+                    </svg>
+                    E-mail
+                </label>
 
-            <button type="submit">Criar conta</button>
+                <div class="auth__input-wrap">
+                    <input class="auth__input"
+                    id="email"
+                    name="email"
+                    type="email"
+                    value="{{ email or '' }}"
+                    placeholder="voce@exemplo.com"
+                    autocomplete="email"
+                    maxlength="255"
+                    required>
+                </div>
+            </div>
+
+            <div class="auth__field">
+                <label class="auth__label" for="password">
+                    <svg class="auth__label-icon"
+                    aria-hidden="true"
+                    viewBox="0 0 640 640"
+                    xmlns="http://www.w3.org/2000/svg">
+                        <path d="M224 192L224 256L416 256L416 192C416 139 373 96 320 96C267 96 224 139 224 192zM160 256L160 192C160 103.6 231.6 32 320 32C408.4 32 480 103.6 480 192L480 256C515.3 256 544 284.7 544 320L544 544C544 579.3 515.3 608 480 608L160 608C124.7 608 96 579.3 96 544L96 320C96 284.7 124.7 256 160 256z"/>
+                    </svg>
+                    Senha
+                </label>
+
+                <div class="auth__input-wrap">
+                    <input class="auth__input"
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Crie uma senha"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
+                    aria-describedby="password-hint"
+                    required>
+                </div>
+
+                <span class="auth__hint" id="password-hint">Use de 8 a 128 caracteres.</span>
+            </div>
+
+            <button class="auth__submit" type="submit">Criar conta</button>
         </form>
 
-        <a href="{{ url_for('auth.login') }}">Já tenho uma conta</a>
-        <a href="{{ url_for('views.home') }}">Voltar ao blog</a>
+        <footer class="auth__links">
+            <a class="auth__link" href="{{ url_for('auth.login') }}">Já tenho uma conta</a>
+            <a class="auth__link" href="{{ url_for('views.home') }}">Voltar ao blog</a>
+        </footer>
     </main>
 </body>
 </html>
