@@ -40,9 +40,13 @@ def is_api_request() -> bool:
 
 @login_manager.unauthorized_handler
 def handle_unauthorized():
+    login_url = url_for('auth.login')
     if is_api_request():
-        return jsonify({'message': 'Authentication required'}), 401
-    return redirect(url_for('auth.login'))
+        return jsonify({
+            'message': 'Authentication required',
+            'login_url': login_url,
+        }), 401
+    return redirect(login_url)
 
 
 @app.errorhandler(403)
