@@ -35,6 +35,14 @@ export const API = {
         });
     },
 
+    async like(articleId) {
+        return this._fetch(`/api/articles/${articleId}/likes`, { method: 'POST' });
+    },
+
+    async unlike(articleId) {
+        return this._fetch(`/api/articles/${articleId}/likes`, { method: 'DELETE' });
+    },
+
     async searchByTitle(query) {
         return this._fetch(`/api/articles/title/${encodeURIComponent(query)}`);
     },

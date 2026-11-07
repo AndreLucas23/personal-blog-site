@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/article.css') }}">
 
     <title>{{ article['article_title'] }} — Blog Pessoal</title>
@@ -159,6 +160,21 @@
         <article class="art__body">
             <h1 class="art__title" id="view-title">{{ article['article_title'] }}</h1>
             <p class="art__content" id="view-content">{{ article['article_content'] }}</p>
+
+            <button class="c-like art__like{% if article['liked'] %} is-liked{% endif %}"
+            type="button"
+            data-article-id="{{ article['article_id'] }}"
+            aria-pressed="{{ 'true' if article['liked'] else 'false' }}"
+            aria-label="{{ 'Descurtir artigo' if article['liked'] else 'Curtir artigo' }}">
+                <svg class="c-like__icon"
+                aria-hidden="true"
+                viewBox="0 0 640 640"
+                xmlns="http://www.w3.org/2000/svg">
+                    <path d="M320 560L130 372C74 316 74 224 130 168C186 112 276 116 320 184C364 116 454 112 510 168C566 224 566 316 510 372Z"/>
+                </svg>
+
+                <span class="c-like__count">{{ article['likes'] }}</span>
+            </button>
         </article>
 
     </main>
