@@ -4,9 +4,25 @@ import sys
 
 from werkzeug.security import generate_password_hash
 
+import user_validation as validation
 from repositories import user_repository
 
-MIN_PASSWORD_LENGTH = 8
+ERROR_MESSAGES = {
+    validation.USERNAME_REQUIRED: 'A username is required.',
+    validation.USERNAME_TOO_LONG: (
+        f'The username can have at most {validation.MAX_USERNAME_LENGTH} characters.'
+    ),
+    validation.EMAIL_TOO_LONG: (
+        f'The email can have at most {validation.MAX_EMAIL_LENGTH} characters.'
+    ),
+    validation.EMAIL_INVALID: 'A valid email is required.',
+    validation.PASSWORD_TOO_SHORT: (
+        f'The password must have at least {validation.MIN_PASSWORD_LENGTH} characters.'
+    ),
+    validation.PASSWORD_TOO_LONG: (
+        f'The password can have at most {validation.MAX_PASSWORD_LENGTH} characters.'
+    ),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -17,10 +33,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def exit_on_error(error_code: str | None) -> None:
+    if error_code:
+        sys.exit(ERROR_MESSAGES[error_code])
+
+
 def ask_password() -> str:
     password = getpass.getpass('Password: ')
-    if len(password) < MIN_PASSWORD_LENGTH:
-        sys.exit(f'The password must have at least {MIN_PASSWORD_LENGTH} characters.')
+    exit_on_error(validation.validate_password(password))
 
     if getpass.getpass('Repeat the password: ') != password:
         sys.exit('The passwords do not match.')
@@ -32,9 +52,7 @@ def main() -> None:
     args = parse_args()
     username = (args.username or input('Username: ')).strip()
     email = (args.email or input('Email: ')).strip()
-
-    if not username or '@' not in email:
-        sys.exit('A username and a valid email are required.')
+    exit_on_error(validation.validate_identity(username, email))
 
     password_hash = generate_password_hash(ask_password())
 

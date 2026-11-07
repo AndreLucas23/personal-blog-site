@@ -15,8 +15,7 @@ PASSWORD_TOO_LONG = 'password_too_long'
 EMAIL_PATTERN = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 
 
-def validate_new_user(username: str, email: str, password: str) -> str | None:
-    """Return the code of the first problem found, or None when the data is valid."""
+def validate_identity(username: str, email: str) -> str | None:
     if not username:
         return USERNAME_REQUIRED
 
@@ -29,6 +28,10 @@ def validate_new_user(username: str, email: str, password: str) -> str | None:
     if not EMAIL_PATTERN.match(email):
         return EMAIL_INVALID
 
+    return None
+
+
+def validate_password(password: str) -> str | None:
     if len(password) < MIN_PASSWORD_LENGTH:
         return PASSWORD_TOO_SHORT
 
@@ -36,3 +39,8 @@ def validate_new_user(username: str, email: str, password: str) -> str | None:
         return PASSWORD_TOO_LONG
 
     return None
+
+
+def validate_new_user(username: str, email: str, password: str) -> str | None:
+    """Return the code of the first problem found, or None when the data is valid."""
+    return validate_identity(username, email) or validate_password(password)
