@@ -40,6 +40,10 @@ def admin_required(view):
     return wrapped
 
 
+def current_user_id() -> int | None:
+    return current_user.user_id if current_user.is_authenticated else None
+
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
