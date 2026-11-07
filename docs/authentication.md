@@ -58,8 +58,9 @@ Pages that need a session redirect anonymous visitors to `/auth/login`. API rout
 | `/open/<id>` | Everyone | The article. Admins also see the Editar button |
 | `/admin` | Admins | The article list with the controls to create, filter and remove articles |
 | `/auth/login` | Visitors | The login form. After an invalid attempt the email is kept and the password is asked again |
+| `/auth/register` | Visitors | The registration form. After an error the username and email are kept, and the browser already blocks passwords shorter than 8 characters |
 
-The sidebar shows Entrar to visitors. Signed-in users see Sair, and admins also see a link to the panel.
+The sidebar shows Entrar and Criar conta to visitors, and the login and registration pages link to each other. Signed-in users see Sair, and admins also see a link to the panel.
 
 ## Creating users
 
