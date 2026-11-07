@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from auth import admin_required, current_user_id
-from repositories import article_repository
+from repositories import article_repository, like_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -57,6 +57,20 @@ def _patch_article(article_id):
         return jsonify({'message': 'Article not found'}), 404
 
     return jsonify({'message': 'Article updated'}), 200
+
+@api_bp.route('/articles/<int:article_id>/likes', methods=['POST', 'DELETE'])
+@login_required
+def article_likes(article_id):
+    if article_repository.get_by_id(article_id) is None:
+        return jsonify({'message': 'Article not found'}), 404
+
+    is_like = request.method == 'POST'
+    if is_like:
+        like_repository.add(current_user.user_id, article_id)
+    else:
+        like_repository.remove(current_user.user_id, article_id)
+
+    return jsonify({'liked': is_like, 'likes': like_repository.count(article_id)}), 200
 
 @api_bp.route('/articles/id/<int:search_id>', methods=['GET'])
 def search_by_id(search_id):
