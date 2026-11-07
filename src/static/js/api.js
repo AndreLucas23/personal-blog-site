@@ -2,7 +2,8 @@ export const API = {
     async _fetch(endpoint, options = {}) {
         const res = await fetch(endpoint, options);
         if (res.status === 401) {
-            window.location.assign('/auth/login');
+            const body = await res.clone().json().catch(() => ({}));
+            window.location.assign(body.login_url || '/auth/login');
         }
         if (!res.ok) {
             throw new Error(`Erro na API: ${res.status} ${res.statusText}`);
