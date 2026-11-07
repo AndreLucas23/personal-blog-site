@@ -37,15 +37,16 @@ def get_by_id(article_id):
         if conn:
             conn.close()
 
-def create(title, content):
+def create(title: str, content: str, author_id: int) -> int:
     conn = None
     cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO ARTICLES(ARTICLE_TITLE, ARTICLE_CONTENT) VALUES (%s, %s)',
-            (title, content)
+            'INSERT INTO ARTICLES(ARTICLE_TITLE, ARTICLE_CONTENT, AUTHOR_ID) '
+            'VALUES (%s, %s, %s)',
+            (title, content, author_id)
         )
         conn.commit()
         return cursor.lastrowid

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_required
 from repositories import article_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -9,6 +10,7 @@ def get_articles():
     return jsonify(all_articles)
 
 @api_bp.route('/articles', methods=['POST'])
+@login_required
 def add_article():
     data = request.get_json() or {}
     article_title = data.get('new-title')
@@ -17,10 +19,11 @@ def add_article():
     if not article_title or len(article_title) > 30:
         return jsonify({'message': 'Invalid title'}), 400
 
-    article_repository.create(article_title, article_content)
+    article_repository.create(article_title, article_content, current_user.user_id)
     return jsonify({'message': 'artigo criado com sucesso'}), 201
 
 @api_bp.route('/articles/<int:article_id>', methods=['DELETE', 'PATCH'])
+@login_required
 def article_by_id(article_id):
     if request.method == 'DELETE':
         return _delete_article(article_id)
