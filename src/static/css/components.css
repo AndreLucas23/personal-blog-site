@@ -25,6 +25,16 @@
     position: relative;
 }
 
+.aside__account {
+    align-items: center;
+    border-top: 0.1rem solid var(--blue-alpha-12);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: auto;
+    padding: 2rem 0 3.6rem;
+}
+
 .aside__link {
     border-radius: 1.4rem;
     height: 5rem;
