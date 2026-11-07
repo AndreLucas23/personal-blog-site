@@ -1,4 +1,5 @@
 import { API } from "./api.js";
+import { createLikeButton } from "./likes.js";
 
 
 const articlesUI = {
@@ -89,9 +90,10 @@ const articlesUI = {
         }
 
         link.append(date);
-        li.append(link);
+        li.append(link, createLikeButton(article, 'mini__like'));
 
         if (this.canManage) {
+            li.classList.add('mini--manage');
             li.append(this._buildRemoveButton(article));
         }
 
