@@ -36,30 +36,34 @@ New articles are stored with the admin who created them as author. The admin fla
 
 Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. The `/admin` page is a placeholder until the admin panel interface is delivered.
 
+## Creating users
+
+The database starts empty: no account exists until you create one. With the stack running, create the first admin:
+
+```bash
+docker compose exec web python src/create_user.py --admin
+```
+
+The command asks for the username, the email and the password, which is typed twice and never shown. Pass `--username` and `--email` to skip those questions, and leave out `--admin` to create a regular user. The password needs at least 8 characters and is stored as a Werkzeug hash, never in plain text. An email that is already registered is reported and nothing is created.
+
 ## Trying it
 
 ```bash
-curl -c cookies.txt -d 'email=admin@gmail.com&password=admin123' http://localhost:5000/auth/login
+curl -c cookies.txt -d 'email=you@example.com&password=your-password' http://localhost:5000/auth/login
 curl -b cookies.txt -H 'Content-Type: application/json' \
   -d '{"new-title": "Hello", "new-content": "First post"}' \
   http://localhost:5000/api/articles
 ```
 
-## Development accounts
+Use the email and password of the admin you created.
 
-`sql-init/seed.sql` creates two accounts for local development only:
+## Databases created before this change
 
-| Email | Password | Role |
-| --- | --- | --- |
-| `admin@gmail.com` | `admin123` | Admin |
-| `user@gmail.com` | `user123` | Regular |
-
-Never deploy with these accounts. Remove them from the seed or change their passwords first.
-
-## Password hashes
-
-Passwords are stored as Werkzeug hashes and never in plain text. To create a hash for a new seed account:
+Earlier versions seeded two accounts with known passwords, `admin@gmail.com` and `user@gmail.com`, together with sample articles. A database volume created back then still contains them. Never keep those accounts outside your own machine. To start clean in development, discard the volume and let the schema run again:
 
 ```bash
-docker compose exec web python -c "from werkzeug.security import generate_password_hash as h; print(h('your-password'))"
+docker compose down -v
+docker compose up --build
 ```
+
+Deleting only the two users also deletes the sample articles written by them, because articles are removed together with their author.
