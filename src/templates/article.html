@@ -17,7 +17,9 @@
     <title>{{ article['article_title'] }} — Blog Pessoal</title>
 </head>
 <body>
+    {% set can_edit = current_user.is_authenticated and current_user.is_admin %}
 
+    {% if can_edit %}
     <div id="edit-overlay" class="art__overlay"></div>
 
     <div id="edit-panel" class="art__edit-panel">
@@ -115,6 +117,7 @@
 
         </form>
     </div>
+    {% endif %}
 
     <main class="art__main"
     data-article-id="{{ article['article_id'] }}">
@@ -138,6 +141,7 @@
                 </time>
             </div>
 
+            {% if can_edit %}
             <button class="art__edit-btn u-flex-center"
             id="edit-btn"
             aria-label="Editar artigo">
@@ -146,6 +150,7 @@
                 </svg>
                 <span>Editar</span>
             </button>
+            {% endif %}
         </header>
 
         <article class="art__body">
