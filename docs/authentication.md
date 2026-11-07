@@ -48,7 +48,18 @@ The same rules apply to registration and to the create-user command:
 
 New articles are stored with the admin who created them as author. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
 
-Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. The `/admin` page is a placeholder until the admin panel interface is delivered.
+Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired, it opens the login page.
+
+## Pages
+
+| Page | Who sees it | What it offers |
+| --- | --- | --- |
+| `/` | Everyone | The article list and the filter. Nothing can be changed from it |
+| `/open/<id>` | Everyone | The article. Admins also see the Editar button |
+| `/admin` | Admins | The article list with the controls to create, filter and remove articles |
+| `/auth/login` | Visitors | The login form. After an invalid attempt the email is kept and the password is asked again |
+
+The sidebar shows Entrar to visitors. Signed-in users see Sair, and admins also see a link to the panel.
 
 ## Creating users
 
