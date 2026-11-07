@@ -34,11 +34,22 @@ def load_user(user_id: str) -> AuthUser | None:
     return AuthUser(user) if user else None
 
 
+def is_api_request() -> bool:
+    return request.blueprint == 'api'
+
+
 @login_manager.unauthorized_handler
 def handle_unauthorized():
-    if request.blueprint == 'api':
+    if is_api_request():
         return jsonify({'message': 'Authentication required'}), 401
     return redirect(url_for('auth.login'))
+
+
+@app.errorhandler(403)
+def handle_forbidden(error):
+    if is_api_request():
+        return jsonify({'message': 'Admin privileges required'}), 403
+    return error
 
 
 @app.errorhandler(mysql.connector.Error)
