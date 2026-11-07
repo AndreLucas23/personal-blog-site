@@ -82,6 +82,12 @@ body {
     padding: 0.3rem 0.9rem;
 }
 
+.art__author {
+    color: var(--secondary-black);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
 .art__date {
     color: var(--secondary-dark-grey);
     font-size: 1.2rem;

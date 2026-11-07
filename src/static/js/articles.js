@@ -79,7 +79,16 @@ const articlesUI = {
         date.textContent = `Publicado em: ${new Date(article.publish_date).toLocaleDateString()}`;
         date.classList.add('mini__date');
 
-        link.append(idBadge, title, date);
+        link.append(idBadge, title);
+
+        if (article.author) {
+            const author = document.createElement('p');
+            author.textContent = `por ${article.author}`;
+            author.classList.add('mini__author');
+            link.append(author);
+        }
+
+        link.append(date);
         li.append(link);
 
         if (this.canManage) {
