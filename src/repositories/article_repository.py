@@ -1,36 +1,45 @@
 from db import get_db_connection
 
-ARTICLE_WITH_AUTHOR_QUERY = (
+# The first placeholder is the viewer id, used to tell whether they liked each article.
+ARTICLE_DETAILS_QUERY = (
     'SELECT a.article_id, a.article_title, a.article_content, '
-    'a.publish_date, u.username AS author '
+    'a.publish_date, u.username AS author, '
+    '(SELECT COUNT(*) FROM LIKES l WHERE l.article_id = a.article_id) AS likes, '
+    'EXISTS(SELECT 1 FROM LIKES l '
+    'WHERE l.article_id = a.article_id AND l.user_id = %s) AS liked '
     'FROM ARTICLES a LEFT JOIN USERS u ON a.author_id = u.user_id'
 )
 
-def get_all():
+def _with_like_flag(article: dict | None) -> dict | None:
+    if article is not None:
+        article['liked'] = bool(article['liked'])
+    return article
+
+def get_all(viewer_id: int | None = None) -> list[dict]:
     conn = None
     cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(ARTICLE_WITH_AUTHOR_QUERY)
-        return cursor.fetchall()
+        cursor.execute(ARTICLE_DETAILS_QUERY, (viewer_id,))
+        return [_with_like_flag(article) for article in cursor.fetchall()]
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
 
-def get_by_id(article_id):
+def get_by_id(article_id: int, viewer_id: int | None = None) -> dict | None:
     conn = None
     cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            ARTICLE_WITH_AUTHOR_QUERY + ' WHERE a.article_id = %s',
-            (article_id,)
+            ARTICLE_DETAILS_QUERY + ' WHERE a.article_id = %s',
+            (viewer_id, article_id)
         )
-        return cursor.fetchone()
+        return _with_like_flag(cursor.fetchone())
     finally:
         if cursor:
             cursor.close()
@@ -105,34 +114,34 @@ def update(article_id, title=None, content=None):
         if conn:
             conn.close()
 
-def search_by_id(search_id):
+def search_by_id(search_id: int, viewer_id: int | None = None) -> list[dict]:
     conn = None
     cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            ARTICLE_WITH_AUTHOR_QUERY + ' WHERE a.article_id LIKE %s',
-            (f'%{search_id}%',)
+            ARTICLE_DETAILS_QUERY + ' WHERE a.article_id LIKE %s',
+            (viewer_id, f'%{search_id}%')
         )
-        return cursor.fetchall()
+        return [_with_like_flag(article) for article in cursor.fetchall()]
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
 
-def search_by_title(search_title):
+def search_by_title(search_title: str, viewer_id: int | None = None) -> list[dict]:
     conn = None
     cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            ARTICLE_WITH_AUTHOR_QUERY + ' WHERE a.article_title LIKE %s',
-            (f'%{search_title}%',)
+            ARTICLE_DETAILS_QUERY + ' WHERE a.article_title LIKE %s',
+            (viewer_id, f'%{search_title}%')
         )
-        return cursor.fetchall()
+        return [_with_like_flag(article) for article in cursor.fetchall()]
     finally:
         if cursor:
             cursor.close()

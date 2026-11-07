@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify, request
 from flask_login import current_user
 
-from auth import admin_required
+from auth import admin_required, current_user_id
 from repositories import article_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
 @api_bp.route('/articles', methods=['GET'])
 def get_articles():
-    all_articles = article_repository.get_all()
+    all_articles = article_repository.get_all(current_user_id())
     return jsonify(all_articles)
 
 @api_bp.route('/articles', methods=['POST'])
@@ -60,10 +60,12 @@ def _patch_article(article_id):
 
 @api_bp.route('/articles/id/<int:search_id>', methods=['GET'])
 def search_by_id(search_id):
-    search_articles = article_repository.search_by_id(search_id)
+    search_articles = article_repository.search_by_id(search_id, current_user_id())
     return jsonify(search_articles), 200
 
 @api_bp.route('/articles/title/<string:search_title>', methods=['GET'])
 def search_by_title(search_title):
-    search_articles = article_repository.search_by_title(search_title)
+    search_articles = article_repository.search_by_title(
+        search_title, current_user_id()
+    )
     return jsonify(search_articles), 200
