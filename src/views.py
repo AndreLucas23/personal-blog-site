@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, abort
+
+from auth import admin_required
 from repositories import article_repository
 
 views_bp = Blueprint('views', __name__)
@@ -6,6 +8,11 @@ views_bp = Blueprint('views', __name__)
 @views_bp.route('/')
 def home():
     return render_template('home.html')
+
+@views_bp.route('/admin')
+@admin_required
+def admin():
+    return render_template('admin.html')
 
 @views_bp.route('/open/<int:article_id>')
 def open_article(article_id):
