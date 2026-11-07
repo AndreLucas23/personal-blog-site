@@ -35,3 +35,22 @@ def get_by_email(email: str) -> dict | None:
             cursor.close()
         if conn:
             conn.close()
+
+def create(username: str, email: str, password_hash: str, is_admin: bool = False) -> int:
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO USERS (username, email, password_hash, is_admin) '
+            'VALUES (%s, %s, %s, %s)',
+            (username, email, password_hash, int(is_admin))
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
