@@ -1,4 +1,5 @@
 import { API } from "./api.js";
+import { bindLikeButton } from "./likes.js";
 
 
 const editPanelModule = {
@@ -120,6 +121,9 @@ const editPanelModule = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    const likeButton = document.querySelector('.art__like');
+    if (likeButton) bindLikeButton(likeButton);
+
     if (!document.getElementById('edit-btn')) return;
 
     editPanelModule.init();

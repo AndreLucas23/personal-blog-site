@@ -222,3 +222,63 @@
     width: 1.4rem;
 }
 
+.mini__like {
+    height: 3.2rem;
+    position: absolute;
+    right: 1.2rem;
+    top: 1.2rem;
+}
+
+.mini--manage .mini__like {
+    right: 5.2rem;
+}
+
+/* Componente: like button */
+
+.c-like {
+    align-items: center;
+    background: var(--glass-popup-bg);
+    border: 0.1rem solid var(--red-alpha-15);
+    border-radius: 2rem;
+    color: var(--secondary-black);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 1.3rem;
+    font-weight: 700;
+    gap: 0.6rem;
+    padding: 0.5rem 1.1rem;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.c-like:hover {
+    background: var(--red-alpha-10);
+    border-color: var(--red-alpha-40);
+    transform: scale(1.06);
+}
+
+.c-like:disabled {
+    cursor: progress;
+    opacity: 0.7;
+}
+
+.c-like.is-liked {
+    border-color: var(--red-alpha-40);
+}
+
+.c-like__icon {
+    fill: var(--secondary-dark-grey);
+    height: auto;
+    pointer-events: none;
+    transition:
+        fill 0.2s ease,
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 1.5rem;
+}
+
+.c-like.is-liked .c-like__icon {
+    fill: var(--accent-error);
+    transform: scale(1.12);
+}
