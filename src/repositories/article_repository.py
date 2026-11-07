@@ -1,18 +1,18 @@
 from db import get_db_connection
 
+ARTICLE_WITH_AUTHOR_QUERY = (
+    'SELECT a.article_id, a.article_title, a.article_content, '
+    'a.publish_date, u.username AS author '
+    'FROM ARTICLES a LEFT JOIN USERS u ON a.author_id = u.user_id'
+)
+
 def get_all():
     conn = None
     cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            'SELECT ARTICLE_ID as article_id, '
-            'ARTICLE_TITLE as article_title, '
-            'ARTICLE_CONTENT as article_content, '
-            'PUBLISH_DATE as publish_date '
-            'FROM ARTICLES'
-        )
+        cursor.execute(ARTICLE_WITH_AUTHOR_QUERY)
         return cursor.fetchall()
     finally:
         if cursor:
@@ -27,11 +27,7 @@ def get_by_id(article_id):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            'SELECT ARTICLE_ID as article_id, '
-            'ARTICLE_TITLE as article_title, '
-            'ARTICLE_CONTENT as article_content, '
-            'PUBLISH_DATE as publish_date '
-            'FROM ARTICLES WHERE ARTICLE_ID = %s',
+            ARTICLE_WITH_AUTHOR_QUERY + ' WHERE a.article_id = %s',
             (article_id,)
         )
         return cursor.fetchone()
@@ -115,11 +111,7 @@ def search_by_id(search_id):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            'SELECT ARTICLE_ID as article_id, '
-            'ARTICLE_TITLE as article_title, '
-            'ARTICLE_CONTENT as article_content, '
-            'PUBLISH_DATE as publish_date '
-            'FROM ARTICLES WHERE ARTICLE_ID LIKE %s',
+            ARTICLE_WITH_AUTHOR_QUERY + ' WHERE a.article_id LIKE %s',
             (f'%{search_id}%',)
         )
         return cursor.fetchall()
@@ -136,11 +128,7 @@ def search_by_title(search_title):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            'SELECT ARTICLE_ID as article_id, '
-            'ARTICLE_TITLE as article_title, '
-            'ARTICLE_CONTENT as article_content, '
-            'PUBLISH_DATE as publish_date '
-            'FROM ARTICLES WHERE ARTICLE_TITLE LIKE %s',
+            ARTICLE_WITH_AUTHOR_QUERY + ' WHERE a.article_title LIKE %s',
             (f'%{search_title}%',)
         )
         return cursor.fetchall()
