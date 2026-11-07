@@ -3,9 +3,11 @@ import { API } from "./api.js";
 
 const articlesUI = {
     listEl: null,
+    canManage: false,
 
-    init(listElement) {
+    init(listElement, canManage) {
         this.listEl = listElement;
+        this.canManage = canManage;
     },
 
     render(articles) {
@@ -59,7 +61,7 @@ const articlesUI = {
     _buildCard(article, bgIndex) {
         const li = document.createElement('li');
         li.classList.add('mini');
-        li.style.backgroundImage = `url('./static/imgs/mini_${bgIndex}.svg')`;
+        li.style.backgroundImage = `url('/static/imgs/mini_${bgIndex}.svg')`;
 
         const link = document.createElement('a');
         link.href = `/open/${article.article_id}`;
@@ -78,10 +80,12 @@ const articlesUI = {
         date.classList.add('mini__date');
 
         link.append(idBadge, title, date);
+        li.append(link);
 
-        const removeBtn = this._buildRemoveButton(article);
+        if (this.canManage) {
+            li.append(this._buildRemoveButton(article));
+        }
 
-        li.append(link, removeBtn);
         return li;
     },
 
@@ -327,9 +331,13 @@ const filterMenuModule = {
     },
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
+export function initArticlesPage({ canManage }) {
+    document.addEventListener('DOMContentLoaded', () => setUpPage(canManage));
+}
+
+async function setUpPage(canManage) {
     const listEl = document.getElementById('mini-grid');
-    articlesUI.init(listEl);
+    articlesUI.init(listEl, canManage);
 
     try {
         appState.articles = await API.fetchAll();
@@ -340,13 +348,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         listEl.appendChild(articlesUI._buildErrorState());
     }
 
-    addMenuModule.init();
+    if (canManage) {
+        addMenuModule.init();
+    }
     filterMenuModule.init();
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
 
-        if (addMenuModule.menu.classList.contains('is-open')) {
+        if (canManage && addMenuModule.menu.classList.contains('is-open')) {
             addMenuModule.close();
         }
 
@@ -355,4 +365,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             filterMenuModule.close();
         }
     });
-});
+}
