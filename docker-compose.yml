@@ -34,6 +34,7 @@ services:
       - DB_USER=${DB_USER:-blog_user}
       - DB_PASSWORD=${DB_PASSWORD:-1234}
       - DB_NAME=${DB_NAME:-BLOG}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env}
     depends_on:
       db:
         condition: service_healthy
