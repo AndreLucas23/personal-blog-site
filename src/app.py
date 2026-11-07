@@ -1,8 +1,7 @@
-import logging
 import os
 
 import mysql.connector
-from flask import Flask, jsonify, redirect, request, url_for
+from flask import Flask, jsonify, redirect, request, session, url_for
 from flask_cors import CORS
 from flask_login import LoginManager
 
@@ -58,11 +57,14 @@ def handle_forbidden(error):
 
 @app.errorhandler(mysql.connector.Error)
 def handle_db_error(error):
-    logging.error(f'Erro do banco de dados: [{error.errno}] {error.msg}')
+    # Use the session id: loading the user would query the failing database again.
+    app.logger.error(
+        'Database error on %s %s (user %s): [%s] %s',
+        request.method, request.path, session.get('_user_id'), error.errno, error.msg,
+    )
     return jsonify({
         'status': 'error',
-        'message': 'Houve um erro interno ao processar os dados do banco',
-        'debug_error': f'[{error.errno}] {error.msg}'
+        'message': 'An internal error occurred while accessing the database',
     }), 500
 
 
