@@ -43,19 +43,22 @@ The same rules apply to registration and to the create-user command:
 | Endpoint | Anonymous | Signed-in user | Admin |
 | --- | --- | --- | --- |
 | `GET /api/articles` and the search endpoints | Allowed | Allowed | Allowed |
-| `POST`, `PATCH` and `DELETE` under `/api/articles` | `401` with `{"message": "Authentication required"}` | `403` with `{"message": "Admin privileges required"}` | Allowed |
+| `POST /api/articles`, and `PATCH` and `DELETE /api/articles/<id>` | `401` | `403` with `{"message": "Admin privileges required"}` | Allowed |
+| `POST` and `DELETE /api/articles/<id>/likes` | `401` | Allowed | Allowed |
 | `GET /admin` | Redirects to `/auth/login` | `403` | Allowed |
+
+Every `401` from the API has the body `{"message": "Authentication required", "login_url": "/auth/login"}`. Likes are described in [likes.md](likes.md).
 
 New articles are stored with the admin who created them as author. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
 
-Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired, it opens the login page.
+Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired or when a visitor clicks a like button, it opens the `login_url`.
 
 ## Pages
 
 | Page | Who sees it | What it offers |
 | --- | --- | --- |
-| `/` | Everyone | The article list and the filter. Nothing can be changed from it |
-| `/open/<id>` | Everyone | The article. Admins also see the Editar button |
+| `/` | Everyone | The article list with authors and like buttons, and the filter. Articles cannot be changed from it |
+| `/open/<id>` | Everyone | The article, its author and its like button. Admins also see the Editar button |
 | `/admin` | Admins | The article list with the controls to create, filter and remove articles |
 | `/auth/login` | Visitors | The login form. After an invalid attempt the email is kept and the password is asked again |
 | `/auth/register` | Visitors | The registration form. After an error the username and email are kept, and the browser already blocks passwords shorter than 8 characters |
