@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort
 
-from auth import admin_required
+from auth import admin_required, current_user_id
 from repositories import article_repository
 
 views_bp = Blueprint('views', __name__)
@@ -16,7 +16,7 @@ def admin():
 
 @views_bp.route('/open/<int:article_id>')
 def open_article(article_id):
-    article = article_repository.get_by_id(article_id)
+    article = article_repository.get_by_id(article_id, current_user_id())
 
     if article is None:
         abort(404)
