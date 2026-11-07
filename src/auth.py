@@ -77,7 +77,7 @@ def register():
     error_code = validation.validate_new_user(username, email, password)
     if error_code:
         flash(REGISTRATION_ERRORS[error_code])
-        return render_template('register.html'), 400
+        return render_template('register.html', username=username, email=email), 400
 
     password_hash = generate_password_hash(password)
 
@@ -85,7 +85,7 @@ def register():
         user_id = user_repository.create(username, email, password_hash)
     except user_repository.DuplicateEmailError:
         flash(DUPLICATE_EMAIL_MESSAGE)
-        return render_template('register.html'), 409
+        return render_template('register.html', username=username, email=email), 409
 
     login_user(AuthUser(user_repository.get_by_id(user_id)))
     return redirect(url_for('views.home'))
