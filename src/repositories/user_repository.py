@@ -1,4 +1,13 @@
+import mysql.connector
+
 from db import get_db_connection
+
+DUPLICATE_ENTRY_ERROR = 1062
+
+
+class DuplicateEmailError(Exception):
+    pass
+
 
 def get_by_id(user_id: int) -> dict | None:
     conn = None
@@ -49,6 +58,10 @@ def create(username: str, email: str, password_hash: str, is_admin: bool = False
         )
         conn.commit()
         return cursor.lastrowid
+    except mysql.connector.IntegrityError as error:
+        if error.errno != DUPLICATE_ENTRY_ERROR:
+            raise
+        raise DuplicateEmailError(email) from error
     finally:
         if cursor:
             cursor.close()
