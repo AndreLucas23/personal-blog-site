@@ -51,6 +51,15 @@ Commits follow Conventional Commits, without a scope:
 - Merge with **Rebase and merge** to keep the history linear. Merged branches are kept, so the repository does not delete them automatically.
 - Releases are the exception: `dev` is merged into `main` with a merge commit.
 - GitHub closes issues automatically only when the pull request reaches the default branch. For pull requests into an epic branch, close the issue manually after the merge.
+- A pull request with a change people notice adds a line under `Unreleased` in `CHANGELOG.md`, in the section that fits: Added, Changed, Deprecated, Removed, Fixed or Security.
+
+## Releases
+
+Versions follow [Semantic Versioning](https://semver.org): a breaking change raises the major version, a new feature the minor version and a fix the patch version.
+
+1. Move the `Unreleased` entries in `CHANGELOG.md` to a new version heading with the date, and update the comparison links at the end of the file.
+2. Merge that change into `dev`, then open a pull request from `dev` to `main` titled `chore: release version X.Y.Z` and merge it with a merge commit.
+3. Tag the merge commit on `main` as `vX.Y.Z` and publish a GitHub release with the notes of that version.
 
 ## Board
 
@@ -100,5 +109,6 @@ Start and target dates feed the roadmap view. The target date of a sub-issue nev
 - The application starts with `docker compose up --build` and the changed behavior was tested by hand.
 - `docker compose --profile test run --rm tests` passes. New behavior has tests, and a bug fix has a test that fails without it.
 - The README and `TEMPLATE.env` are updated when behavior or configuration changes.
+- `CHANGELOG.md` has the change under `Unreleased` when people will notice it.
 - The commits and the pull request follow this guide.
 - The issue is closed and the card is in `Done`.
