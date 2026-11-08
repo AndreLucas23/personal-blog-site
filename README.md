@@ -1,5 +1,7 @@
 # Personal Blog Site
 
+[![CI](https://github.com/AndreLucas23/personal-blog-site/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/AndreLucas23/personal-blog-site/actions/workflows/ci.yml)
+
 A personal blog for publishing articles, built with Flask and MySQL and run with Docker. The interface is in Brazilian Portuguese.
 
 ## Features

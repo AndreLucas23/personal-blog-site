@@ -30,7 +30,7 @@ Commits follow Conventional Commits, without a scope:
 <type>: <description>
 ```
 
-- Types: `feat`, `fix`, `refactor`, `style`, `docs`, `test` and `chore`.
+- Types: `feat`, `fix`, `refactor`, `style`, `docs`, `test`, `build` (dependencies and the Docker image), `ci` (the pipeline) and `chore`.
 - The description is lowercase, in the imperative mood, in English, without a final period, and ideally up to 72 characters.
 - Each commit is atomic: it contains one logical change and leaves the project working.
 - Use `style` only for formatting that changes no behavior.
@@ -47,6 +47,7 @@ Commits follow Conventional Commits, without a scope:
 - The title is the main commit subject followed by the issue number: `feat: add database relations and tables for social system (#3)`.
 - The body starts with `Closes #<issue>` and follows the pull request template.
 - Copy the labels, milestone and assignee from the issue.
+- The CI workflow runs the tests and `pip-audit` on every pull request. Branch protection on `dev` and `main` requires both checks to pass and the branch to go through a pull request, for administrators too.
 - Merge with **Rebase and merge** to keep the history linear, then delete the branch.
 - Releases are the exception: `dev` is merged into `main` with a merge commit.
 - GitHub closes issues automatically only when the pull request reaches the default branch. For pull requests into an epic branch, close the issue manually after the merge.
