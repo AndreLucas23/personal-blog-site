@@ -48,7 +48,7 @@ Commits follow Conventional Commits, without a scope:
 - The body starts with `Closes #<issue>` and follows the pull request template.
 - Copy the labels, milestone and assignee from the issue.
 - The CI workflow runs the tests and `pip-audit` on every pull request. Branch protection on `dev` and `main` requires both checks to pass and the branch to go through a pull request, for administrators too.
-- Merge with **Rebase and merge** to keep the history linear, then delete the branch.
+- Merge with **Rebase and merge** to keep the history linear. Merged branches are kept, so the repository does not delete them automatically.
 - Releases are the exception: `dev` is merged into `main` with a merge commit.
 - GitHub closes issues automatically only when the pull request reaches the default branch. For pull requests into an epic branch, close the issue manually after the merge.
 
