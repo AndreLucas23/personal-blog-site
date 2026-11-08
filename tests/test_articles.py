@@ -166,7 +166,6 @@ def test_admin_removes_an_article(admin_client, admin_id):
     assert article_repository.get_by_id(article_id) is None
 
 
-@pytest.mark.xfail(reason='#33: removing a missing article answers 200', strict=True)
 def test_removing_a_missing_article_answers_404(admin_client, admin_id):
     assert admin_client.delete('/api/articles/999').status_code == 404
 
