@@ -59,7 +59,7 @@ services:
   tests:
     build: .
     profiles: ["test"]
-    command: sh -c "pip install --no-cache-dir -q -r requirements-dev.txt && pytest -p no:cacheprovider"
+    command: sh -c "pip install --no-cache-dir -q -r requirements-dev.txt && pytest"
     environment:
       - DB_HOST=db-test
       - DB_USER=blog_test
