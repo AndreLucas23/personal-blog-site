@@ -40,5 +40,39 @@ services:
     volumes:
       - .:/app
 
+  db-test:
+    image: mysql:8.0
+    profiles: ["test"]
+    environment:
+      MYSQL_ROOT_PASSWORD: test-root-password
+      MYSQL_DATABASE: BLOG_TEST
+      MYSQL_USER: blog_test
+      MYSQL_PASSWORD: test-password
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  tests:
+    build: .
+    profiles: ["test"]
+    command: sh -c "pip install --no-cache-dir -q -r requirements-dev.txt && pytest -p no:cacheprovider"
+    environment:
+      - DB_HOST=db-test
+      - DB_USER=blog_test
+      - DB_PASSWORD=test-password
+      - DB_NAME=BLOG_TEST
+      - SECRET_KEY=test-secret-key
+      - BLOG_TEST_DATABASE=1
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      db-test:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
 volumes:
   db_data:
