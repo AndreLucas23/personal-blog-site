@@ -52,10 +52,9 @@ def article_by_id(article_id):
     return _patch_article(article_id)
 
 def _delete_article(article_id):
-    deleted = article_repository.delete(article_id)
-    if not deleted:
-        # Technically in the original code we returned 200 anyway, but this is fine.
-        pass
+    if not article_repository.delete(article_id):
+        return jsonify({'message': 'Article not found'}), 404
+
     return jsonify({'message': 'artigo removido com sucesso'}), 200
 
 def _patch_article(article_id):
