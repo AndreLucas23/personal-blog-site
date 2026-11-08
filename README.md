@@ -66,11 +66,28 @@ Variables are read from `.env`, which is never committed. `TEMPLATE.env` lists a
 
 The defaults exist only for local development. Always set your own values outside of it.
 
+## Tests
+
+The suite uses pytest and a real MySQL 8 database, so it also checks the rules the database enforces. Run it with Docker Compose:
+
+```bash
+docker compose --profile test run --rm tests
+```
+
+The `test` profile starts a separate, disposable MySQL kept in memory, so your development data is never touched. The suite refuses to run unless `BLOG_TEST_DATABASE=1` is set, which only the test service does. The tests live in `tests/`, one module per area, with the shared fixtures in `tests/conftest.py`.
+
+To run one module or one test, replace the service command:
+
+```bash
+docker compose --profile test run --rm tests sh -c "pip install -q -r requirements-dev.txt && pytest tests/test_likes.py"
+```
+
 ## Project structure
 
 ```text
 sql-init/schema.sql     Database schema, loaded on the first start
 docs/                   Authentication and likes
+tests/                  Automated tests, run with the test profile
 src/
   app.py                Application entry point, sessions and error handling
   views.py              Pages: home, article and admin panel
