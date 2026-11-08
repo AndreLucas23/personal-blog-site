@@ -97,6 +97,7 @@ Start and target dates feed the roadmap view. The target date of a sub-issue nev
 ## Definition of done
 
 - The application starts with `docker compose up --build` and the changed behavior was tested by hand.
+- `docker compose --profile test run --rm tests` passes. New behavior has tests, and a bug fix has a test that fails without it.
 - The README and `TEMPLATE.env` are updated when behavior or configuration changes.
 - The commits and the pull request follow this guide.
 - The issue is closed and the card is in `Done`.
