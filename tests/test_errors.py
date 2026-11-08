@@ -2,7 +2,7 @@ import logging
 
 import mysql.connector
 
-from repositories import article_repository
+import db
 
 DATABASE_HOST_ERROR = "Unknown MySQL server host 'db'"
 
@@ -13,7 +13,7 @@ def fail_to_connect():
 
 def test_database_errors_hide_internal_details(client, monkeypatch):
     """Regression for #11: the response exposed the MySQL error and the host."""
-    monkeypatch.setattr(article_repository, 'get_db_connection', fail_to_connect)
+    monkeypatch.setattr(db, 'get_db_connection', fail_to_connect)
 
     response = client.get('/api/articles')
 
@@ -26,7 +26,7 @@ def test_database_errors_hide_internal_details(client, monkeypatch):
 
 
 def test_database_errors_are_logged_with_the_request(client, monkeypatch, caplog):
-    monkeypatch.setattr(article_repository, 'get_db_connection', fail_to_connect)
+    monkeypatch.setattr(db, 'get_db_connection', fail_to_connect)
 
     with caplog.at_level(logging.ERROR):
         client.get('/api/articles')

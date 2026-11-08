@@ -1,4 +1,4 @@
-from db import get_db_connection
+from db import db_cursor
 
 # The first placeholder is the viewer id, used to tell whether they liked each article.
 ARTICLE_DETAILS_QUERY = (
@@ -16,71 +16,35 @@ def _with_like_flag(article: dict | None) -> dict | None:
     return article
 
 def get_all(viewer_id: int | None = None) -> list[dict]:
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+    with db_cursor(dictionary=True) as cursor:
         cursor.execute(ARTICLE_DETAILS_QUERY, (viewer_id,))
         return [_with_like_flag(article) for article in cursor.fetchall()]
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 def get_by_id(article_id: int, viewer_id: int | None = None) -> dict | None:
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+    with db_cursor(dictionary=True) as cursor:
         cursor.execute(
             ARTICLE_DETAILS_QUERY + ' WHERE a.article_id = %s',
             (viewer_id, article_id)
         )
         return _with_like_flag(cursor.fetchone())
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 def create(title: str, content: str, author_id: int) -> int:
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    with db_cursor() as cursor:
         cursor.execute(
             'INSERT INTO ARTICLES(ARTICLE_TITLE, ARTICLE_CONTENT, AUTHOR_ID) '
             'VALUES (%s, %s, %s)',
             (title, content, author_id)
         )
-        conn.commit()
         return cursor.lastrowid
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
-def delete(article_id):
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+def delete(article_id: int) -> bool:
+    with db_cursor() as cursor:
         cursor.execute('DELETE FROM ARTICLES WHERE ARTICLE_ID = %s', (article_id,))
-        conn.commit()
         return cursor.rowcount > 0
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
-def update(article_id, title=None, content=None):
+def update(
+    article_id: int, title: str | None = None, content: str | None = None
+) -> bool:
     if title is None and content is None:
         return False
 
@@ -97,53 +61,25 @@ def update(article_id, title=None, content=None):
 
     values.append(article_id)
 
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    with db_cursor() as cursor:
         cursor.execute(
             f'UPDATE ARTICLES SET {", ".join(fields)} WHERE ARTICLE_ID = %s',
             tuple(values)
         )
-        conn.commit()
         return cursor.rowcount > 0
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 def search_by_id(search_id: int, viewer_id: int | None = None) -> list[dict]:
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+    with db_cursor(dictionary=True) as cursor:
         cursor.execute(
             ARTICLE_DETAILS_QUERY + ' WHERE a.article_id LIKE %s',
             (viewer_id, f'%{search_id}%')
         )
         return [_with_like_flag(article) for article in cursor.fetchall()]
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 def search_by_title(search_title: str, viewer_id: int | None = None) -> list[dict]:
-    conn = None
-    cursor = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+    with db_cursor(dictionary=True) as cursor:
         cursor.execute(
             ARTICLE_DETAILS_QUERY + ' WHERE a.article_title LIKE %s',
             (viewer_id, f'%{search_title}%')
         )
         return [_with_like_flag(article) for article in cursor.fetchall()]
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
