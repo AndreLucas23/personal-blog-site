@@ -13,8 +13,9 @@ This guide describes how work is planned, written and delivered in this reposito
 
 | Branch | Purpose |
 | --- | --- |
-| `main` | Released code. Receives `dev` through a merge pull request. |
+| `main` | Released code. Receives a release branch through a merge pull request. |
 | `dev` | Default branch. Integrates finished work. |
+| `release/X.Y.Z` | Prepares a release from `dev`, as described under Releases. |
 | `epic/<n>-<name>` | Groups the issues of an epic. Merges into `dev` when the epic is complete. |
 | `<type>/<n>-<name>` | Work for one issue, for example `feat/4-accounts-backend` or `docs/9-project-documentation`. |
 
@@ -49,7 +50,7 @@ Commits follow Conventional Commits, without a scope:
 - Copy the labels, milestone and assignee from the issue.
 - The CI workflow runs the tests and `pip-audit` on every pull request. Branch protection on `dev` and `main` requires both checks to pass and the branch to go through a pull request, for administrators too.
 - Merge with **Rebase and merge** to keep the history linear. Merged branches are kept, so the repository does not delete them automatically.
-- Releases are the exception: `dev` is merged into `main` with a merge commit.
+- Releases are the exception: a release branch is merged into `main` with a merge commit, as described under Releases.
 - GitHub closes issues automatically only when the pull request reaches the default branch. For pull requests into an epic branch, close the issue manually after the merge.
 - A pull request with a change people notice adds a line under `Unreleased` in `CHANGELOG.md`, in the section that fits: Added, Changed, Deprecated, Removed, Fixed or Security.
 
@@ -57,9 +58,10 @@ Commits follow Conventional Commits, without a scope:
 
 Versions follow [Semantic Versioning](https://semver.org): a breaking change raises the major version, a new feature the minor version and a fix the patch version.
 
-1. Move the `Unreleased` entries in `CHANGELOG.md` to a new version heading with the date, and update the comparison links at the end of the file.
-2. Merge that change into `dev`, then open a pull request from `dev` to `main` titled `chore: release version X.Y.Z` and merge it with a merge commit.
-3. Tag the merge commit on `main` as `vX.Y.Z` and publish a GitHub release with the notes of that version.
+1. Move the `Unreleased` entries in `CHANGELOG.md` to a new version heading with the date, and update the comparison links at the end of the file. Merge that change into `dev`.
+2. Create `release/X.Y.Z` from `dev` and merge `main` into it. `main` holds the merge commit of every release, which the linear `dev` never receives, and branch protection requires the pull request to be up to date with `main`. The release branch ends up with the same files as `dev`.
+3. Open a pull request from `release/X.Y.Z` to `main` titled `chore: release version X.Y.Z (#issue)` and merge it with a merge commit once the checks pass.
+4. Tag the merge commit on `main` as `vX.Y.Z` and publish a GitHub release with the notes of that version.
 
 ## Board
 
