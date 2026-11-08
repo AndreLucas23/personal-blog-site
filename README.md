@@ -105,3 +105,7 @@ Without a session the protected endpoints answer `401` with the login page URL, 
 ## Contributing
 
 Branches, commits, pull requests and issues follow the conventions in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Released under the [MIT License](LICENSE).
