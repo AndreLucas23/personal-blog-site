@@ -1,0 +1,19 @@
+/* Página: painel de administração */
+
+.admin__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2.2rem;
+}
+
+.admin__title {
+    font-weight: 800;
+    line-height: normal;
+    text-transform: none;
+}
+
+.admin__greeting {
+    color: var(--secondary-dark-grey);
+    font-size: 1.5rem;
+    font-weight: 500;
+}

@@ -1,0 +1,284 @@
+/* Classes de componente */
+
+/* Componente: section */
+
+.c-section {
+    box-shadow: inset 0.3rem 0.3rem 0.6rem var(--shadow-neutral);
+    display: flex;
+    max-width: 100vw;
+    min-height: 100vh;
+}
+
+/* Componente: sidebar */
+
+.aside__nav {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100%;
+    justify-content: start;
+    padding-top: 3.6rem;
+}
+
+.aside__item {
+    position: relative;
+}
+
+.aside__account {
+    align-items: center;
+    border-top: 0.1rem solid var(--blue-alpha-12);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: auto;
+    padding: 2rem 0 3.6rem;
+}
+
+.aside__link {
+    border-radius: 1.4rem;
+    height: 5rem;
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 5rem;
+}
+
+.aside__link:hover {
+    background: var(--blue-alpha-08);
+    box-shadow:
+        0 0.4rem 1.4rem rgba(64, 64, 192, 0.16),
+        inset 0 0.1rem 0 var(--glass-highlight);
+    transform: scale(1.08) translateY(-0.2rem);
+}
+
+.aside__icon {
+    fill: var(--secondary-dark-grey);
+    height: auto;
+    transition: fill 0.25s ease, filter 0.25s ease;
+    width: 2.8rem;
+}
+
+.aside__link:hover .aside__icon {
+    fill: var(--accent-blue);
+    filter: drop-shadow(0 0.2rem 0.8rem var(--blue-alpha-35));
+}
+
+.aside__popup {
+    background: var(--glass-popup-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 0.1rem solid var(--blue-alpha-12);
+    border-radius: 1rem;
+    box-shadow:
+        0 0.8rem 2.4rem var(--shadow-medium),
+        0 0.2rem 0.6rem var(--blue-alpha-08),
+        inset 0 0.1rem 0 var(--glass-highlight);
+    color: var(--secondary-black);
+    font-size: 1.2rem;
+    font-weight: 600;
+    height: 3.4rem;
+    letter-spacing: 0.03rem;
+    left: calc(100% + 1.4rem);
+    opacity: 0;
+    padding: 0 1.4rem;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(-6px);
+    transition:
+        opacity 0.25s ease,
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    width: auto;
+}
+
+.aside__popup::before {
+    border-color: transparent rgba(255, 255, 255, 0.92) transparent transparent;
+    border-style: solid;
+    border-width: 0.7rem;
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.aside__link:hover + .aside__popup {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Componente: miniature */
+
+.mini {
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background-position: center;
+    background-size: cover;
+    border: 0.1rem solid var(--glass-border);
+    border-radius: 1.6rem;
+    box-shadow:
+        0 0.4rem 1.6rem var(--shadow-neutral),
+        0 0.1rem 0.4rem var(--shadow-light),
+        inset 0 0.1rem 0 var(--glass-highlight);
+    display: flex;
+    flex-direction: column;
+    height: 22rem;
+    justify-content: space-between;
+    position: relative;
+    text-align: center;
+    transition:
+        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.35s ease;
+}
+
+.mini:hover {
+    box-shadow:
+        0 1.2rem 3.6rem rgba(64, 64, 192, 0.18),
+        0 0.4rem 1.2rem var(--shadow-neutral),
+        inset 0 0.1rem 0 var(--glass-highlight);
+    cursor: pointer;
+    transform: translateY(-0.7rem);
+}
+
+.mini__link {
+    color: var(--secondary-black);
+    cursor: pointer;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 2rem;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.mini__id {
+    background: var(--blue-alpha-12);
+    border-radius: 2rem;
+    color: var(--accent-blue);
+    font-size: 1.1rem;
+    font-weight: 700;
+    left: 1.2rem;
+    letter-spacing: 0.04rem;
+    padding: 0.3rem 0.9rem;
+    position: absolute;
+    top: 1.2rem;
+}
+
+.mini__title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.mini__author {
+    color: rgba(21, 21, 21, 0.72);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.mini__date {
+    bottom: 1.5rem;
+    color: var(--pure-white-alpha-75);
+    font-size: 1.2rem;
+    font-weight: 500;
+    position: absolute;
+}
+
+.mini__rmv {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(8px);
+    border: 0.1rem solid var(--red-alpha-15);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    height: 3.2rem;
+    justify-content: center;
+    position: absolute;
+    right: 1.2rem;
+    top: 1.2rem;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 3.2rem;
+}
+
+.mini__rmv:hover {
+    background: var(--red-alpha-10);
+    border-color: var(--red-alpha-40);
+    transform: scale(1.12);
+}
+
+.mini__rmv-icon {
+    fill: var(--accent-error);
+    height: auto;
+    pointer-events: none;
+    width: 1.4rem;
+}
+
+.mini__like {
+    height: 3.2rem;
+    position: absolute;
+    right: 1.2rem;
+    top: 1.2rem;
+}
+
+.mini--manage .mini__like {
+    right: 5.2rem;
+}
+
+/* Componente: like button */
+
+.c-like {
+    align-items: center;
+    background: var(--glass-popup-bg);
+    border: 0.1rem solid var(--red-alpha-15);
+    border-radius: 2rem;
+    color: var(--secondary-black);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 1.3rem;
+    font-weight: 700;
+    gap: 0.6rem;
+    padding: 0.5rem 1.1rem;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.c-like:hover {
+    background: var(--red-alpha-10);
+    border-color: var(--red-alpha-40);
+    transform: scale(1.06);
+}
+
+.c-like:disabled {
+    cursor: progress;
+    opacity: 0.7;
+}
+
+.c-like.is-liked {
+    border-color: var(--red-alpha-40);
+}
+
+.c-like__icon {
+    fill: var(--secondary-dark-grey);
+    height: auto;
+    pointer-events: none;
+    transition:
+        fill 0.2s ease,
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 1.5rem;
+}
+
+.c-like.is-liked .c-like__icon {
+    fill: var(--accent-error);
+    transform: scale(1.12);
+}

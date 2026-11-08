@@ -1,0 +1,78 @@
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: blog_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root1234}
+      MYSQL_DATABASE: ${DB_NAME:-BLOG}
+      MYSQL_USER: ${DB_USER:-blog_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-1234}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql-init/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1' 2>/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  web:
+    build: .
+    container_name: blog_flask
+    restart: always
+    command: python src/app.py
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=${DB_HOST:-blog_mysql}
+      - DB_USER=${DB_USER:-blog_user}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_NAME=${DB_NAME:-BLOG}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  db-test:
+    image: mysql:8.0
+    profiles: ["test"]
+    environment:
+      MYSQL_ROOT_PASSWORD: test-root-password
+      MYSQL_DATABASE: BLOG_TEST
+      MYSQL_USER: blog_test
+      MYSQL_PASSWORD: test-password
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  tests:
+    build: .
+    profiles: ["test"]
+    command: sh -c "pip install --no-cache-dir -q -r requirements-dev.txt && pytest"
+    environment:
+      - DB_HOST=db-test
+      - DB_USER=blog_test
+      - DB_PASSWORD=test-password
+      - DB_NAME=BLOG_TEST
+      - SECRET_KEY=test-secret-key
+      - BLOG_TEST_DATABASE=1
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      db-test:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:

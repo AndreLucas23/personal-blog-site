@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    {% include 'partials/head.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+
+    <title>Blog Pessoal</title>
+</head>
+<body>
+    <noscript>O Javascript está desativado ou não é suportado no seu navegador. Para melhor experiência, por favor, ative-o</noscript>
+
+    <main class="pg__main">
+        {% include 'partials/sidebar.html' %}
+
+        <div class="no-aside">
+            {% include 'partials/filter_menu.html' %}
+
+            <section class="c-section pg__home u-flex-center u-main-bg-1"
+            id="home"
+            aria-label="Apresentação">
+
+                <div class="home__text">
+                    <h1 class="home__title">Dê asas às<br>suas ideias</h1>
+
+                    <p class="home__subtitle">Aqui, você pode criar artigos variados<br>
+                    para compartilhar com seus amigos.<br>
+                    Comece usando a criatividade na seção<br>
+                    abaixo e se prepare para ampliar a rede.</p>
+                </div>
+
+                <img class="home__img"
+                src="{{ url_for('static', filename='imgs/home_img.svg') }}"
+                alt="Um papel de texto entre um homem e uma mulher segurando seus celulares.">
+
+            </section>
+
+            <section id="articles"
+            class="pg__articles c-section u-primary-white-bg">
+                <header class="articles__header">
+                    <h2 class="articles__title">Artigos</h2>
+
+                    <div class="articles__btns">
+                        <button class="articles__filter-btn"
+                        id="filter-btn"
+                        aria-label="Filtrar artigos">
+                            <svg class="articles__btn-icon"
+                            aria-hidden="true"
+                            viewBox="0 0 640 640"
+                            xmlns="http://www.w3.org/2000/svg">
+                                <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z"/>
+                            </svg>
+
+                            <span class="articles__btn-label">Filtrar<br>artigos</span>
+                        </button>
+                    </div>
+                </header>
+                
+                <ul id="mini-grid"
+                class="articles__mini-grid"></ul>
+                
+                <footer class="signature">
+                    Criado por <a class="signature__link u-transition-02s-ease"
+                    href="https://github.com/AndreLucas23"
+                    target="_blank" 
+                    rel="noopener noreferrer">André Lucas</a>
+                </footer>
+            </section>
+
+            <section id="social"
+            class="pg__social c-section u-main-bg-1">
+
+            </section>
+        </div>
+    </main>
+    <script type="module" src="{{ url_for('static', filename='js/pages/home.js') }}"></script>
+</body>
+</html>

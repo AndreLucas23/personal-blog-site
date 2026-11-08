@@ -1,0 +1,14 @@
+.vscode
+.idea
+
+__pycache__/
+*.pyc
+.pytest_cache/
+
+.env
+venv/
+
+# Local assistant files
+.agent/
+.claude/settings.local.json
+CLAUDE.local.md
