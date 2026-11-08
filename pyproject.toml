@@ -1,5 +1,6 @@
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers"
+# No cache: the tests run as root in a container that mounts the repository.
+addopts = "-ra --strict-markers -p no:cacheprovider"
 xfail_strict = true
