@@ -41,6 +41,10 @@ def test_admin_creates_an_article_as_its_author(admin_client):
         {'new-title': 'x' * 31, 'new-content': 'Conteúdo'},
         {'new-title': 'Título'},
         {'new-title': 'Título', 'new-content': ''},
+        {'new-title': '   ', 'new-content': 'Conteúdo'},
+        {'new-title': 'Título', 'new-content': '   '},
+        {'new-title': 123, 'new-content': 'Conteúdo'},
+        {'new-title': 'Título', 'new-content': 123},
         {},
     ],
 )
@@ -98,7 +102,6 @@ def test_update_rejects_a_title_that_is_too_long(admin_client, admin_id):
     assert article_repository.get_by_id(article_id)['article_title'] == 'Original'
 
 
-@pytest.mark.xfail(reason='#33: updates accept an empty title', strict=True)
 def test_update_rejects_an_empty_title(admin_client, admin_id):
     article_id = create_article(admin_id, title='Original')
 
@@ -108,7 +111,6 @@ def test_update_rejects_an_empty_title(admin_client, admin_id):
     assert article_repository.get_by_id(article_id)['article_title'] == 'Original'
 
 
-@pytest.mark.xfail(reason='#33: updates accept empty content', strict=True)
 def test_update_rejects_empty_content(admin_client, admin_id):
     article_id = create_article(admin_id, content='Original')
 
@@ -118,11 +120,39 @@ def test_update_rejects_empty_content(admin_client, admin_id):
     assert article_repository.get_by_id(article_id)['article_content'] == 'Original'
 
 
-@pytest.mark.xfail(reason='#33: a title that is not a string causes a 500', strict=True)
 def test_update_rejects_a_title_that_is_not_text(admin_client, admin_id):
     article_id = create_article(admin_id)
 
     response = admin_client.patch(f'/api/articles/{article_id}', json={'title': 123})
+
+    assert response.status_code == 400
+
+
+def test_update_rejects_a_blank_title(admin_client, admin_id):
+    article_id = create_article(admin_id, title='Original')
+
+    response = admin_client.patch(f'/api/articles/{article_id}', json={'title': '   '})
+
+    assert response.status_code == 400
+    assert article_repository.get_by_id(article_id)['article_title'] == 'Original'
+
+
+def test_update_rejects_content_that_is_not_text(admin_client, admin_id):
+    article_id = create_article(admin_id, content='Original')
+
+    response = admin_client.patch(
+        f'/api/articles/{article_id}', json={'content': 123}
+    )
+
+    assert response.status_code == 400
+    assert article_repository.get_by_id(article_id)['article_content'] == 'Original'
+
+
+def test_write_endpoints_reject_a_body_that_is_not_an_object(admin_client, admin_id):
+    article_id = create_article(admin_id)
+
+    assert admin_client.post('/api/articles', json=['Título']).status_code == 400
+    response = admin_client.patch(f'/api/articles/{article_id}', json=['x'])
 
     assert response.status_code == 400
 
