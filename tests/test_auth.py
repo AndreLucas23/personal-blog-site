@@ -30,6 +30,20 @@ def test_session_cookie_is_http_only_and_same_site_lax(client, reader_id):
     assert 'SameSite=Lax' in cookie
 
 
+def test_session_cookie_is_not_secure_by_default(client, reader_id):
+    response = login(client, READER['email'], READER['password'])
+
+    assert 'Secure' not in response.headers['Set-Cookie']
+
+
+def test_session_cookie_is_secure_when_configured(app, client, reader_id, monkeypatch):
+    monkeypatch.setitem(app.config, 'SESSION_COOKIE_SECURE', True)
+
+    response = login(client, READER['email'], READER['password'])
+
+    assert 'Secure' in response.headers['Set-Cookie']
+
+
 def test_login_with_wrong_password_keeps_the_email(client, reader_id):
     response = login(client, READER['email'], 'wrong-password')
 

@@ -35,6 +35,7 @@ services:
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env}
       - FLASK_DEBUG=${FLASK_DEBUG:-1}
       - CORS_ORIGINS=${CORS_ORIGINS:-}
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-0}
     depends_on:
       db:
         condition: service_healthy
