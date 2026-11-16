@@ -34,6 +34,7 @@ services:
       - DB_NAME=${DB_NAME:-BLOG}
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env}
       - FLASK_DEBUG=${FLASK_DEBUG:-1}
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
     depends_on:
       db:
         condition: service_healthy

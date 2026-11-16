@@ -8,15 +8,23 @@ from flask_login import LoginManager
 from api import api_bp
 from auth import auth_bp
 from auth_user import AuthUser
-from settings import env_flag
+from settings import env_flag, env_list
 from views import views_bp
 
 secret_key = os.environ.get('SECRET_KEY')
 if not secret_key:
     raise RuntimeError('The SECRET_KEY environment variable must be set')
 
+
+def configure_cors(flask_app: Flask, origins: list[str]) -> None:
+    # Without origins there are no CORS headers, and browsers only let the
+    # pages of this application call the API.
+    if origins:
+        CORS(flask_app, resources={r'/api/*': {'origins': origins}})
+
+
 app = Flask(__name__)
-CORS(app)
+configure_cors(app, env_list('CORS_ORIGINS'))
 app.secret_key = secret_key
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
