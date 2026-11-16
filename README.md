@@ -121,6 +121,10 @@ Each article has `article_id`, `article_title`, `article_content`, `publish_date
 
 Without a session the protected endpoints answer `401` with the login page URL, and regular users get `403` from the admin endpoints.
 
+## Security
+
+To report a vulnerability, follow the [security policy](SECURITY.md) instead of opening a public issue.
+
 ## Contributing
 
 Branches, commits, pull requests and issues follow the conventions in [CONTRIBUTING.md](CONTRIBUTING.md).
