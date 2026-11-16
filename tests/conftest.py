@@ -1,16 +1,14 @@
 import os
-import re
 import time
-from pathlib import Path
 
 import mysql.connector
 import pytest
 
+import migrate
 from db import get_db_connection
 from helpers import ADMIN, READER, create_user, login
 
 TEST_DATABASE_FLAG = 'BLOG_TEST_DATABASE'
-SCHEMA_PATH = Path(__file__).resolve().parent.parent / 'sql-init' / 'schema.sql'
 TABLES = ('LIKES', 'ARTICLES', 'USERS')
 DB_WAIT_SECONDS = 60
 
@@ -25,14 +23,6 @@ def pytest_configure(config):
             returncode=2,
         )
     os.environ.setdefault('SECRET_KEY', 'test-secret-key')
-
-
-def schema_statements() -> list[str]:
-    """The table definitions of the real schema, without the database selection."""
-    sql = SCHEMA_PATH.read_text(encoding='utf-8')
-    statements = [part.strip() for part in sql.split(';') if part.strip()]
-    skipped = re.compile(r'^(SET NAMES|CREATE DATABASE|USE)\b', re.IGNORECASE)
-    return [statement for statement in statements if not skipped.match(statement)]
 
 
 def wait_for_database():
@@ -58,15 +48,37 @@ def run_sql(*statements: str) -> None:
         conn.close()
 
 
+def drop_all_tables() -> None:
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SHOW TABLES')
+        tables = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+    finally:
+        conn.close()
+
+    run_sql(
+        'SET FOREIGN_KEY_CHECKS = 0',
+        *(f'DROP TABLE `{table}`' for table in tables),
+        'SET FOREIGN_KEY_CHECKS = 1',
+    )
+
+
 @pytest.fixture(scope='session', autouse=True)
 def schema():
     wait_for_database().close()
-    run_sql(
-        'SET FOREIGN_KEY_CHECKS = 0',
-        *(f'DROP TABLE IF EXISTS {table}' for table in TABLES),
-        'SET FOREIGN_KEY_CHECKS = 1',
-        *schema_statements(),
-    )
+    drop_all_tables()
+    migrate.apply_pending()
+
+
+@pytest.fixture
+def empty_database(schema):
+    """A database without tables, which gets the real schema back afterwards."""
+    drop_all_tables()
+    yield
+    drop_all_tables()
+    migrate.apply_pending()
 
 
 @pytest.fixture(autouse=True)
