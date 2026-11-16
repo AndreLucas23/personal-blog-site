@@ -10,4 +10,5 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["python", "src/app.py"]
+# Compose replaces this command with the development server.
+CMD ["sh", "-c", "python src/migrate.py && exec gunicorn --chdir src --bind 0.0.0.0:5000 --access-logfile - app:app"]
