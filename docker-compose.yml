@@ -13,7 +13,6 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./sql-init/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     healthcheck:
       test: ["CMD-SHELL", "mysql -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1' 2>/dev/null || exit 1"]
       interval: 10s
@@ -25,7 +24,7 @@ services:
     build: .
     container_name: blog_flask
     restart: always
-    command: python src/app.py
+    command: sh -c "python src/migrate.py && python src/app.py"
     ports:
       - "5000:5000"
     environment:
