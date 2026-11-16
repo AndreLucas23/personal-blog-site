@@ -21,7 +21,7 @@ Both need a session and answer `200` with the new state:
 {"liked": true, "likes": 3}
 ```
 
-They answer `401` without a session and `404` for a missing article.
+They answer `401` without a session and `404` for a missing article. Like every request that changes something, they need the [CSRF token](authentication.md#csrf-protection).
 
 Every article returned by the API also has `likes`, the number of likes, and `liked`, which is `true` when the signed-in viewer liked it and always `false` for visitors.
 

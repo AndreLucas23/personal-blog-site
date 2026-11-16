@@ -11,14 +11,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Dependabot checks the Python packages, the Docker base image and the GitHub Actions for updates every week (#37).
 - Security policy in `SECURITY.md`, with the supported versions and how to report a vulnerability privately (#37).
 - Database migrations: numbered SQL files in `migrations/`, applied by `python src/migrate.py` and every time the web container starts, so the schema can change without discarding the data (#36).
+- Gunicorn serves the application in the Docker image. Docker Compose keeps the development server (#19).
+- `SESSION_COOKIE_SECURE` marks the session cookie `Secure` for deployments over HTTPS (#19).
 
 ### Changed
 
+- **Breaking:** `POST`, `PATCH` and `DELETE` requests must send the CSRF token of the session, in the `csrf_token` form field or the `X-CSRF-Token` header (#19).
+- **Breaking:** logout is `POST /auth/logout` instead of `GET` (#19).
+- **Breaking:** the API sends CORS headers only to the origins listed in `CORS_ORIGINS`, and to none by default. It used to allow every origin (#19).
+- Debug mode follows `FLASK_DEBUG` and is off when it is not set. Docker Compose switches it on (#19).
 - The schema is created by the migrations instead of `sql-init/schema.sql`, which was removed. Databases created before keep their tables and data (#36).
 
 ### Fixed
 
 - The tables were always created in a database named `BLOG`, even with another `DB_NAME` (#36).
+
+### Security
+
+- State-changing requests are protected against cross-site request forgery (#19).
+- The login answers `429` after five failed attempts for the same email from the same address within fifteen minutes (#19).
+- The container runs as an unprivileged user instead of root (#19).
 
 ## [1.0.0] - 2026-11-08
 

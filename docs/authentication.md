@@ -19,12 +19,31 @@ Changing the value signs every user out.
 | Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/auth/login` | Login page. Redirects to the home page when the user is already signed in |
-| `POST` | `/auth/login` | Form fields `email` and `password`. Redirects to the home page on success and answers `401` with the login page otherwise |
+| `POST` | `/auth/login` | Form fields `email` and `password`. Redirects to the home page on success and answers `401` with the login page otherwise, or `429` after too many failed attempts |
 | `GET` | `/auth/register` | Registration page. Redirects to the home page when the user is already signed in |
 | `POST` | `/auth/register` | Form fields `username`, `email` and `password`. Creates a regular user, signs them in and redirects to the home page. Answers `400` for invalid data and `409` for an email that is already registered, both with the registration page |
-| `GET` | `/auth/logout` | Ends the session and redirects to the home page. Requires a session |
+| `POST` | `/auth/logout` | Ends the session and redirects to the home page. Requires a session |
 
-The session cookie is `HttpOnly` and `SameSite=Lax`.
+Every `POST` needs the CSRF token described below.
+
+The session cookie is `HttpOnly` and `SameSite=Lax`. With `SESSION_COOKIE_SECURE=1` it is also `Secure`, so browsers send it only over HTTPS. Switch it on whenever the application is served over HTTPS.
+
+## CSRF protection
+
+A page on another site must not be able to act as a signed-in visitor. Each session has a random token, and every `POST`, `PATCH` and `DELETE` request has to send it back:
+
+- Forms send it in the hidden field `csrf_token`.
+- The JavaScript client sends it in the `X-CSRF-Token` header, read from `<meta name="csrf-token">` in the page.
+
+A request without the token of its session answers `400`, as a page for the forms and as `{"message": "Invalid or missing CSRF token"}` for the API. The token is checked before the session, so an API request without it answers `400` even for a visitor.
+
+Logout is a `POST` for the same reason: a link that ends the session could be triggered from any site.
+
+## Login attempts
+
+After five failed attempts for the same email from the same address within fifteen minutes, the login answers `429` and asks the visitor to wait, even when the password is right. The block ends when the oldest of those attempts is fifteen minutes old, and a successful login clears the count.
+
+The limit also applies to emails that have no account, so the answer does not reveal which emails are registered. The attempts are stored in the `FAILED_LOGINS` table and removed once they no longer count.
 
 ## Registration
 
@@ -78,13 +97,16 @@ The command asks for the username, the email and the password, which is typed tw
 ## Trying it
 
 ```bash
-curl -c cookies.txt -d 'email=you@example.com&password=your-password' http://localhost:5000/auth/login
-curl -b cookies.txt -H 'Content-Type: application/json' \
+token=$(curl -s -c cookies.txt http://localhost:5000/auth/login \
+  | grep -o 'name="csrf-token" content="[^"]*"' | cut -d'"' -f4)
+curl -b cookies.txt -c cookies.txt --data-urlencode "csrf_token=$token" \
+  -d 'email=you@example.com&password=your-password' http://localhost:5000/auth/login
+curl -b cookies.txt -H "X-CSRF-Token: $token" -H 'Content-Type: application/json' \
   -d '{"new-title": "Hello", "new-content": "First post"}' \
   http://localhost:5000/api/articles
 ```
 
-Use the email and password of the admin you created.
+The first command opens a session and reads its CSRF token from the login page. Use the email and password of the admin you created.
 
 ## Databases created before this change
 

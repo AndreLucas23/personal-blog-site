@@ -17,6 +17,7 @@ How accounts, sessions and permissions work is described in [docs/authentication
 
 - Python 3.11 and Flask 3, with Flask-Login for sessions
 - MySQL 8
+- Gunicorn as the production server
 - HTML, CSS and JavaScript without a build step
 - Docker and Docker Compose
 
@@ -65,6 +66,9 @@ Variables are read from `.env`, which is never committed. `TEMPLATE.env` lists a
 | `DB_PASSWORD` | Application database password | `1234` |
 | `DB_NAME` | Database name | `BLOG` |
 | `SECRET_KEY` | Signs the session cookie | None: required |
+| `FLASK_DEBUG` | `1` runs the development server with the debugger and the reloader | `1` |
+| `CORS_ORIGINS` | Origins allowed to call the API from a browser, separated by commas | Empty: none |
+| `SESSION_COOKIE_SECURE` | `1` makes browsers send the session cookie only over HTTPS | `0` |
 
 The defaults exist only for local development. Always set your own values outside of it.
 
@@ -88,6 +92,29 @@ To change the schema, add a file with the next number, such as `migrations/002_a
 - MySQL cannot roll back `CREATE` or `ALTER TABLE`. A migration that fails halfway leaves its first statements applied, so keep each file small and undo the partial change by hand before running it again.
 
 A database created before migrations existed needs nothing special: the first migration keeps the existing tables and their data and only records the starting point.
+
+## Deployment
+
+`docker-compose.yml` describes the development setup: the Flask development server with debug mode, the source code mounted into the container and default passwords. Do not expose it to the internet.
+
+The image itself is ready for production. Its default command applies the pending migrations and starts Gunicorn on port 5000, as the unprivileged user `app`:
+
+```bash
+docker build -t personal-blog-site .
+docker run --env-file production.env -p 5000:5000 personal-blog-site
+```
+
+`production.env` stands for a file with the variables of the Configuration section, where `DB_HOST` points at a MySQL server the container can reach.
+
+Before the first deploy:
+
+- Set your own `SECRET_KEY` and database passwords.
+- Leave `FLASK_DEBUG` unset or `0`. The debugger lets anyone who reaches it run code on the server.
+- Serve the application over HTTPS and set `SESSION_COOKIE_SECURE=1`.
+- Leave `CORS_ORIGINS` empty unless a page on another origin must call the API.
+- Set `WEB_CONCURRENCY` to the number of Gunicorn workers you want. The default is one.
+
+Behind a reverse proxy every request reaches the application from the address of the proxy, so the [login limit](docs/authentication.md#login-attempts) counts per account only.
 
 ## Tests
 
@@ -116,11 +143,13 @@ src/
   views.py              Pages: home, article and admin panel
   api.py                JSON API under /api
   auth.py               Login, logout, registration and the admin check
+  csrf.py               CSRF token for state-changing requests
   auth_user.py          The signed-in user model
   user_validation.py    Rules for usernames, emails and passwords
   create_user.py        Command to create users from the terminal
   migrate.py            Command to apply the pending database migrations
   db.py                 Database connection
+  settings.py           Reading options from environment variables
   repositories/         Data access, one module per table
   templates/            Jinja pages, with shared pieces in partials/
   static/               CSS, JavaScript and images, with page entry points in js/pages/
@@ -142,6 +171,8 @@ src/
 Each article has `article_id`, `article_title`, `article_content`, `publish_date`, `author`, `likes` and `liked`, which tells whether the signed-in viewer liked it. Titles are limited to 30 characters.
 
 Without a session the protected endpoints answer `401` with the login page URL, and regular users get `403` from the admin endpoints.
+
+`POST`, `PATCH` and `DELETE` requests must send the CSRF token of the session in the `X-CSRF-Token` header and answer `400` without it, as [docs/authentication.md](docs/authentication.md#csrf-protection) describes.
 
 ## Security
 
