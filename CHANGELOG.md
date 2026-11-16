@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Dependabot checks the Python packages, the Docker base image and the GitHub Actions for updates every week (#37).
 - Security policy in `SECURITY.md`, with the supported versions and how to report a vulnerability privately (#37).
+- Database migrations: numbered SQL files in `migrations/`, applied by `python src/migrate.py` and every time the web container starts, so the schema can change without discarding the data (#36).
+
+### Changed
+
+- The schema is created by the migrations instead of `sql-init/schema.sql`, which was removed. Databases created before keep their tables and data (#36).
+
+### Fixed
+
+- The tables were always created in a database named `BLOG`, even with another `DB_NAME` (#36).
 
 ## [1.0.0] - 2026-11-08
 

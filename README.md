@@ -45,7 +45,7 @@ Requirements: Docker with the Compose plugin.
 
 4. Open http://localhost:5000, sign in and open the admin panel from the sidebar.
 
-The MySQL container creates the schema from `sql-init/schema.sql` on its first start. The database starts empty, with no accounts and no articles. To discard the data and start again, remove the volume:
+The web container applies the [database migrations](#database-migrations) every time it starts, so a new database gets its tables on the first start. The database starts empty, with no accounts and no articles. To discard the data and start again, remove the volume:
 
 ```bash
 docker compose down -v
@@ -68,6 +68,27 @@ Variables are read from `.env`, which is never committed. `TEMPLATE.env` lists a
 
 The defaults exist only for local development. Always set your own values outside of it.
 
+## Database migrations
+
+The schema is the result of the SQL files in `migrations/`, applied in the order of their numbers. The `SCHEMA_MIGRATIONS` table records the ones a database already has, so each file runs once and the data stays in place.
+
+The web container applies the pending migrations before it starts the application. To apply them by hand:
+
+```bash
+docker compose exec web python src/migrate.py
+```
+
+On a deploy without Docker Compose, run `python src/migrate.py` with the `DB_*` variables set before starting the application. If a migration fails, the command exits with an error and the application does not start.
+
+To change the schema, add a file with the next number, such as `migrations/002_add_article_summary.sql`:
+
+- The name is three digits, an underscore and a short description in lowercase `snake_case`.
+- A file can hold several statements.
+- Never edit a migration that was already merged. Databases that have it will not run it again, so correct it with a new migration.
+- MySQL cannot roll back `CREATE` or `ALTER TABLE`. A migration that fails halfway leaves its first statements applied, so keep each file small and undo the partial change by hand before running it again.
+
+A database created before migrations existed needs nothing special: the first migration keeps the existing tables and their data and only records the starting point.
+
 ## Tests
 
 The suite uses pytest and a real MySQL 8 database, so it also checks the rules the database enforces. Run it with Docker Compose:
@@ -87,7 +108,7 @@ docker compose --profile test run --rm tests sh -c "pip install -q -r requiremen
 ## Project structure
 
 ```text
-sql-init/schema.sql     Database schema, loaded on the first start
+migrations/             Database schema, one numbered SQL file per change
 docs/                   Authentication and likes
 tests/                  Automated tests, run with the test profile
 src/
@@ -98,6 +119,7 @@ src/
   auth_user.py          The signed-in user model
   user_validation.py    Rules for usernames, emails and passwords
   create_user.py        Command to create users from the terminal
+  migrate.py            Command to apply the pending database migrations
   db.py                 Database connection
   repositories/         Data access, one module per table
   templates/            Jinja pages, with shared pieces in partials/
