@@ -1,5 +1,19 @@
+const SAFE_METHODS = ['GET', 'HEAD'];
+
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').content;
+}
+
 export const API = {
     async _fetch(endpoint, options = {}) {
+        const method = options.method || 'GET';
+        if (!SAFE_METHODS.includes(method)) {
+            options = {
+                ...options,
+                headers: { ...options.headers, 'X-CSRF-Token': csrfToken() },
+            };
+        }
+
         const res = await fetch(endpoint, options);
         if (res.status === 401) {
             const body = await res.clone().json().catch(() => ({}));

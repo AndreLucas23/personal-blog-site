@@ -45,6 +45,12 @@
     width: 5rem;
 }
 
+.aside__link--button {
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+}
+
 .aside__link:hover {
     background: var(--blue-alpha-08);
     box-shadow:

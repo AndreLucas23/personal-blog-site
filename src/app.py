@@ -5,6 +5,7 @@ from flask import Flask, jsonify, redirect, request, session, url_for
 from flask_cors import CORS
 from flask_login import LoginManager
 
+import csrf
 from api import api_bp
 from auth import auth_bp
 from auth_user import AuthUser
@@ -31,6 +32,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE')
 
 login_manager = LoginManager(app)
+csrf.init_app(app)
 
 app.register_blueprint(views_bp)
 app.register_blueprint(api_bp)
