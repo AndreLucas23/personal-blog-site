@@ -8,6 +8,7 @@ from flask_login import LoginManager
 from api import api_bp
 from auth import auth_bp
 from auth_user import AuthUser
+from settings import env_flag
 from views import views_bp
 
 secret_key = os.environ.get('SECRET_KEY')
@@ -69,4 +70,4 @@ def handle_db_error(error):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=env_flag('FLASK_DEBUG'))

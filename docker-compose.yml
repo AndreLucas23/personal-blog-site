@@ -33,6 +33,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-1234}
       - DB_NAME=${DB_NAME:-BLOG}
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env}
+      - FLASK_DEBUG=${FLASK_DEBUG:-1}
     depends_on:
       db:
         condition: service_healthy
