@@ -6,11 +6,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import user_validation as validation
 from auth_user import AuthUser
-from repositories import user_repository
+from repositories import failed_login_repository, user_repository
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+MAX_FAILED_LOGINS = 5
+FAILED_LOGIN_WINDOW_MINUTES = 15
+
 DUPLICATE_EMAIL_MESSAGE = 'Este e-mail já está cadastrado.'
+TOO_MANY_LOGINS_MESSAGE = (
+    'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.'
+)
 REGISTRATION_ERRORS = {
     validation.USERNAME_REQUIRED: 'Informe um nome de usuário.',
     validation.USERNAME_TOO_LONG: (
@@ -54,14 +60,25 @@ def login():
 
     email = request.form.get('email', '').strip()
     password = request.form.get('password', '')
+    ip_address = request.remote_addr or ''
+
+    # Checked before the password, so a blocked client learns nothing from guessing.
+    failures = failed_login_repository.count_recent(
+        email, ip_address, FAILED_LOGIN_WINDOW_MINUTES
+    )
+    if failures >= MAX_FAILED_LOGINS:
+        flash(TOO_MANY_LOGINS_MESSAGE)
+        return render_template('login.html', email=email), 429
 
     user = user_repository.get_by_email(email)
     is_valid = user and check_password_hash(user['password_hash'], password)
 
     if not is_valid:
+        failed_login_repository.add(email, ip_address, FAILED_LOGIN_WINDOW_MINUTES)
         flash('E-mail ou senha inválidos.')
         return render_template('login.html', email=email), 401
 
+    failed_login_repository.clear(email, ip_address)
     login_user(AuthUser(user))
     return redirect(url_for('views.home'))
 

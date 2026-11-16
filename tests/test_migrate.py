@@ -37,19 +37,21 @@ def test_applying_again_changes_nothing(empty_database):
     assert recorded_migrations() == recorded
 
 
-def test_database_created_before_migrations_keeps_its_data(empty_database):
-    migrate.apply_pending()
+def test_database_created_before_migrations_keeps_its_data(empty_database, tmp_path):
+    initial_schema = migrate.MIGRATIONS_DIR / '001_initial_schema.sql'
+    write_migration(tmp_path, initial_schema.name, initial_schema.read_text('utf-8'))
+    migrate.apply_pending(tmp_path)
     with db_cursor() as cursor:
         cursor.execute(
             'INSERT INTO USERS (username, email, password_hash) VALUES (%s, %s, %s)',
             ('Ana', 'ana@example.com', 'hash'),
         )
-        # Without the history, the database looks like one created from the old schema file.
+        # The first tables without the history are what the old schema file left.
         cursor.execute('DROP TABLE SCHEMA_MIGRATIONS')
 
     names = migrate.apply_pending()
 
-    assert '001_initial_schema.sql' in names
+    assert names == sorted(path.name for path in migrate.MIGRATIONS_DIR.glob('*.sql'))
     with db_cursor() as cursor:
         cursor.execute('SELECT email FROM USERS')
         assert cursor.fetchall() == [('ana@example.com',)]
