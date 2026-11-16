@@ -27,6 +27,8 @@ app = Flask(__name__)
 configure_cors(app, env_list('CORS_ORIGINS'))
 app.secret_key = secret_key
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+# Browsers send a Secure cookie only over HTTPS, so it stays off for plain HTTP.
+app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE')
 
 login_manager = LoginManager(app)
 
