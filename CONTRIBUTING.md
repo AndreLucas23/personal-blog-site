@@ -98,6 +98,7 @@ Start and target dates feed the roadmap view. The target date of a sub-issue nev
 - JavaScript uses `camelCase` and four spaces.
 - CSS follows BEM (`block__element--modifier`) and the `u-` prefix for utility classes.
 - Database tables are uppercase and plural (`USERS`, `ARTICLES`, `LIKES`), and columns use `snake_case`.
+- A schema change is a new numbered file in `migrations/`, as the README describes. Never edit a migration that was already merged.
 - REST endpoints use plural nouns and no verbs.
 - Environment variables use `SCREAMING_SNAKE_CASE`.
 - SQL always uses parameterized queries. Never build a query by concatenating input.
