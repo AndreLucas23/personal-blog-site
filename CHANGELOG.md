@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Dependabot checks the Python packages, the Docker base image and the GitHub Actions for updates every week (#37).
+- Security policy in `SECURITY.md`, with the supported versions and how to report a vulnerability privately (#37).
+
 ## [1.0.0] - 2026-11-08
 
 The first release: a personal blog with articles, public accounts, an admin panel and likes.
