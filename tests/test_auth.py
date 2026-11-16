@@ -58,14 +58,14 @@ def test_login_with_unknown_email_fails(client):
 
 
 def test_logout_ends_the_session(reader_client):
-    response = reader_client.get('/auth/logout')
+    response = reader_client.post('/auth/logout')
 
     assert response.status_code == 302
     assert reader_client.get('/auth/login').status_code == 200
 
 
 def test_logout_without_a_session_redirects_to_login(client):
-    response = client.get('/auth/logout')
+    response = client.post('/auth/logout')
 
     assert response.status_code == 302
     assert response.headers['Location'].endswith('/auth/login')

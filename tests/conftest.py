@@ -94,7 +94,8 @@ def clean_tables(schema):
 def app():
     from app import app as flask_app
 
-    flask_app.config.update(TESTING=True)
+    # Most tests post without a token. tests/test_csrf.py switches the check on.
+    flask_app.config.update(TESTING=True, CSRF_ENABLED=False)
     return flask_app
 
 

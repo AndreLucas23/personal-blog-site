@@ -34,6 +34,8 @@
         <form class="auth__form"
         method="post"
         action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="auth__field">
                 <label class="auth__label" for="email">
                     <svg class="auth__label-icon"
