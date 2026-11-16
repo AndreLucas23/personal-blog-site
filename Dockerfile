@@ -8,6 +8,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# The application only reads its files, so it does not need root.
+RUN useradd --create-home app
+USER app
+# pip installs here when the tests add their packages as this user.
+ENV PATH="/home/app/.local/bin:${PATH}"
+
 EXPOSE 5000
 
 # Compose replaces this command with the development server.

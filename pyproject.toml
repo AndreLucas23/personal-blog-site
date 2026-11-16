@@ -1,6 +1,7 @@
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-# No cache: the tests run as root in a container that mounts the repository.
+# No cache: the tests run in a container that mounts the repository, as a user
+# that may not own its files.
 addopts = "-ra --strict-markers -p no:cacheprovider"
 xfail_strict = true
