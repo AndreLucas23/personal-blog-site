@@ -76,13 +76,13 @@ Pages that need a session redirect anonymous visitors to `/auth/login`. API rout
 
 | Page | Who sees it | What it offers |
 | --- | --- | --- |
-| `/` | Everyone | The article list with authors and like buttons, and the filter. Articles cannot be changed from it |
+| `/` | Everyone | The article list with authors and like buttons, and the search by title. Articles cannot be changed from it |
 | `/open/<id>` | Everyone | The article, its author and its like button. Admins also see the Editar button |
-| `/admin` | Admins | The article list with the controls to create, filter and remove articles |
+| `/admin` | Admins | The article list with the controls to create, search and remove articles |
 | `/auth/login` | Visitors | The login form. After an invalid attempt the email is kept and the password is asked again |
 | `/auth/register` | Visitors | The registration form. After an error the username and email are kept, and the browser already blocks passwords shorter than 8 characters |
 
-The sidebar shows Entrar and Criar conta to visitors, and the login and registration pages link to each other. Signed-in users see Sair, and admins also see a link to the panel.
+The top bar shows Entrar and Criar conta to visitors, and the login and registration pages link to each other. Signed-in users get an account menu with their name, the theme choice and Sair, and admins also see Painel in the top bar.
 
 ## Creating users
 

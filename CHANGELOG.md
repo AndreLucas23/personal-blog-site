@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- A social network layout on every page: a top bar with the main destinations and an account menu, three columns on wide screens and one on phones, and shared components for cards, forms, menus, dialogs and messages (#70).
+- Light and dark themes that follow the system, with a theme choice in the account menu (#70).
 - Dependabot checks the Python packages, the Docker base image and the GitHub Actions for updates every week (#37).
 - Security policy in `SECURITY.md`, with the supported versions and how to report a vulnerability privately (#37).
 - Database migrations: numbered SQL files in `migrations/`, applied by `python src/migrate.py` and every time the web container starts, so the schema can change without discarding the data (#36).
@@ -16,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The product is now called Social Blog (#70).
+- Pages use system fonts and one SVG icon sprite instead of Google Fonts and inline icons, so they make no requests to other sites (#70).
 - **Breaking:** `POST`, `PATCH` and `DELETE` requests must send the CSRF token of the session, in the `csrf_token` form field or the `X-CSRF-Token` header (#19).
 - **Breaking:** logout is `POST /auth/logout` instead of `GET` (#19).
 - **Breaking:** the API sends CORS headers only to the origins listed in `CORS_ORIGINS`, and to none by default. It used to allow every origin (#19).
