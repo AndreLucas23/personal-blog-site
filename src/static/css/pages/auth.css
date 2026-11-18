@@ -1,0 +1,49 @@
+/* Login and registration */
+
+.auth {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.auth__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-8) var(--space-6);
+}
+
+.auth__header {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: center;
+}
+
+.auth__logo {
+    height: 3rem;
+    margin-bottom: var(--space-2);
+    width: 3rem;
+}
+
+.auth__title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.auth__subtitle {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+
+.auth__switch {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    text-align: center;
+}
+
+.auth__switch a {
+    font-weight: 600;
+}
