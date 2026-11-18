@@ -1,70 +1,109 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    {% include 'partials/head.html' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% extends 'base.html' %}
 
-    <title>Painel de administração | Blog Pessoal</title>
-</head>
-<body>
-    <noscript>O Javascript está desativado ou não é suportado no seu navegador. Para melhor experiência, por favor, ative-o</noscript>
+{% block title %}Painel | Social Blog{% endblock %}
 
-    <main class="pg__main">
-        {% include 'partials/sidebar.html' %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/admin.css') }}">
+{% endblock %}
 
-        <div class="no-aside">
-            {% include 'partials/add_menu.html' %}
+{% block page_class %}page--wide{% endblock %}
 
-            {% include 'partials/filter_menu.html' %}
-
-            <section id="articles"
-            class="pg__articles c-section u-primary-white-bg"
-            aria-labelledby="admin-title">
-                <header class="articles__header">
-                    <div class="admin__heading">
-                        <h1 class="articles__title admin__title"
-                        id="admin-title">Painel</h1>
-
-                        <p class="admin__greeting">Olá, {{ current_user.username }}. Aqui você cria, filtra e remove artigos.</p>
-                    </div>
-
-                    <div class="articles__btns">
-                        <button class="articles__add-btn"
-                        id="add-btn"
-                        aria-label="Adicionar novo artigo">
-                            <svg class="articles__btn-icon"
-                            aria-hidden="true"
-                            viewBox="0 0 512 512"
-                            xmlns="http://www.w3.org/2000/svg">
-                                <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/>
-                            </svg>
-
-                            <span class="articles__btn-label">Adicionar<br>artigo</span>
-                        </button>
-
-                        <button class="articles__filter-btn"
-                        id="filter-btn"
-                        aria-label="Filtrar artigos">
-                            <svg class="articles__btn-icon"
-                            aria-hidden="true"
-                            viewBox="0 0 640 640"
-                            xmlns="http://www.w3.org/2000/svg">
-                                <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z"/>
-                            </svg>
-
-                            <span class="articles__btn-label">Filtrar<br>artigos</span>
-                        </button>
-                    </div>
-                </header>
-
-                <ul id="mini-grid"
-                class="articles__mini-grid"></ul>
-            </section>
+{% block page %}
+<main id="main" class="page__main">
+    <header class="admin-header">
+        <div>
+            <h1 class="section-title">Painel</h1>
+            <p class="section-subtitle">Olá, {{ current_user.username }}. Aqui você cria, busca e remove artigos.</p>
         </div>
-    </main>
-    <script type="module" src="{{ url_for('static', filename='js/pages/admin.js') }}"></script>
-</body>
-</html>
+
+        <button class="btn btn--primary" id="new-article-btn" type="button">
+            {{ icon('plus') }}
+            Novo artigo
+        </button>
+    </header>
+
+    <section class="card" aria-labelledby="admin-articles-title">
+        <div class="admin-toolbar">
+            <h2 class="card__title" id="admin-articles-title">Artigos</h2>
+
+            <div class="admin-toolbar__search">
+                <label class="visually-hidden" for="admin-search-type">Buscar por</label>
+                <select class="select" id="admin-search-type">
+                    <option value="title">Título</option>
+                    <option value="id">ID</option>
+                </select>
+
+                <div class="input-group">
+                    {{ icon('search') }}
+                    <label class="visually-hidden" for="admin-search">Buscar artigos</label>
+                    <input class="input"
+                    id="admin-search"
+                    type="search"
+                    placeholder="Buscar artigos"
+                    autocomplete="off"
+                    maxlength="150">
+                </div>
+            </div>
+        </div>
+
+        <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
+
+        <ul class="admin-list" id="admin-list" aria-busy="true" aria-labelledby="admin-articles-title"></ul>
+    </section>
+</main>
+
+<dialog class="dialog" id="new-article-dialog" aria-labelledby="new-article-title">
+    <form class="dialog__panel" id="new-article-form" novalidate>
+        <div class="dialog__header">
+            <h2 class="dialog__title" id="new-article-title">Novo artigo</h2>
+            <button class="icon-btn" type="button" aria-label="Fechar" data-dialog-close>
+                {{ icon('close') }}
+            </button>
+        </div>
+
+        <div class="dialog__body form">
+            <div class="field">
+                <div class="field__row">
+                    <label class="field__label" for="new-title">Título</label>
+                    <span class="field__counter" id="new-title-counter">0 / 30</span>
+                </div>
+                <input class="input"
+                id="new-title"
+                name="new-title"
+                type="text"
+                maxlength="30"
+                placeholder="Um título curto e claro"
+                autocomplete="off"
+                aria-describedby="new-title-error"
+                required>
+                <span class="field__error" id="new-title-error" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+                <div class="field__row">
+                    <label class="field__label" for="new-content">Conteúdo</label>
+                    <span class="field__counter" id="new-content-counter">0 / 2500</span>
+                </div>
+                <textarea class="textarea"
+                id="new-content"
+                name="new-content"
+                rows="10"
+                maxlength="2500"
+                placeholder="Escreva o artigo"
+                aria-describedby="new-content-error"
+                required></textarea>
+                <span class="field__error" id="new-content-error" aria-live="polite"></span>
+            </div>
+        </div>
+
+        <div class="dialog__footer">
+            <button class="btn btn--ghost" type="button" data-dialog-close>Cancelar</button>
+            <button class="btn btn--primary" type="submit" id="new-article-submit">Publicar</button>
+        </div>
+    </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/admin.js') }}"></script>
+{% endblock %}
