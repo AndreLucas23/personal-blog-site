@@ -1,0 +1,232 @@
+/* Top bar, page grid and footer. */
+
+.topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.topbar__inner {
+    align-items: center;
+    display: flex;
+    gap: var(--space-4);
+    height: var(--topbar-height);
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 var(--space-4);
+}
+
+.brand {
+    align-items: center;
+    color: var(--text);
+    display: flex;
+    flex-shrink: 0;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    gap: var(--space-2);
+    letter-spacing: -0.01em;
+}
+
+.brand:hover {
+    text-decoration: none;
+}
+
+.brand__mark {
+    height: 2rem;
+    width: 2rem;
+}
+
+.topnav {
+    align-items: center;
+    display: flex;
+    gap: var(--space-1);
+    margin-left: auto;
+}
+
+.topnav__link {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-xs);
+    gap: 2px;
+    justify-content: center;
+    min-width: 4.5rem;
+    padding: var(--space-1) var(--space-2);
+    position: relative;
+    transition: color var(--transition), background var(--transition);
+}
+
+.topnav__link .icon {
+    height: 1.375rem;
+    width: 1.375rem;
+}
+
+.topnav__link:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+    text-decoration: none;
+}
+
+.topnav__link[aria-current="page"] {
+    color: var(--text);
+}
+
+.topnav__link[aria-current="page"]::after {
+    background: var(--text);
+    border-radius: var(--radius-full);
+    bottom: calc(var(--space-1) * -1 - 1px);
+    content: "";
+    height: 2px;
+    left: var(--space-3);
+    position: absolute;
+    right: var(--space-3);
+}
+
+.topnav__me {
+    gap: 2px;
+}
+
+.topnav__me .avatar {
+    height: 1.375rem;
+    width: 1.375rem;
+}
+
+.topnav__caret {
+    align-items: center;
+    display: inline-flex;
+    gap: 1px;
+}
+
+.topnav__caret .icon {
+    height: 0.875rem;
+    width: 0.875rem;
+}
+
+.topnav__account {
+    position: relative;
+}
+
+.topnav__account .menu {
+    right: 0;
+    top: calc(100% + var(--space-2));
+}
+
+.topnav__guest {
+    align-items: center;
+    display: flex;
+    gap: var(--space-2);
+    margin-left: var(--space-2);
+}
+
+@media (max-width: 639px) {
+    .brand__name {
+        display: none;
+    }
+
+    .topnav__link {
+        min-width: 3rem;
+    }
+
+    .topnav__label {
+        border: 0;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+}
+
+/* Page grid: pages pick a variant with a modifier class. */
+
+.page {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: var(--space-6) var(--space-4) var(--space-12);
+}
+
+.page__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+}
+
+.page__left,
+.page__right {
+    align-self: start;
+    display: none;
+    flex-direction: column;
+    gap: var(--space-4);
+    position: sticky;
+    top: calc(var(--topbar-height) + var(--space-6));
+}
+
+@media (min-width: 768px) {
+    .page--feed {
+        grid-template-columns: 14rem minmax(0, 1fr);
+    }
+
+    .page--feed .page__left {
+        display: flex;
+    }
+}
+
+@media (min-width: 1100px) {
+    .page--feed {
+        grid-template-columns: 14rem minmax(0, 1fr) 19rem;
+    }
+
+    .page--feed .page__right {
+        display: flex;
+    }
+}
+
+.page--reading {
+    max-width: 46rem;
+}
+
+.page--wide {
+    max-width: 64rem;
+}
+
+.page--narrow {
+    max-width: 28rem;
+    padding-top: var(--space-10);
+}
+
+/* Footer */
+
+.site-footer {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    padding: 0 var(--space-2);
+}
+
+.site-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    list-style: none;
+    margin-bottom: var(--space-2);
+    padding: 0;
+}
+
+.site-footer a {
+    color: inherit;
+}
+
+.site-footer a:hover {
+    color: var(--brand);
+}
