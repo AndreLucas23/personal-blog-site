@@ -1,0 +1,9 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert--{{ 'success' if category == 'success' else 'info' if category == 'info' else 'error' }}"
+role="{{ 'status' if category in ('success', 'info') else 'alert' }}">
+    {{ icon('check' if category == 'success' else 'info' if category == 'info' else 'alert') }}
+    <span>{{ message }}</span>
+</div>
+{% endfor %}
+{% endwith %}
