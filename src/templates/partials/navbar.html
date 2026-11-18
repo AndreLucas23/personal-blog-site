@@ -1,0 +1,79 @@
+<header class="topbar">
+    <div class="topbar__inner">
+        <a class="brand" href="{{ url_for('views.home') }}">
+            <img class="brand__mark" src="{{ url_for('static', filename='imgs/logo.svg') }}" alt="">
+            <span class="brand__name">Social Blog</span>
+        </a>
+
+        <nav class="topnav" aria-label="Principal">
+            <a class="topnav__link" href="{{ url_for('views.home') }}"
+            {% if request.endpoint == 'views.home' %}aria-current="page"{% endif %}>
+                {{ icon('home') }}
+                <span class="topnav__label">Início</span>
+            </a>
+
+            {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+            <a class="topnav__link" href="{{ url_for('views.admin') }}"
+            {% if request.endpoint == 'views.admin' %}aria-current="page"{% endif %}>
+                {{ icon('shield') }}
+                <span class="topnav__label">Painel</span>
+            </a>
+            {% endif %}
+
+            <div class="topnav__account">
+                <button class="topnav__link topnav__me"
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                aria-controls="account-menu"
+                data-menu-button>
+                    {{ avatar(current_user.username, 'xs') }}
+                    <span class="topnav__caret">
+                        <span class="topnav__label">Eu</span>
+                        {{ icon('chevron-down') }}
+                    </span>
+                    <span class="visually-hidden">Menu da conta</span>
+                </button>
+
+                <div class="menu" id="account-menu" role="menu" aria-label="Conta" hidden>
+                    <div class="menu__header">
+                        {{ avatar(current_user.username, 'md') }}
+                        <div class="menu__header-text">
+                            <strong>{{ current_user.username }}</strong>
+                            <span>{{ current_user.email }}</span>
+                        </div>
+                    </div>
+
+                    <div role="group" aria-label="Tema">
+                        <span class="menu__label" aria-hidden="true">Tema</span>
+                        <button class="menu__item" type="button" role="menuitemradio" aria-checked="true" data-theme-choice="system">
+                            {{ icon('monitor') }} Padrão do sistema
+                        </button>
+                        <button class="menu__item" type="button" role="menuitemradio" aria-checked="false" data-theme-choice="light">
+                            {{ icon('sun') }} Claro
+                        </button>
+                        <button class="menu__item" type="button" role="menuitemradio" aria-checked="false" data-theme-choice="dark">
+                            {{ icon('moon') }} Escuro
+                        </button>
+                    </div>
+
+                    <hr class="menu__separator">
+
+                    <form method="post" action="{{ url_for('auth.logout') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="menu__item" type="submit" role="menuitem">
+                            {{ icon('log-out') }} Sair
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="topnav__guest">
+                <a class="btn btn--ghost" href="{{ url_for('auth.login') }}">Entrar</a>
+                <a class="btn btn--primary" href="{{ url_for('auth.register') }}">Criar conta</a>
+            </div>
+            {% endif %}
+        </nav>
+    </div>
+</header>
