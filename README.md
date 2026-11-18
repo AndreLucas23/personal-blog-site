@@ -1,15 +1,16 @@
-# Personal Blog Site
+# Social Blog
 
 [![CI](https://github.com/AndreLucas23/personal-blog-site/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/AndreLucas23/personal-blog-site/actions/workflows/ci.yml)
 
-A personal blog for publishing articles, built with Flask and MySQL and run with Docker. The interface is in Brazilian Portuguese.
+Social Blog is a social network for publishing and reading articles, built with Flask and MySQL and run with Docker. The interface is in Brazilian Portuguese.
 
 ## Features
 
-- Anyone can read and filter articles, each with its author, date and like count.
+- Anyone can read and search articles, each with its author, date and like count.
 - Visitors can create an account, sign in and sign out.
 - Signed-in users can like and unlike articles.
-- Admins create, filter and remove articles in the admin panel at `/admin`, and edit them on the article page.
+- Admins create, search and remove articles in the admin panel at `/admin`, and edit them on the article page.
+- Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
 
 How accounts, sessions and permissions work is described in [docs/authentication.md](docs/authentication.md), and likes in [docs/likes.md](docs/likes.md).
 
@@ -44,7 +45,7 @@ Requirements: Docker with the Compose plugin.
    docker compose exec web python src/create_user.py --admin
    ```
 
-4. Open http://localhost:5000, sign in and open the admin panel from the sidebar.
+4. Open http://localhost:5000, sign in and open the admin panel from Painel in the top bar.
 
 The web container applies the [database migrations](#database-migrations) every time it starts, so a new database gets its tables on the first start. The database starts empty, with no accounts and no articles. To discard the data and start again, remove the volume:
 
@@ -140,6 +141,7 @@ docs/                   Authentication and likes
 tests/                  Automated tests, run with the test profile
 src/
   app.py                Application entry point, sessions and error handling
+  template_helpers.py   Icons, avatars and dates for the templates
   views.py              Pages: home, article and admin panel
   api.py                JSON API under /api
   auth.py               Login, logout, registration and the admin check
@@ -151,8 +153,11 @@ src/
   db.py                 Database connection
   settings.py           Reading options from environment variables
   repositories/         Data access, one module per table
-  templates/            Jinja pages, with shared pieces in partials/
-  static/               CSS, JavaScript and images, with page entry points in js/pages/
+  templates/            Jinja pages that extend base.html, with shared pieces in partials/
+  static/               Styles, scripts and images:
+    css/                theme.css (tokens and themes), layout.css, ui.css (components) and pages/
+    js/                 api.js, ui/ helpers, components/ and one entry point per page in pages/
+    imgs/               Logo and the icons.svg sprite used by templates and scripts
 ```
 
 ## API
