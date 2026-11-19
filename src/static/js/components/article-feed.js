@@ -17,6 +17,13 @@ export function showArticles(feed, articles, emptyState, { keepOrder = false } =
     feed.removeAttribute('aria-busy');
 }
 
+/** Add cards after the ones shown, and return the link of the first new one. */
+export function appendArticles(feed, articles) {
+    const cards = articles.map(createArticleCard);
+    feed.append(...cards);
+    return cards[0]?.querySelector('.post__link') ?? null;
+}
+
 export function showLoadError(feed) {
     feed.replaceChildren(createEmptyState({
         iconName: 'alert',
