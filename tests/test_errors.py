@@ -81,6 +81,16 @@ def test_wrong_method_answers_405_on_pages_and_api(client):
     assert api.get_json() == {'message': 'Method not allowed'}
 
 
+def test_405_lists_the_allowed_methods(client):
+    page = client.put('/auth/login')
+    api = client.put('/api/articles')
+
+    assert {'GET', 'POST'} <= set(page.headers['Allow'].split(', '))
+    assert {'GET', 'POST'} <= set(api.headers['Allow'].split(', '))
+    assert page.mimetype == 'text/html'
+    assert api.mimetype == 'application/json'
+
+
 def test_forbidden_page_is_in_portuguese(reader_client):
     response = reader_client.get('/admin')
 
