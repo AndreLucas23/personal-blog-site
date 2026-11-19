@@ -98,3 +98,28 @@ def test_settings_start_with_the_current_profile(reader_client, reader_id):
     assert 'value="Engenheira"' in page
     assert '>Linha 1</textarea>' in page
     assert 'id="avatar-remove"' in page
+
+
+def test_account_menu_links_to_the_profile_and_the_settings(reader_client):
+    page = reader_client.get('/').get_data(as_text=True)
+
+    assert 'href="/@reader"' in page
+    assert 'href="/settings/profile"' in page
+
+
+def test_top_bar_shows_the_member_photo(reader_client, reader_id):
+    user_repository.set_avatar(reader_id, AVATAR)
+
+    page = reader_client.get('/').get_data(as_text=True)
+
+    assert f'<img class="avatar avatar--xs" src="/media/{AVATAR}"' in page
+
+
+def test_article_byline_links_to_the_author(client, admin_id):
+    article_id = create_article(admin_id)
+    user_repository.set_avatar(admin_id, AVATAR)
+
+    page = client.get(f'/open/{article_id}').get_data(as_text=True)
+
+    assert '<a class="byline__name" href="/@owner">Owner</a>' in page
+    assert f'src="/media/{AVATAR}"' in page

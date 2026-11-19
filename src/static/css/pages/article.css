@@ -63,7 +63,12 @@
 }
 
 .byline__name {
+    color: var(--text);
     font-weight: 600;
+}
+
+a.byline__name:hover {
+    color: var(--brand);
 }
 
 .byline__meta {

@@ -27,7 +27,7 @@ def test_article_page_renders_existing_article(client, admin_id):
     assert response.status_code == 200
     page = response.get_data(as_text=True)
     assert '<h1 class="article__title" id="view-title">Olá</h1>' in page
-    assert '<span class="byline__name">Owner</span>' in page
+    assert '<a class="byline__name" href="/@owner">Owner</a>' in page
     assert 'Primeiro post' in page
     assert '<title>Olá | Social Blog</title>' in page
 
