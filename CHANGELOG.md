@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Every member writes articles in Markdown, with an optional summary, in an editor at `/write` with a toolbar, shortcuts and a preview, and edits them at `/write/<id>` (#80).
+- Articles live at `/articles/<id>/<slug>`, show the formatted text and the reading time, and give the author Editar and Excluir (#80).
+- `GET /api/articles/<id>` and `POST /api/previews` (#80).
 - Profile pages at `/@<username>` with the member's photo, details, bio and articles, and the profile settings at `/settings/profile` with the photo upload (#76).
 - Member photos in the top bar, the account menu, the profile card, the article cards and the byline, which link to the profile (#76).
 - Every member has a unique username and a display name. Existing accounts get a username derived from their name (#75).
@@ -27,6 +30,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Breaking:** `POST /api/articles` takes `title`, `summary` and `content` instead of `new-title` and `new-content`, and invalid fields answer `400` with an error code for each one (#80).
+- **Breaking:** any member creates articles; only the author edits them, and the author or an admin deletes them. Admins no longer edit other members' articles (#80).
+- **Breaking:** article lists leave `article_content` out and carry `url`, `summary`, `excerpt` and `reading_time` (#80).
+- `/open/<id>` redirects to the article's new address (#80).
+- Titles take up to 150 characters, and the content up to 50,000 (#80).
+- The admin panel became Moderação, without the creation dialog (#80).
 - **Breaking:** the login form field is `login` instead of `email`, and registration asks for `display_name` and `username` (#75).
 - **Breaking:** `create_user.py` takes `--name` for the display name, and `--username` is now the unique username (#75).
 - `author` in the API and the pages is the display name of the author (#75).
@@ -47,6 +56,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Article Markdown is rendered without raw HTML or unsafe links, links are marked `nofollow ugc`, and remote images are not loaded (#80).
 - Profile websites cannot carry a user name before the host, such as `https://bank.com@evil.example`, which would disguise where the link goes (#76).
 - Every response carries a Content Security Policy that allows only the application's own scripts, styles, images and forms, plus `nosniff`, frame denial, a strict referrer policy, a permissions policy and same-origin isolation headers (#71).
 - `SESSION_COOKIE_SECURE=1` also sends `Strict-Transport-Security` (#71).
