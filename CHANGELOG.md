@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Every member has a unique username and a display name. Existing accounts get a username derived from their name (#75).
 - Sign in with the email or the username (#75).
 - Profile fields: headline, bio, location and website, with `GET /api/users/<username>`, and `GET` and `PATCH /api/users/me` (#75).
-- Avatar upload with `PUT` and `DELETE /api/users/me/avatar`: JPEG, PNG or WebP up to 5 MB, stored as a 400 px WebP square in the `uploads_data` volume and served from `/media` (#75).
+- Avatar upload with `PUT` and `DELETE /api/users/me/avatar`: JPEG, PNG or WebP up to 5 MB, stored as a 400 px WebP square in the `uploads_data` volume and served from `/media`, where only browsers cache them, for a day (#75).
 - Articles in the API carry `author_username` and `author_avatar_url`, and `GET /api/articles?author=<username>` lists one member's articles (#75).
 - `UPLOAD_DIR` sets the directory of the uploaded images (#75).
 - A social network layout on every page: a top bar with the main destinations and an account menu, three columns on wide screens and one on phones, and shared components for cards, forms, menus, dialogs and messages (#70).

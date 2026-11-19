@@ -139,7 +139,7 @@ def test_avatar_changes_need_a_session(client):
     assert client.delete(AVATAR_URL).status_code == 401
 
 
-def test_media_serves_uploads_with_long_cache(client, reader_client):
+def test_media_serves_uploads_only_to_browser_caches(client, reader_client):
     avatar_url = upload(reader_client, image_bytes()).get_json()['avatar_url']
 
     response = client.get(avatar_url)
@@ -147,8 +147,17 @@ def test_media_serves_uploads_with_long_cache(client, reader_client):
     assert response.status_code == 200
     assert response.mimetype == 'image/webp'
     cache = response.headers['Cache-Control']
-    assert 'max-age=31536000' in cache
-    assert 'immutable' in cache
+    assert 'private' in cache
+    assert 'max-age=86400' in cache
+    assert 'public' not in cache
+    assert 'immutable' not in cache
+
+
+def test_removed_avatar_is_no_longer_served(client, reader_client):
+    avatar_url = upload(reader_client, image_bytes()).get_json()['avatar_url']
+    reader_client.delete(AVATAR_URL)
+
+    assert client.get(avatar_url).status_code == 404
 
 
 @pytest.mark.parametrize('path', [
