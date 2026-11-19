@@ -33,6 +33,13 @@ def test_public_profile_counts_the_articles(client, admin_id):
     assert client.get('/api/users/owner').get_json()['articles'] == 2
 
 
+def test_profiles_do_not_count_drafts(client, admin_id):
+    create_article(admin_id)
+    create_article(admin_id, status='draft')
+
+    assert client.get('/api/users/owner').get_json()['articles'] == 1
+
+
 def test_unknown_profile_answers_404(client):
     response = client.get('/api/users/ghost')
 
