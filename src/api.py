@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
+import user_validation as validation
 from auth import admin_required, current_user_id
-from repositories import article_repository, like_repository
+from repositories import article_repository, like_repository, user_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -105,3 +106,86 @@ def search_by_title(search_title):
         search_title, current_user_id()
     )
     return jsonify(search_articles), 200
+
+
+# Optional profile fields are stored as NULL when a member leaves them empty.
+OPTIONAL_PROFILE_FIELDS = ('headline', 'bio', 'location', 'website')
+
+
+def _normalize_profile_field(field: str, value: str) -> str:
+    if field == 'username':
+        return validation.normalize_username(value)
+    if field == 'website':
+        return validation.normalize_website(value)
+    if field == 'bio':
+        return value.replace('\r\n', '\n').strip()
+    return value.strip()
+
+
+def _profile_json(user: dict, *, include_email: bool = False) -> dict:
+    profile = {
+        'username': user['username'],
+        'display_name': user['display_name'],
+        'headline': user['headline'],
+        'bio': user['bio'],
+        'location': user['location'],
+        'website': user['website'],
+        'joined_at': user['created_at'],
+        'articles': user['article_count'],
+    }
+    if include_email:
+        profile['email'] = user['email']
+    return profile
+
+
+@api_bp.route('/users/me', methods=['GET'])
+@login_required
+def get_own_profile():
+    profile = user_repository.get_profile_by_id(current_user.user_id)
+    return jsonify(_profile_json(profile, include_email=True))
+
+
+@api_bp.route('/users/me', methods=['PATCH'])
+@login_required
+def update_own_profile():
+    data = _json_object()
+    if data is None:
+        return jsonify({'message': 'Invalid request body'}), 400
+
+    changes = {}
+    for field in user_repository.PROFILE_COLUMNS:
+        if field not in data:
+            continue
+        value = data[field]
+        if value is None and field in OPTIONAL_PROFILE_FIELDS:
+            value = ''
+        if not isinstance(value, str):
+            return jsonify({'message': 'Invalid profile', 'errors': {field: 'invalid'}}), 400
+        changes[field] = _normalize_profile_field(field, value)
+
+    if not changes:
+        return jsonify({'message': 'No fields to update'}), 400
+
+    errors = validation.validate_profile(changes)
+    if errors:
+        return jsonify({'message': 'Invalid profile', 'errors': errors}), 400
+
+    stored = {
+        field: (value or None) if field in OPTIONAL_PROFILE_FIELDS else value
+        for field, value in changes.items()
+    }
+    try:
+        user_repository.update_profile(current_user.user_id, stored)
+    except user_repository.DuplicateUsernameError:
+        return jsonify({'message': 'Username taken', 'errors': {'username': 'username_taken'}}), 409
+
+    profile = user_repository.get_profile_by_id(current_user.user_id)
+    return jsonify(_profile_json(profile, include_email=True))
+
+
+@api_bp.route('/users/<string:username>', methods=['GET'])
+def get_profile(username):
+    profile = user_repository.get_profile(validation.normalize_username(username))
+    if profile is None:
+        return jsonify({'message': 'User not found'}), 404
+    return jsonify(_profile_json(profile))
