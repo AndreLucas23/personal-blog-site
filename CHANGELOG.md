@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - A social network layout on every page: a top bar with the main destinations and an account menu, three columns on wide screens and one on phones, and shared components for cards, forms, menus, dialogs and messages (#70).
 - Light and dark themes that follow the system, with a theme choice in the account menu (#70).
-- Error pages in the new layout for 400, 403, 404, 405, 413, 429 and 500, and JSON errors with a `message` for every error under `/api` (#71).
+- Error pages in the new layout for 400, 403, 404, 405 and 500, and JSON errors with a `message` for every error under `/api` (#71).
 - Dependabot checks the Python packages, the Docker base image and the GitHub Actions for updates every week (#37).
 - Security policy in `SECURITY.md`, with the supported versions and how to report a vulnerability privately (#37).
 - Database migrations: numbered SQL files in `migrations/`, applied by `python src/migrate.py` and every time the web container starts, so the schema can change without discarding the data (#36).

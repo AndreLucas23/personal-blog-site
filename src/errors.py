@@ -12,8 +12,6 @@ API_MESSAGES = {
     403: 'Forbidden',
     404: 'Not found',
     405: 'Method not allowed',
-    413: 'Request too large',
-    429: 'Too many requests',
     500: 'Internal server error',
 }
 
@@ -22,8 +20,6 @@ PAGE_MESSAGES = {
     403: ('Acesso negado', 'Você não tem permissão para ver esta página.'),
     404: ('Página não encontrada', 'O endereço pode estar errado ou o conteúdo foi removido.'),
     405: ('Ação não permitida', 'Esta página não aceita essa ação.'),
-    413: ('Arquivo grande demais', 'Envie um arquivo menor e tente de novo.'),
-    429: ('Muitas tentativas', 'Aguarde um pouco antes de tentar de novo.'),
     500: ('Algo deu errado', 'Tivemos um problema do nosso lado. Tente de novo em instantes.'),
 }
 
@@ -51,7 +47,8 @@ def _error_headers(error: HTTPException) -> list[tuple[str, str]]:
 
 
 def _render_page(status: int, message: str | None = None, *, with_account: bool = True) -> Response:
-    title, default_message = PAGE_MESSAGES.get(status, PAGE_MESSAGES[500])
+    # Other client errors read as an invalid request, other server errors as a failure.
+    title, default_message = PAGE_MESSAGES.get(status) or PAGE_MESSAGES[400 if status < 500 else 500]
     context = {'status': status, 'title': title, 'message': message or default_message}
 
     # The account menu loads the member from the database, which may be the failing part,
