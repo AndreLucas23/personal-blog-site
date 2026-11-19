@@ -9,11 +9,12 @@ Social Blog is a social network for publishing and reading articles, built with 
 - Anyone can read and search articles, each with its author, date and like count.
 - Visitors can create an account with a name and a unique username, and sign in with the email or the username.
 - Every member has a public profile at `/@username` with a headline, a bio, a location, a website, a photo and their articles, edited at `/settings/profile`. Photos appear next to the member's name across the site.
+- Every member writes articles in Markdown at `/write`, with a preview, and edits or deletes their own. Articles live at readable addresses such as `/articles/12/arquitetura-limpa`.
 - Signed-in users can like and unlike articles.
-- Admins create, search and remove articles in the admin panel at `/admin`, and edit them on the article page.
+- Admins search and remove articles that break the rules in the moderation panel at `/admin`.
 - Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
 
-How accounts, sessions and permissions work is described in [docs/authentication.md](docs/authentication.md), profiles and avatars in [docs/profiles.md](docs/profiles.md), and likes in [docs/likes.md](docs/likes.md).
+How accounts, sessions and permissions work is described in [docs/authentication.md](docs/authentication.md), articles and Markdown in [docs/articles.md](docs/articles.md), profiles and avatars in [docs/profiles.md](docs/profiles.md), and likes in [docs/likes.md](docs/likes.md).
 
 ## Stack
 
@@ -46,7 +47,7 @@ Requirements: Docker with the Compose plugin.
    docker compose exec web python src/create_user.py --admin
    ```
 
-4. Open http://localhost:5000, sign in and open the admin panel from Painel in the top bar.
+4. Open http://localhost:5000, sign in, write your first article from Escrever and open the moderation panel from Moderação in the top bar.
 
 The web container applies the [database migrations](#database-migrations) every time it starts, so a new database gets its tables on the first start. The database starts empty, with no accounts and no articles. To discard the data and start again, remove the volume:
 
@@ -139,16 +140,19 @@ docker compose --profile test run --rm tests sh -c "pip install -q -r requiremen
 
 ```text
 migrations/             Database schema, one numbered SQL file per change
-docs/                   Authentication, profiles and likes
+docs/                   Authentication, articles, profiles and likes
 tests/                  Automated tests, run with the test profile
 src/
   app.py                Application entry point and sessions
+  article_validation.py Rules for the fields of an article
+  markdown_render.py    Safe HTML, plain text and reading time from Markdown
+  slugs.py              Readable words for addresses
   errors.py             Error pages and JSON errors
   media.py              Serving the uploaded images under /media
   uploads.py            Checking, resizing and storing uploaded images
   security_headers.py   Content Security Policy and browser hardening headers
   template_helpers.py   Icons, avatars and dates for the templates
-  views.py              Pages: home, article, profile, profile settings and admin panel
+  views.py              Pages: home, article, editor, profile, profile settings and moderation
   api.py                JSON API under /api
   auth.py               Login, logout, registration and the admin check
   csrf.py               CSRF token for state-changing requests
@@ -171,11 +175,13 @@ src/
 | Method | Path | Access | Description |
 | --- | --- | --- | --- |
 | `GET` | `/api/articles` | Everyone | List all articles, or one member's with `?author=<username>` |
+| `GET` | `/api/articles/<id>` | Everyone | One article with its content |
 | `GET` | `/api/articles/id/<id>` | Everyone | Search articles by id, partial match |
 | `GET` | `/api/articles/title/<title>` | Everyone | Search articles by title, partial match |
-| `POST` | `/api/articles` | Admins | Create an article with `new-title` and `new-content` |
-| `PATCH` | `/api/articles/<id>` | Admins | Update `title` and/or `content` |
-| `DELETE` | `/api/articles/<id>` | Admins | Remove an article |
+| `POST` | `/api/articles` | Signed in | Create an article with `title`, `summary` and `content` |
+| `PATCH` | `/api/articles/<id>` | The author | Change `title`, `summary` or `content` |
+| `DELETE` | `/api/articles/<id>` | The author or an admin | Delete an article |
+| `POST` | `/api/previews` | Signed in | The HTML of a Markdown text |
 | `POST` | `/api/articles/<id>/likes` | Signed in | Like an article |
 | `DELETE` | `/api/articles/<id>/likes` | Signed in | Remove your like |
 | `GET` | `/api/users/<username>` | Everyone | A member's public profile |
@@ -184,9 +190,9 @@ src/
 | `PUT` | `/api/users/me/avatar` | Signed in | Upload your avatar as a `multipart/form-data` field named `avatar` |
 | `DELETE` | `/api/users/me/avatar` | Signed in | Remove your avatar |
 
-Each article has `article_id`, `article_title`, `article_content`, `publish_date`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it. Titles are limited to 30 characters. [docs/profiles.md](docs/profiles.md#api) describes the profile endpoints and their errors.
+Each article has `article_id`, `url`, `article_title`, `summary`, `excerpt`, `reading_time`, `publish_date`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it; a single article also has `article_content`. [docs/articles.md](docs/articles.md#api) describes the article endpoints and their errors, and [docs/profiles.md](docs/profiles.md#api) the profile ones.
 
-Without a session the protected endpoints answer `401` with the login page URL, and regular users get `403` from the admin endpoints.
+Without a session the protected endpoints answer `401` with the login page URL, and members get `403` for actions on articles that are not theirs.
 
 Errors answer JSON with a `message`, such as `{"message": "Not found"}` for an unknown route, and never include internal details. Database failures answer `500` with `{"status": "error", "message": "An internal error occurred while accessing the database"}`. Pages show the same errors as styled pages in Portuguese.
 

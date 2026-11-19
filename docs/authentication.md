@@ -1,6 +1,6 @@
 # Authentication
 
-Readers browse the blog without an account. Creating, editing and removing articles requires an admin user.
+Readers browse Social Blog without an account. Writing, liking and editing a profile need one, and moderation needs an admin.
 
 ## Configuration
 
@@ -63,13 +63,15 @@ The same rules apply to registration and to the create-user command:
 | Endpoint | Anonymous | Signed-in user | Admin |
 | --- | --- | --- | --- |
 | `GET /api/articles` and the search endpoints | Allowed | Allowed | Allowed |
-| `POST /api/articles`, and `PATCH` and `DELETE /api/articles/<id>` | `401` | `403` with `{"message": "Admin privileges required"}` | Allowed |
+| `POST /api/articles` | `401` | Allowed | Allowed |
+| `PATCH /api/articles/<id>` | `401` | Only for their own articles, `403` otherwise | Only for their own articles |
+| `DELETE /api/articles/<id>` | `401` | Only for their own articles, `403` otherwise | Allowed |
 | `POST` and `DELETE /api/articles/<id>/likes` | `401` | Allowed | Allowed |
 | `GET /admin` | Redirects to `/auth/login` | `403` | Allowed |
 
 Every `401` from the API has the body `{"message": "Authentication required", "login_url": "/auth/login"}`. Likes are described in [likes.md](likes.md).
 
-New articles are stored with the admin who created them as author. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
+New articles are stored with the member who created them as author, as [articles.md](articles.md#permissions) describes. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
 
 Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired or when a visitor clicks a like button, it opens the `login_url`.
 
@@ -78,14 +80,15 @@ Pages that need a session redirect anonymous visitors to `/auth/login`. API rout
 | Page | Who sees it | What it offers |
 | --- | --- | --- |
 | `/` | Everyone | The article list with authors and like buttons, and the search by title. Articles cannot be changed from it |
-| `/open/<id>` | Everyone | The article, its author and its like button. Admins also see the Editar button |
-| `/admin` | Admins | The article list with the controls to create, search and remove articles |
+| `/articles/<id>/<slug>` | Everyone | The article, its author and its like button. The author also gets Editar and Excluir, and admins Remover |
+| `/write` and `/write/<id>` | Signed in | The editor, for a new article or one of your own |
+| `/admin` | Admins | Moderação: the article list with the search and the removal of articles |
 | `/@<username>` | Everyone | The profile of a member, as [profiles.md](profiles.md#pages) describes |
 | `/settings/profile` | Signed in | The profile settings. Visitors are sent to the login page |
 | `/auth/login` | Visitors | The login form, with the email or the username. After an invalid attempt the login is kept and the password is asked again |
 | `/auth/register` | Visitors | The registration form. After an error the name, the username and the email are kept, and the browser already blocks passwords shorter than 8 characters |
 
-The top bar shows Entrar and Criar conta to visitors, and the login and registration pages link to each other. Signed-in users get an account menu with their photo, name and username, links to their profile and to the profile settings, the theme choice and Sair, and admins also see Painel in the top bar.
+The top bar shows Entrar and Criar conta to visitors, and the login and registration pages link to each other. Signed-in users get Escrever and an account menu with their photo, name and username, links to their profile and to the profile settings, the theme choice and Sair, and admins also see Moderação in the top bar.
 
 ## Creating users
 
