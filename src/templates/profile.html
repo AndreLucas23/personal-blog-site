@@ -65,17 +65,19 @@
         {% if is_own %}
         {# Only the author sees the drafts tab. #}
         <div class="tabs" role="tablist" aria-label="Seus artigos">
-            <button class="tab" id="tab-published" type="button" role="tab" aria-selected="true" aria-controls="profile-feed">Publicados</button>
+            <button class="tab" id="tab-published" type="button" role="tab" aria-selected="true" aria-controls="published-panel">Publicados</button>
             <button class="tab" id="tab-drafts" type="button" role="tab" aria-selected="false" aria-controls="drafts-feed" tabindex="-1">Rascunhos</button>
         </div>
         {% endif %}
 
-        <div class="feed"
-        id="profile-feed"
-        data-username="{{ member['username'] }}"
-        data-own="{{ 'true' if is_own else 'false' }}"
-        {% if is_own %}role="tabpanel" aria-labelledby="tab-published"{% endif %}
-        aria-busy="true"></div>
+        <div class="profile-articles__panel" id="published-panel" {% if is_own %}role="tabpanel" aria-labelledby="tab-published"{% endif %}>
+            <div class="feed"
+            id="profile-feed"
+            data-username="{{ member['username'] }}"
+            data-own="{{ 'true' if is_own else 'false' }}"
+            aria-busy="true"></div>
+            <button class="btn btn--secondary load-more" id="profile-more" type="button" hidden>Mais artigos</button>
+        </div>
 
         {% if is_own %}
         <div class="feed" id="drafts-feed" role="tabpanel" aria-labelledby="tab-drafts" hidden></div>

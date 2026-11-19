@@ -105,6 +105,12 @@
     gap: var(--space-3);
 }
 
+.profile-articles__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
 .profile-articles__title {
     font-size: var(--text-xl);
     font-weight: 700;

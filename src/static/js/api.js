@@ -38,13 +38,19 @@ async function request(endpoint, { method = 'GET', json, formData } = {}) {
     return body;
 }
 
+function pageQuery(params) {
+    const query = new URLSearchParams(Object.entries(params).filter(([, value]) => value != null)).toString();
+    return query ? `?${query}` : '';
+}
+
 export const API = {
-    fetchAll() {
-        return request('/api/articles');
+    /** A page of articles, newest first: {articles, next_cursor}. */
+    fetchAll(cursor = null) {
+        return request(`/api/articles${pageQuery({ cursor })}`);
     },
 
-    fetchArticlesBy(username) {
-        return request(`/api/articles?author=${encodeURIComponent(username)}`);
+    fetchArticlesBy(username, cursor = null) {
+        return request(`/api/articles${pageQuery({ author: username, cursor })}`);
     },
 
     fetchDrafts() {
