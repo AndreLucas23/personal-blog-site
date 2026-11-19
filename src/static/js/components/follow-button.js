@@ -1,4 +1,5 @@
 import { API } from '../api.js';
+import { el } from '../ui/dom.js';
 import { showToast } from '../ui/toast.js';
 
 function renderFollowState(button, followed) {
@@ -41,4 +42,20 @@ export function bindFollowButton(button, { onChange } = {}) {
             busy = false;
         }
     });
+}
+
+/** The follow button of a member drawn by a script, like the one the pages draw. */
+export function createFollowButton({ username, display_name: name, followed }, size = 'btn--sm') {
+    const button = el(
+        'button',
+        {
+            class: `btn ${followed ? 'btn--secondary' : 'btn--primary'} ${size} follow-btn`,
+            type: 'button',
+            dataset: { follow: username, followed: String(followed) },
+        },
+        el('span', { class: 'follow-btn__text', text: followed ? 'Seguindo' : 'Seguir' }),
+        el('span', { class: 'u-visually-hidden', text: ` ${name}` }),
+    );
+    bindFollowButton(button);
+    return button;
 }

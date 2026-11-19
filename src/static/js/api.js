@@ -92,6 +92,19 @@ export const API = {
         return request(`/api/articles/id/${encodeURIComponent(query)}`);
     },
 
+    /** A page of a member's followers: {members, next_cursor}. */
+    fetchFollowers(username, cursor = null) {
+        return request(`/api/users/${encodeURIComponent(username)}/followers${pageQuery({ cursor })}`);
+    },
+
+    fetchFollowing(username, cursor = null) {
+        return request(`/api/users/${encodeURIComponent(username)}/following${pageQuery({ cursor })}`);
+    },
+
+    fetchSuggestions() {
+        return request('/api/users/me/suggestions');
+    },
+
     follow(username) {
         return request(`/api/users/${encodeURIComponent(username)}/follow`, { method: 'PUT' });
     },

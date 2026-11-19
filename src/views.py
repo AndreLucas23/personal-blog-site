@@ -108,6 +108,25 @@ def profile(username):
     return render_template('profile.html', member=member, is_own=is_own)
 
 
+@views_bp.route('/@<username>/followers')
+def followers(username):
+    return _connections(username, 'followers')
+
+@views_bp.route('/@<username>/following')
+def following(username):
+    return _connections(username, 'following')
+
+def _connections(username: str, kind: str):
+    """The followers or the following of a member, listed by the page's script."""
+    canonical = validation.normalize_username(username)
+    member = user_repository.get_profile(canonical, current_user_id())
+    if member is None:
+        abort(404)
+    if username != canonical:
+        return redirect(url_for(f'views.{kind}', username=canonical), 301)
+    return render_template('connections.html', member=member, kind=kind)
+
+
 @views_bp.route('/settings/profile')
 @login_required
 def profile_settings():

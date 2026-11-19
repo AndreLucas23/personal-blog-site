@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% set heading = ('Seguidores de ' if kind == 'followers' else 'Quem ') ~ member['display_name'] ~ ('' if kind == 'followers' else ' segue') %}
+{% block title %}{{ heading }} | Social Blog{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/connections.css') }}">
+{% endblock %}
+
+{% block page_class %}page--connections{% endblock %}
+
+{% block page %}
+<main id="main" class="page__main">
+    <a class="back-link" href="{{ url_for('views.profile', username=member['username']) }}">
+        {{ icon('arrow-left', 'icon--sm') }}
+        Voltar para o perfil
+    </a>
+
+    <section class="card connections" aria-labelledby="connections-title">
+        <h1 class="connections__title" id="connections-title">{{ heading }}</h1>
+
+        <nav class="tabs" aria-label="Conexões de {{ member['display_name'] }}">
+            <a class="tab"
+            href="{{ url_for('views.followers', username=member['username']) }}"
+            {% if kind == 'followers' %}aria-current="page"{% endif %}>
+                Seguidores <span class="tab__count">{{ member['follower_count'] }}</span>
+            </a>
+            <a class="tab"
+            href="{{ url_for('views.following', username=member['username']) }}"
+            {% if kind == 'following' %}aria-current="page"{% endif %}>
+                Seguindo <span class="tab__count">{{ member['following_count'] }}</span>
+            </a>
+        </nav>
+
+        <ul class="member-list"
+        id="member-list"
+        data-username="{{ member['username'] }}"
+        data-name="{{ member['display_name'] }}"
+        data-kind="{{ kind }}"
+        data-viewer="{{ current_user.username if current_user.is_authenticated else '' }}"
+        data-login-url="{{ login_url() }}"
+        aria-labelledby="connections-title"
+        aria-busy="true"></ul>
+        <button class="btn btn--secondary load-more" id="members-more" type="button" hidden>Mais pessoas</button>
+    </section>
+</main>
+
+<aside class="page__right" aria-label="Mais">
+    {% include 'partials/footer.html' %}
+</aside>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/connections.js') }}"></script>
+{% endblock %}

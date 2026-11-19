@@ -132,7 +132,7 @@ def test_profiles_count_followers_and_following(client, reader_client, admin_id)
 
     assert '<strong id="profile-followers">1</strong>' in owner
     assert '<strong id="profile-followers">0</strong>' in reader and '>seguidores<' in reader
-    assert '<li><strong>1</strong> seguindo</li>' in reader
+    assert '<strong>1</strong> seguindo</a>' in reader
 
 
 def test_articles_offer_to_follow_their_author(client, reader_client, admin_client, reader_id):

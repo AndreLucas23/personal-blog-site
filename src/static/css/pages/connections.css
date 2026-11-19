@@ -1,0 +1,29 @@
+/* Followers and following of a member */
+
+@media (min-width: 1100px) {
+    .page--connections {
+        grid-template-columns: minmax(0, 1fr) 19rem;
+    }
+
+    .page--connections .page__right {
+        display: flex;
+    }
+}
+
+.connections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+}
+
+.connections__title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+}
+
+.tab__count {
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: var(--space-1);
+}
