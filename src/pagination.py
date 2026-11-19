@@ -24,10 +24,10 @@ def decode_cursor(cursor: str) -> tuple[datetime, int] | None:
         return None
 
 
-def read_limit(value: str | None) -> int | None:
-    """The page size a request asks for, the default without one, or None when invalid."""
+def read_limit(value: str | None, default: int = PAGE_SIZE, maximum: int = MAX_PAGE_SIZE) -> int | None:
+    """The number of items a request asks for, the default without one, or None when invalid."""
     if value is None:
-        return PAGE_SIZE
-    if not value.isdecimal() or not 1 <= int(value) <= MAX_PAGE_SIZE:
+        return default
+    if not value.isdecimal() or not 1 <= int(value) <= maximum:
         return None
     return int(value)
