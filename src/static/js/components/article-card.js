@@ -7,30 +7,46 @@ export function articleUrl(article) {
     return `/open/${article.article_id}`;
 }
 
-export function createArticleCard(article) {
+export function profileUrl(username) {
+    return `/@${encodeURIComponent(username)}`;
+}
+
+function createAuthor(article) {
     const author = article.author || 'Membro removido';
+    const name = article.author_username
+        ? el('a', { class: 'post__author', href: profileUrl(article.author_username), text: author })
+        : el('span', { class: 'post__author', text: author });
+    const photo = avatar(author, 'md', article.author_avatar_url);
+
+    return el(
+        'header',
+        { class: 'post__header' },
+        // The name is the link people use; the photo repeats it for the pointer only.
+        article.author_username
+            ? el('a', { href: profileUrl(article.author_username), tabindex: '-1', 'aria-hidden': 'true' }, photo)
+            : photo,
+        el(
+            'div',
+            { class: 'post__meta' },
+            name,
+            el('time', {
+                class: 'post__time',
+                datetime: isoString(article.publish_date),
+                title: formatDateTime(article.publish_date),
+                text: timeAgo(article.publish_date),
+            }),
+        ),
+    );
+}
+
+export function createArticleCard(article) {
     const url = articleUrl(article);
     const titleId = `article-title-${article.article_id}`;
 
     return el(
         'article',
         { class: 'card post', 'aria-labelledby': titleId },
-        el(
-            'header',
-            { class: 'post__header' },
-            avatar(author, 'md'),
-            el(
-                'div',
-                { class: 'post__meta' },
-                el('span', { class: 'post__author', text: author }),
-                el('time', {
-                    class: 'post__time',
-                    datetime: isoString(article.publish_date),
-                    title: formatDateTime(article.publish_date),
-                    text: timeAgo(article.publish_date),
-                }),
-            ),
-        ),
+        createAuthor(article),
         el(
             'a',
             { class: 'post__link', href: url },

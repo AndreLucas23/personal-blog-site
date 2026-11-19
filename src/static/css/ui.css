@@ -207,6 +207,11 @@
     user-select: none;
 }
 
+/* Wraps an avatar that scripts redraw, without adding a box of its own. */
+.avatar-slot {
+    display: contents;
+}
+
 .avatar--xs { font-size: 0.625rem; height: 1.5rem; width: 1.5rem; }
 .avatar--sm { font-size: 0.8125rem; height: 2rem; width: 2rem; }
 .avatar--md { font-size: 1rem; height: 3rem; width: 3rem; }
@@ -769,6 +774,10 @@ a.chip:hover {
     font-weight: 600;
 }
 
+a.post__author:hover {
+    color: var(--brand);
+}
+
 .post__time {
     color: var(--text-muted);
     font-size: var(--text-xs);
@@ -866,11 +875,37 @@ a.chip:hover {
     margin-top: -2.25rem;
 }
 
-.profile-card__name {
+.profile-card__identity {
+    align-items: center;
     color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.profile-card__identity:hover {
+    text-decoration: none;
+}
+
+.profile-card__identity:hover .profile-card__name {
+    color: var(--brand);
+    text-decoration: underline;
+}
+
+.profile-card__name {
     font-size: var(--text-base);
     font-weight: 700;
     margin-top: var(--space-1);
+}
+
+.profile-card__headline {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    overflow-wrap: anywhere;
+}
+
+.profile-card__edit {
+    margin-top: var(--space-2);
 }
 
 .profile-card__detail {

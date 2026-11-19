@@ -25,9 +25,20 @@
             <h1 class="article__title" id="view-title">{{ article['article_title'] }}</h1>
 
             <div class="byline">
+                {% if article['author_username'] %}
+                {% set author_url = url_for('views.profile', username=article['author_username']) %}
+                <a class="byline__avatar" href="{{ author_url }}" tabindex="-1" aria-hidden="true">
+                    {{ avatar(author, 'md', media_url(article['author_avatar_path'])) }}
+                </a>
+                {% else %}
                 {{ avatar(author, 'md') }}
+                {% endif %}
                 <div class="byline__text">
+                    {% if article['author_username'] %}
+                    <a class="byline__name" href="{{ author_url }}">{{ author }}</a>
+                    {% else %}
                     <span class="byline__name">{{ author }}</span>
+                    {% endif %}
                     <span class="byline__meta">
                         <time datetime="{{ article['publish_date'] | iso_datetime }}">{{ article['publish_date'] | long_date }}</time>
                     </span>
