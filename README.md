@@ -11,7 +11,7 @@ Social Blog is a social network for publishing and reading articles, built with 
 - Every member has a public profile at `/@username` with a headline, a bio, a location, a website, a photo and their articles, edited at `/settings/profile`. Photos appear next to the member's name across the site.
 - Every member writes articles in Markdown at `/write`, with a preview, a cover, tags and private drafts, and edits or deletes their own. Articles live at readable addresses such as `/articles/12/arquitetura-limpa`.
 - Lists come in pages, newest first, with Mais artigos to load the next one.
-- Signed-in users can like and unlike articles.
+- Signed-in users can like and unlike articles, and follow other members from their profiles and articles.
 - Admins search and remove articles that break the rules in the moderation panel at `/admin`.
 - Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
 
@@ -195,6 +195,8 @@ src/
 | `PATCH` | `/api/users/me` | Signed in | Change your name, username, headline, bio, location or website |
 | `PUT` | `/api/users/me/avatar` | Signed in | Upload your avatar as a `multipart/form-data` field named `avatar` |
 | `DELETE` | `/api/users/me/avatar` | Signed in | Remove your avatar |
+| `PUT` | `/api/users/<username>/follow` | Signed in | Follow a member |
+| `DELETE` | `/api/users/<username>/follow` | Signed in | Unfollow a member |
 
 `GET /api/articles` answers `{"articles": [...], "next_cursor": "..."}`, with up to `limit` articles (20 by default, 50 at most); pass `next_cursor` back as `?cursor=` for the next page, until it is `null`.
 
