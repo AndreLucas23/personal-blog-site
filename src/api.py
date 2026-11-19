@@ -26,6 +26,7 @@ def _article_json(article: dict, *, with_content: bool = False) -> dict:
         'url': article_url(article),
         'article_title': article['article_title'],
         'summary': article['summary'],
+        'cover_url': media_url(article['cover_path']),
         'tags': article['tags'],
         'excerpt': article['summary'] or markdown_render.excerpt(plain),
         'reading_time': markdown_render.reading_minutes(plain),
@@ -206,8 +207,59 @@ def delete_article(article_id):
     if article['author_id'] != current_user.user_id and not current_user.is_admin:
         return jsonify({'message': 'Only the author or an admin can remove this article'}), 403
 
-    article_repository.delete(article_id)
+    _, cover = article_repository.delete(article_id)
+    uploads.delete_upload(cover, current_app.config['UPLOAD_DIR'])
     return jsonify({'message': 'Article removed'}), 200
+
+def _refuse_cover_change(article_id: int):
+    """The answer to give when the viewer may not change the cover, or None."""
+    article = article_repository.get_by_id(article_id, current_user.user_id)
+    if article is None:
+        return _article_not_found()
+    # Like the words, the cover is the author's; moderation removes the whole article.
+    if article['author_id'] != current_user.user_id:
+        return jsonify({'message': 'Only the author can change the cover'}), 403
+    return None
+
+def _replace_cover(article_id: int, file_name: str | None):
+    upload_dir = current_app.config['UPLOAD_DIR']
+    try:
+        found, previous = article_repository.set_cover(article_id, file_name)
+    except Exception:
+        # Without the row nothing points at the new file, so it must not stay behind.
+        uploads.delete_upload(file_name, upload_dir)
+        raise
+    if not found:
+        # Removed by its author in another tab, or by a moderator, during the upload.
+        uploads.delete_upload(file_name, upload_dir)
+        return _article_not_found()
+    uploads.delete_upload(previous, upload_dir)
+
+    article = article_repository.get_by_id(article_id, current_user.user_id)
+    if article is None:
+        return _article_not_found()
+    return jsonify(_article_json(article, with_content=True))
+
+@api_bp.route('/articles/<int:article_id>/cover', methods=['PUT'])
+@login_required
+def upload_cover(article_id):
+    refused = _refuse_cover_change(article_id)
+    if refused:
+        return refused
+    image, refused = _uploaded_image('cover')
+    if refused:
+        return refused
+
+    try:
+        file_name = uploads.save_cover(image.stream, current_app.config['UPLOAD_DIR'])
+    except uploads.ImageError as error:
+        return _invalid_image('cover', error.code)
+    return _replace_cover(article_id, file_name)
+
+@api_bp.route('/articles/<int:article_id>/cover', methods=['DELETE'])
+@login_required
+def remove_cover(article_id):
+    return _refuse_cover_change(article_id) or _replace_cover(article_id, None)
 
 @api_bp.route('/previews', methods=['POST'])
 @login_required

@@ -15,6 +15,8 @@ MAX_REQUEST_BYTES = 6 * 1024 * 1024
 # Decoding is what costs memory, so huge dimensions are refused before it.
 MAX_IMAGE_PIXELS = 40_000_000
 AVATAR_SIZE = 400
+# The shape link previews use, so a shared article shows its cover whole.
+COVER_SIZE = (1200, 630)
 FILE_NAME = re.compile(r'[0-9a-f]{32}\.webp')
 
 IMAGE_MISSING = 'image_missing'
@@ -47,6 +49,14 @@ def save_avatar(stream: BinaryIO, upload_dir: Path) -> str:
     Raises ImageError with a code when the file is not an image the site accepts.
     """
     return _save_fitted(stream, upload_dir, (AVATAR_SIZE, AVATAR_SIZE))
+
+
+def save_cover(stream: BinaryIO, upload_dir: Path) -> str:
+    """Store a WebP version of the image in the size of covers and return its file name.
+
+    Raises ImageError with a code when the file is not an image the site accepts.
+    """
+    return _save_fitted(stream, upload_dir, COVER_SIZE)
 
 
 def _save_fitted(stream: BinaryIO, upload_dir: Path, size: tuple[int, int]) -> str:
