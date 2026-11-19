@@ -15,7 +15,7 @@ MAX_REQUEST_BYTES = 6 * 1024 * 1024
 # Decoding is what costs memory, so huge dimensions are refused before it.
 MAX_IMAGE_PIXELS = 40_000_000
 AVATAR_SIZE = 400
-# The shape link previews use, so a shared article shows its cover whole.
+# 1.91 to 1, the shape that link previews use.
 COVER_SIZE = (1200, 630)
 FILE_NAME = re.compile(r'[0-9a-f]{32}\.webp')
 
