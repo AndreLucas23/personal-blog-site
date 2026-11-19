@@ -16,8 +16,7 @@
     <form class="editor"
     id="editor"
     novalidate
-    data-article-id="{{ article['article_id'] if editing else '' }}"
-    data-status="{{ article['status'] if editing else 'new' }}">
+    data-article-id="{{ article['article_id'] if editing else '' }}">
         <header class="editor__header">
             <a class="back-link" href="{{ back_url }}">
                 {{ icon('arrow-left', 'icon--sm') }}
