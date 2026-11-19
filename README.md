@@ -147,6 +147,7 @@ src/
   article_validation.py Rules for the fields of an article
   markdown_render.py    Safe HTML, plain text and reading time from Markdown
   slugs.py              Readable words for addresses
+  links.py              Addresses of pages, shared by the pages and the API
   errors.py             Error pages and JSON errors
   media.py              Serving the uploaded images under /media
   uploads.py            Checking, resizing and storing uploaded images
