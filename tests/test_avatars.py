@@ -97,7 +97,7 @@ def test_files_the_site_cannot_use_are_rejected(reader_client, upload_dir, data,
     assert response.status_code == 400
     assert response.get_json() == {'message': 'Invalid image', 'errors': {'avatar': code}}
     assert list(upload_dir.iterdir()) == []
-    assert user_repository.get_by_username('reader')['avatar_path'] is None
+    assert user_repository.get_profile('reader')['avatar_path'] is None
 
 
 def test_request_larger_than_the_limit_answers_413_with_the_image_code(reader_client):
