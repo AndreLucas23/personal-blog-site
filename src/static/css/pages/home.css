@@ -53,3 +53,25 @@
     margin-bottom: var(--space-2);
     padding: var(--space-3);
 }
+
+.composer {
+    align-items: center;
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-4);
+}
+
+.composer__prompt {
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    flex: 1;
+    font-weight: 600;
+    padding: var(--space-3) var(--space-4);
+    transition: background var(--transition);
+}
+
+.composer__prompt:hover {
+    background: var(--surface-hover);
+    text-decoration: none;
+}

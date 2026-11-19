@@ -41,6 +41,14 @@
 </aside>
 
 <main id="main" class="page__main">
+    {% if current_user.is_authenticated %}
+    <section class="card composer" aria-label="Escrever um artigo">
+        <span class="avatar-slot" data-me-avatar="md">{{ avatar(current_user.display_name, 'md', media_url(current_user.avatar_path), eager=true) }}</span>
+        <a class="composer__prompt" href="{{ url_for('views.write') }}">Escreva um artigo para a comunidade…</a>
+        <a class="icon-btn" href="{{ url_for('views.write') }}" aria-label="Escrever um artigo">{{ icon('pen') }}</a>
+    </section>
+    {% endif %}
+
     <section class="card feed-header" aria-labelledby="feed-title">
         <div>
             <h1 class="section-title" id="feed-title">Artigos</h1>

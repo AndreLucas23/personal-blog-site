@@ -1,6 +1,7 @@
 from flask import Blueprint, abort, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
+import article_validation
 import markdown_render
 import uploads
 import user_validation as validation
@@ -43,6 +44,31 @@ def article(article_id, slug=None):
         canonical_url=canonical,
         description=found['summary'] or markdown_render.excerpt(found['article_content']),
     )
+
+def _editor(article: dict | None):
+    return render_template(
+        'editor.html',
+        article=article,
+        max_title=article_validation.MAX_TITLE_LENGTH,
+        max_summary=article_validation.MAX_SUMMARY_LENGTH,
+        max_content=article_validation.MAX_CONTENT_LENGTH,
+    )
+
+@views_bp.route('/write')
+@login_required
+def write():
+    return _editor(None)
+
+# Not /articles/<id>/edit, which would clash with an article whose words are "edit".
+@views_bp.route('/write/<int:article_id>')
+@login_required
+def edit_article(article_id):
+    found = article_repository.get_by_id(article_id)
+    if found is None:
+        abort(404)
+    if found['author_id'] != current_user.user_id:
+        abort(403)
+    return _editor(found)
 
 @views_bp.route('/open/<int:article_id>')
 def open_article(article_id):
