@@ -28,7 +28,7 @@ An article is a draft or published. A draft needs only its title, so members can
 
 An article may have a cover: a JPEG, PNG or WebP image of up to 5 MB, cropped to 1200 by 630 pixels, the shape of link previews, and stored as WebP in the uploads volume like avatars. Cards and the article page show it above the title.
 
-The editor shows the chosen cover at once and sends it when the article is saved, like the words, so a new cover reaches readers only with Publicar or Salvar alterações. If the article is saved but the cover is not, the editor keeps the reason next to the cover; an article published that way opens again in its editor to try once more. Replacing or removing a cover, or deleting the article, deletes the old file. Changing the cover does not count as an update of the text.
+The editor shows the chosen cover at once and sends it when the article is saved, like the words, so a new cover reaches readers only with Publicar or Salvar alterações. Publicar saves the draft and its new cover before it publishes, so readers get the article with the cover or not at all. If the cover is refused, the article is saved without it and the editor keeps the reason next to the cover. Replacing or removing a cover, or deleting the article, deletes the old file. Changing the cover does not count as an update of the text.
 
 ## Tags
 

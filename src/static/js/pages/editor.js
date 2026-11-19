@@ -251,7 +251,7 @@ function chooseCover(file) {
 }
 
 /** Tell why the cover was not saved, when the article itself was. */
-function coverNotSaved(error, article) {
+function coverNotSaved(error, article, publishing) {
     const code = error instanceof ApiError ? error.errors?.cover : null;
     if (!code) console.error(error);
     const reason = IMAGE_ERRORS[code] || 'Não foi possível enviar a capa.';
@@ -264,7 +264,9 @@ function coverNotSaved(error, article) {
         return;
     }
     coverError.textContent = reason;
-    showToast('O artigo foi salvo, mas a capa não. Confira a capa e salve de novo.', { type: 'error' });
+    showToast(publishing
+        ? 'O artigo não foi publicado: o rascunho foi salvo, mas a capa não.'
+        : 'O artigo foi salvo, mas a capa não. Confira a capa e salve de novo.', { type: 'error' });
 }
 
 function readFields() {
@@ -328,9 +330,12 @@ async function save(status, button) {
 
     saving = true;
     setBusy(button, true);
+    // Publishing with a new cover saves the draft and the cover first, so readers get the
+    // article with its cover or not at all.
+    const coverFirst = status === 'published' && !unpublishButton && coverChange !== undefined;
 
     try {
-        const payload = { ...fields, status };
+        const payload = { ...fields, status: coverFirst ? 'draft' : status };
         let article = articleId
             ? await API.updateArticle(articleId, payload)
             : await API.createArticle(payload);
@@ -350,10 +355,11 @@ async function save(status, button) {
             } catch (error) {
                 saving = false;
                 setBusy(button, false);
-                coverNotSaved(error, article);
+                coverNotSaved(error, article, coverFirst);
                 return null;
             }
         }
+        if (coverFirst) article = await API.updateArticle(articleId, { status });
         dirty = false;
 
         if (article.status === 'published') {
