@@ -1,13 +1,22 @@
 """Rules for the articles members write."""
+import re
+import unicodedata
+
 MAX_TITLE_LENGTH = 150
 MAX_SUMMARY_LENGTH = 300
 MAX_CONTENT_LENGTH = 50_000
+MAX_TAGS = 5
+MIN_TAG_LENGTH = 2
+MAX_TAG_LENGTH = 30
 
 TITLE_REQUIRED = 'title_required'
 TITLE_TOO_LONG = 'title_too_long'
 SUMMARY_TOO_LONG = 'summary_too_long'
 CONTENT_REQUIRED = 'content_required'
 CONTENT_TOO_LONG = 'content_too_long'
+TAGS_TOO_MANY = 'tags_too_many'
+TAG_TOO_SHORT = 'tag_too_short'
+TAG_TOO_LONG = 'tag_too_long'
 INVALID = 'invalid'
 
 DRAFT = 'draft'
@@ -26,6 +35,35 @@ def normalize(field: str, value: str) -> str:
         return value.replace('\r\n', '\n').strip('\n').rstrip()
     # Titles and summaries are a single line.
     return ' '.join(value.split())
+
+
+def normalize_tag(value: str) -> str:
+    """Lowercase words joined by hyphens, such as banco-de-dados. Accents stay."""
+    tag = unicodedata.normalize('NFC', value).lower().strip().lstrip('#')
+    tag = re.sub(r'[\s_]+', '-', tag)
+    tag = re.sub(r'[^\w-]', '', tag)
+    return re.sub(r'-{2,}', '-', tag).strip('-')
+
+
+def normalize_tags(values: list[str]) -> list[str]:
+    """Normalized tags in the order given, without blanks or repeats."""
+    tags = []
+    for value in values:
+        tag = normalize_tag(value)
+        if tag and tag not in tags:
+            tags.append(tag)
+    return tags
+
+
+def validate_tags(tags: list[str]) -> str | None:
+    if len(tags) > MAX_TAGS:
+        return TAGS_TOO_MANY
+    for tag in tags:
+        if len(tag) < MIN_TAG_LENGTH:
+            return TAG_TOO_SHORT
+        if len(tag) > MAX_TAG_LENGTH:
+            return TAG_TOO_LONG
+    return None
 
 
 def validate(fields: dict[str, str], *, title_required: bool, content_required: bool) -> dict[str, str]:

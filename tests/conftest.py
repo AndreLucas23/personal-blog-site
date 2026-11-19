@@ -9,7 +9,7 @@ from db import get_db_connection
 from helpers import ADMIN, READER, create_user, login
 
 TEST_DATABASE_FLAG = 'BLOG_TEST_DATABASE'
-TABLES = ('LIKES', 'ARTICLES', 'USERS', 'FAILED_LOGINS')
+TABLES = ('ARTICLE_TAGS', 'TAGS', 'LIKES', 'ARTICLES', 'USERS', 'FAILED_LOGINS')
 DB_WAIT_SECONDS = 60
 
 

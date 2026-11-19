@@ -6,6 +6,9 @@ ARTICLE_DETAILS_QUERY = (
     'a.status, a.publish_date, a.created_at, a.updated_at, '
     'u.display_name AS author, u.username AS author_username, '
     'u.avatar_path AS author_avatar_path, '
+    "(SELECT GROUP_CONCAT(t.name ORDER BY article_tags.position SEPARATOR ',') "
+    'FROM ARTICLE_TAGS article_tags JOIN TAGS t ON t.tag_id = article_tags.tag_id '
+    'WHERE article_tags.article_id = a.article_id) AS tag_names, '
     '(SELECT COUNT(*) FROM LIKES l WHERE l.article_id = a.article_id) AS likes, '
     'EXISTS(SELECT 1 FROM LIKES l '
     'WHERE l.article_id = a.article_id AND l.user_id = %s) AS liked '
@@ -15,6 +18,9 @@ ARTICLE_DETAILS_QUERY = (
 def _with_like_flag(article: dict | None) -> dict | None:
     if article is not None:
         article['liked'] = bool(article['liked'])
+        # Tags are normalized, so they never hold the comma that joins them.
+        names = article.pop('tag_names')
+        article['tags'] = names.split(',') if names else []
     return article
 
 # Lists show published articles only; a draft is reached by its author alone.
@@ -76,12 +82,16 @@ def delete(article_id: int) -> bool:
         cursor.execute('DELETE FROM ARTICLES WHERE ARTICLE_ID = %s', (article_id,))
         return cursor.rowcount > 0
 
-def update(article_id: int, changes: dict[str, str | None]) -> bool:
-    """Change the fields named as in COLUMNS and the status. False for a missing article."""
+def update(article_id: int, changes: dict[str, str | None], edited: bool = False) -> bool:
+    """Change the fields named as in COLUMNS and the status. False for a missing article.
+
+    Changing a field marks the article as edited, and so does edited, for changes
+    such as tags that live in other tables.
+    """
     fields = [field for field in COLUMNS if field in changes]
     assignments = [f'{COLUMNS[field]} = %s' for field in fields]
     values = [changes[field] for field in fields]
-    if fields:
+    if fields or edited:
         assignments.append('updated_at = CURRENT_TIMESTAMP')
 
     if 'status' in changes:
