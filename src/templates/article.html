@@ -24,6 +24,14 @@
         Voltar para o início
     </a>
 
+    {% if article['status'] == 'draft' %}
+    <div class="alert alert--info article-draft" role="status">
+        {{ icon('lock') }}
+        <span>Rascunho: só você vê este artigo até publicá-lo.</span>
+        <a class="btn btn--primary btn--sm" href="{{ url_for('views.edit_article', article_id=article['article_id']) }}">Continuar editando</a>
+    </div>
+    {% endif %}
+
     <article class="card article"
     data-article-id="{{ article['article_id'] }}"
     aria-labelledby="article-title">
@@ -45,6 +53,9 @@
                         <time datetime="{{ article['publish_date'] | iso_datetime }}" data-local-date>{{ article['publish_date'] | long_date }}</time>
                         {% else %}
                         Rascunho
+                        {% endif %}
+                        {% if updated_later %}
+                        · atualizado em <time datetime="{{ article['updated_at'] | iso_datetime }}" data-local-date>{{ article['updated_at'] | long_date }}</time>
                         {% endif %}
                         · {{ reading_minutes }} min de leitura
                     </span>
@@ -89,6 +100,15 @@
 
         <div class="article__body prose">{{ content_html }}</div>
 
+        {% if article['tags'] %}
+        <ul class="article__tags" aria-label="Tags">
+            {% for tag in article['tags'] %}
+            <li class="chip">{{ tag }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if article['status'] == 'published' %}
         <footer class="article__footer">
             <button class="like-btn{% if article['liked'] %} is-liked{% endif %}"
             type="button"
@@ -102,6 +122,7 @@
                 </span>
             </button>
         </footer>
+        {% endif %}
     </article>
 </main>
 {% endblock %}
