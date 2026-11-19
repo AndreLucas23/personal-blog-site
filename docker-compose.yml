@@ -36,11 +36,13 @@ services:
       - FLASK_DEBUG=${FLASK_DEBUG:-1}
       - CORS_ORIGINS=${CORS_ORIGINS:-}
       - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-0}
+      - UPLOAD_DIR=${UPLOAD_DIR:-/data/uploads}
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
+      - uploads_data:/data/uploads
 
   db-test:
     image: mysql:8.0
@@ -78,3 +80,4 @@ services:
 
 volumes:
   db_data:
+  uploads_data:

@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
 
+import uploads
 import user_validation as validation
 from auth import admin_required, current_user_id
+from media import media_url
 from repositories import article_repository, like_repository, user_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -130,6 +132,7 @@ def _profile_json(user: dict, *, include_email: bool = False) -> dict:
         'bio': user['bio'],
         'location': user['location'],
         'website': user['website'],
+        'avatar_url': media_url(user['avatar_path']),
         'joined_at': user['created_at'],
         'articles': user['article_count'],
     }
@@ -181,6 +184,32 @@ def update_own_profile():
 
     profile = user_repository.get_profile_by_id(current_user.user_id)
     return jsonify(_profile_json(profile, include_email=True))
+
+
+@api_bp.route('/users/me/avatar', methods=['PUT'])
+@login_required
+def upload_avatar():
+    image = request.files.get('avatar')
+    if image is None:
+        return jsonify({'message': 'Invalid image', 'errors': {'avatar': uploads.IMAGE_MISSING}}), 400
+
+    upload_dir = current_app.config['UPLOAD_DIR']
+    try:
+        file_name = uploads.save_avatar(image.stream, upload_dir)
+    except uploads.ImageError as error:
+        return jsonify({'message': 'Invalid image', 'errors': {'avatar': error.code}}), 400
+
+    previous = user_repository.set_avatar(current_user.user_id, file_name)
+    uploads.delete_upload(previous, upload_dir)
+    return jsonify({'avatar_url': media_url(file_name)})
+
+
+@api_bp.route('/users/me/avatar', methods=['DELETE'])
+@login_required
+def remove_avatar():
+    previous = user_repository.set_avatar(current_user.user_id, None)
+    uploads.delete_upload(previous, current_app.config['UPLOAD_DIR'])
+    return jsonify({'avatar_url': None})
 
 
 @api_bp.route('/users/<string:username>', methods=['GET'])

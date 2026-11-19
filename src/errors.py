@@ -12,6 +12,7 @@ API_MESSAGES = {
     403: 'Forbidden',
     404: 'Not found',
     405: 'Method not allowed',
+    413: 'Request too large',
     500: 'Internal server error',
 }
 
