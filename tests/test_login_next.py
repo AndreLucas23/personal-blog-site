@@ -107,3 +107,9 @@ def test_signing_in_does_not_lead_to_the_api_or_the_sign_in_pages(client, reader
     response = client.post('/auth/login', data={**READER_LOGIN, 'next': target})
 
     assert response.headers['Location'] == '/'
+
+
+def test_creating_an_account_from_a_page_leads_back_to_it(client, reader_id):
+    page = client.get('/@reader').get_data(as_text=True)
+
+    assert 'href="/auth/register?next=/@reader"' in page
