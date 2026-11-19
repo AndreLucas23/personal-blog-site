@@ -1,10 +1,14 @@
 """Turning the Markdown members write into HTML that is safe to show."""
+import re
+
 from markdown_it import MarkdownIt
 from markupsafe import Markup
 
 # Links in members' text lead to sites nobody here vouches for.
 LINK_REL = 'nofollow ugc noopener noreferrer'
 WORDS_PER_MINUTE = 200
+# markdown-it lets data:image links through; no data: link belongs in an article.
+UNSAFE_LINK = re.compile(r'^(javascript|vbscript|file|data):')
 EXCERPT_LENGTH = 220
 
 
@@ -20,10 +24,14 @@ def _link_open(self, tokens, index, options, env) -> str:
     return self.renderToken(tokens, index, options, env)
 
 
+def _is_safe_link(url: str) -> bool:
+    return not UNSAFE_LINK.match(url.strip().lower())
+
+
 def _create_markdown() -> MarkdownIt:
-    # Without raw HTML, and with the link targets markdown-it already refuses, such as
-    # javascript: and data:, the output is safe to put in a page.
+    # Without raw HTML and with only safe link targets, the output can go in a page.
     markdown = MarkdownIt('commonmark', {'html': False})
+    markdown.validateLink = _is_safe_link
     markdown.enable(['table', 'strikethrough'])
     # Remote images would tell other sites who reads what, and the page policy blocks them.
     markdown.disable('image')
