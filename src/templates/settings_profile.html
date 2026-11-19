@@ -25,7 +25,7 @@
 
     <section class="card settings-photo" aria-labelledby="photo-title">
         <span class="settings-photo__current" id="avatar-current" data-me-avatar="xl">
-            {{ avatar(member['display_name'], 'xl', media_url(member['avatar_path'])) }}
+            {{ avatar(member['display_name'], 'xl', media_url(member['avatar_path']), eager=true) }}
         </span>
 
         <div class="settings-photo__body">

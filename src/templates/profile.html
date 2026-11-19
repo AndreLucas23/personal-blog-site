@@ -15,7 +15,7 @@
 
         <div class="profile__body">
             <div class="profile__top">
-                {{ avatar(member['display_name'], 'xl', media_url(member['avatar_path'])) }}
+                {{ avatar(member['display_name'], 'xl', media_url(member['avatar_path']), eager=true) }}
 
                 {% if is_own %}
                 <a class="btn btn--secondary" href="{{ url_for('views.profile_settings') }}">

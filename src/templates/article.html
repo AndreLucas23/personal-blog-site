@@ -28,7 +28,7 @@
                 {% if article['author_username'] %}
                 {% set author_url = url_for('views.profile', username=article['author_username']) %}
                 <a class="byline__avatar" href="{{ author_url }}" tabindex="-1" aria-hidden="true">
-                    {{ avatar(author, 'md', media_url(article['author_avatar_path'])) }}
+                    {{ avatar(author, 'md', media_url(article['author_avatar_path']), eager=true) }}
                 </a>
                 {% else %}
                 {{ avatar(author, 'md') }}
