@@ -134,6 +134,49 @@
     border-color: var(--brand) var(--brand) transparent transparent;
 }
 
+/* Members in a list: photo, name and headline, with a follow button */
+.member-list {
+    list-style: none;
+    padding: 0;
+}
+
+.member-row {
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+}
+
+.member-row:last-child {
+    border-bottom: 0;
+}
+
+.member-row__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    line-height: 1.35;
+    min-width: 0;
+}
+
+.member-row__name {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.member-row__name:hover {
+    color: var(--brand);
+}
+
+.member-row__detail {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Follow: the width of Seguindo, so the button keeps its size when it changes */
 .follow-btn {
     justify-content: center;

@@ -88,6 +88,14 @@
     padding: 0;
 }
 
+.profile__stat {
+    color: inherit;
+}
+
+.profile__stat:hover {
+    color: var(--brand);
+}
+
 .profile__stats strong {
     color: var(--text);
 }
