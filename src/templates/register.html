@@ -110,7 +110,7 @@
 
     <p class="auth__switch">
         Já faz parte?
-        <a href="{{ url_for('auth.login', next=next_page) if next_page else url_for('auth.login') }}">Entrar</a>
+        <a href="{{ url_for('auth.login', next=next_page) }}">Entrar</a>
     </p>
 </main>
 {% endblock %}
