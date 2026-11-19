@@ -111,7 +111,7 @@ Before the first deploy:
 
 - Set your own `SECRET_KEY` and database passwords.
 - Leave `FLASK_DEBUG` unset or `0`. The debugger lets anyone who reaches it run code on the server.
-- Serve the application over HTTPS and set `SESSION_COOKIE_SECURE=1`.
+- Serve the application over HTTPS and set `SESSION_COOKIE_SECURE=1`, which also sends `Strict-Transport-Security`.
 - Leave `CORS_ORIGINS` empty unless a page on another origin must call the API.
 - Set `WEB_CONCURRENCY` to the number of Gunicorn workers you want. The default is one.
 
@@ -140,7 +140,9 @@ migrations/             Database schema, one numbered SQL file per change
 docs/                   Authentication and likes
 tests/                  Automated tests, run with the test profile
 src/
-  app.py                Application entry point, sessions and error handling
+  app.py                Application entry point and sessions
+  errors.py             Error pages and JSON errors
+  security_headers.py   Content Security Policy and browser hardening headers
   template_helpers.py   Icons, avatars and dates for the templates
   views.py              Pages: home, article and admin panel
   api.py                JSON API under /api
@@ -177,11 +179,15 @@ Each article has `article_id`, `article_title`, `article_content`, `publish_date
 
 Without a session the protected endpoints answer `401` with the login page URL, and regular users get `403` from the admin endpoints.
 
+Errors answer JSON with a `message`, such as `{"message": "Not found"}` for an unknown route, and never include internal details. Database failures answer `500` with `{"status": "error", "message": "An internal error occurred while accessing the database"}`. Pages show the same errors as styled pages in Portuguese.
+
 `POST`, `PATCH` and `DELETE` requests must send the CSRF token of the session in the `X-CSRF-Token` header and answer `400` without it, as [docs/authentication.md](docs/authentication.md#csrf-protection) describes.
 
 ## Security
 
 To report a vulnerability, follow the [security policy](SECURITY.md) instead of opening a public issue.
+
+Every response carries a Content Security Policy that only lets the application's own scripts, styles, images, fonts and forms run, and forbids framing the site. It also sends `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` that turns off the camera, microphone, location, payment and USB features, and `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` set to `same-origin`. The policy blocks inline code, so templates have no inline scripts, styles or event handler attributes.
 
 ## Contributing
 
