@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Article covers: JPEG, PNG or WebP, cropped to 1200 by 630 and stored as WebP, chosen in the editor and sent with the article, shown on cards and on the article page, with `PUT` and `DELETE /api/articles/<id>/cover` (#82).
+- Mais artigos on the home page, on profiles and in moderation, which loads the next page of articles (#82).
 - Private drafts: save without publishing, publish later and move a published article back to drafts, with a Rascunhos tab on your profile and `GET /api/users/me/drafts` (#81).
 - Up to 5 tags per article, normalized to lowercase words joined by hyphens, shown on cards and articles and given in the editor as chips (#81).
 - Articles record when they were updated, and their page mentions edits made on a later day (#81).
@@ -33,6 +35,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Breaking:** `GET /api/articles` answers one page, newest first, as `{"articles": [...], "next_cursor": ...}` instead of a list of every article, with `limit` and `cursor` to choose the page (#82).
+- The Content Security Policy also allows `blob:` images, so the editor shows a chosen cover before it is sent (#82).
 - **Breaking:** `POST /api/articles` takes `title`, `summary` and `content` instead of `new-title` and `new-content`, and invalid fields answer `400` with an error code for each one (#80).
 - **Breaking:** any member creates articles; only the author edits them, and the author or an admin deletes them. Admins no longer edit other members' articles (#80).
 - **Breaking:** article lists leave `article_content` out and carry `url`, `summary`, `excerpt` and `reading_time` (#80).
