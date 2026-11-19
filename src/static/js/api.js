@@ -102,4 +102,14 @@ export const API = {
     removeAvatar() {
         return request('/api/users/me/avatar', { method: 'DELETE' });
     },
+
+    uploadCover(articleId, file) {
+        const formData = new FormData();
+        formData.append('cover', file);
+        return request(`/api/articles/${articleId}/cover`, { method: 'PUT', formData });
+    },
+
+    removeCover(articleId) {
+        return request(`/api/articles/${articleId}/cover`, { method: 'DELETE' });
+    },
 };

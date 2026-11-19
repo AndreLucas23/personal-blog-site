@@ -38,6 +38,35 @@
         </header>
 
         <div class="card editor__card">
+            {% set cover_url = media_url(article['cover_path']) if editing else None %}
+            <div class="cover-field">
+                <img class="cover-field__image"
+                id="cover-preview"
+                alt=""
+                width="1200"
+                height="630"
+                {% if cover_url %}src="{{ cover_url }}"{% else %}hidden{% endif %}>
+                <div class="cover-field__actions">
+                    <button class="btn btn--secondary btn--sm" id="cover-pick" type="button" aria-describedby="cover-hint cover-error">
+                        {{ icon('image', 'icon--sm') }}
+                        <span>{{ 'Trocar capa' if cover_url else 'Adicionar capa' }}</span>
+                    </button>
+                    <button class="btn btn--ghost btn--sm" id="cover-remove" type="button" {% if not cover_url %}hidden{% endif %}>
+                        {{ icon('trash', 'icon--sm') }}
+                        Remover capa
+                    </button>
+                </div>
+                <span class="field__hint" id="cover-hint">JPEG, PNG ou WebP, recortada em 1200 × 630. Vai com o artigo quando você salvar.</span>
+                <input class="u-visually-hidden"
+                id="cover-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                data-max-bytes="{{ max_image_bytes }}"
+                tabindex="-1"
+                aria-hidden="true">
+                <span class="field__error" id="cover-error" aria-live="polite"></span>
+            </div>
+
             <div class="field">
                 <label class="u-visually-hidden" for="title">Título</label>
                 <textarea class="editor__title"

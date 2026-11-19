@@ -34,6 +34,8 @@ def test_content_security_policy_allows_only_the_application(client):
     assert directives['default-src'] == "'self'"
     assert directives['script-src'] == "'self'"
     assert directives['style-src'] == "'self'"
+    # blob: lets the editor show a chosen cover before it is sent.
+    assert directives['img-src'] == "'self' blob:"
     assert directives['object-src'] == "'none'"
     assert directives['frame-ancestors'] == "'none'"
     assert directives['form-action'] == "'self'"
