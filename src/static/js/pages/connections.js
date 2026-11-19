@@ -12,7 +12,20 @@ const fetchPage = (cursor) => (kind === 'followers'
     ? API.fetchFollowers(username, cursor)
     : API.fetchFollowing(username, cursor));
 
-const rowsFor = (members) => members.map((member) => createMemberRow(member, { viewer, loginUrl }));
+// On your own lists every follow changes how many people you follow.
+const followingCount = own ? document.getElementById('following-count') : null;
+
+function rowFor(member) {
+    let shown = member.followed;
+    const countFollow = ({ followed }) => {
+        if (followed === shown) return;
+        followingCount.textContent = Number(followingCount.textContent) + (followed ? 1 : -1);
+        shown = followed;
+    };
+    return createMemberRow(member, { viewer, loginUrl, onFollowChange: followingCount ? countFollow : null });
+}
+
+const rowsFor = (members) => members.map(rowFor);
 
 const more = createLoadMore(document.getElementById('members-more'), {
     fetchPage,
