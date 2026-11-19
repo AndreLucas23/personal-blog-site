@@ -87,3 +87,52 @@ def test_the_lists_of_a_missing_member_answer_404(client):
 @pytest.mark.parametrize('query', ['cursor=abc', 'limit=0', 'limit=51'])
 def test_invalid_pages_are_refused(client, admin_id, query):
     assert client.get(f'/api/users/owner/followers?{query}').status_code == 400
+
+
+def test_the_followers_page_names_its_list(client, admin_id):
+    follow_at(member('ana'), admin_id, START)
+
+    page = client.get('/@owner/followers').get_data(as_text=True)
+
+    assert '<title>Seguidores de Owner | Social Blog</title>' in page
+    assert 'data-kind="followers"' in page and 'data-username="owner"' in page
+    assert 'Seguidores <span class="tab__count">1</span>' in page
+    assert 'href="/@owner/followers"\n            aria-current="page"' in page
+
+
+def test_the_following_page_names_its_list(client, admin_id):
+    page = client.get('/@owner/following').get_data(as_text=True)
+
+    assert '<title>Quem Owner segue | Social Blog</title>' in page
+    assert 'data-kind="following"' in page
+
+
+def test_visitors_get_a_way_to_sign_in_and_come_back(client, admin_id):
+    page = client.get('/@owner/followers').get_data(as_text=True)
+
+    assert 'data-viewer=""' in page
+    assert 'data-login-url="/auth/login?next=/@owner/followers"' in page
+
+
+def test_the_lists_know_who_reads_them(reader_client, admin_id):
+    page = reader_client.get('/@owner/followers').get_data(as_text=True)
+
+    assert 'data-viewer="reader"' in page
+
+
+def test_the_pages_of_a_missing_member_answer_404(client):
+    assert client.get('/@ghost/followers').status_code == 404
+    assert client.get('/@ghost/following').status_code == 404
+
+
+def test_the_pages_have_one_address_whatever_the_letter_case(client, admin_id):
+    response = client.get('/@Owner/following')
+
+    assert response.status_code == 301
+    assert response.headers['Location'] == '/@owner/following'
+
+
+def test_profile_counts_open_the_lists(client, admin_id):
+    page = client.get('/@owner').get_data(as_text=True)
+
+    assert 'href="/@owner/followers"' in page and 'href="/@owner/following"' in page

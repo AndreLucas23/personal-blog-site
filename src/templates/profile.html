@@ -54,10 +54,14 @@
                     artigo{{ '' if member['article_count'] == 1 else 's' }} publicado{{ '' if member['article_count'] == 1 else 's' }}
                 </li>
                 <li>
-                    <strong id="profile-followers">{{ member['follower_count'] }}</strong>
-                    <span id="profile-followers-label">seguidor{{ '' if member['follower_count'] == 1 else 'es' }}</span>
+                    <a class="profile__stat" href="{{ url_for('views.followers', username=member['username']) }}">
+                        <strong id="profile-followers">{{ member['follower_count'] }}</strong>
+                        <span id="profile-followers-label">seguidor{{ '' if member['follower_count'] == 1 else 'es' }}</span>
+                    </a>
                 </li>
-                <li><strong>{{ member['following_count'] }}</strong> seguindo</li>
+                <li>
+                    <a class="profile__stat" href="{{ url_for('views.following', username=member['username']) }}"><strong>{{ member['following_count'] }}</strong> seguindo</a>
+                </li>
             </ul>
         </div>
     </section>
