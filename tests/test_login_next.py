@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from helpers import READER
@@ -81,3 +83,21 @@ def test_the_sign_in_link_of_a_page_leads_back_to_it(client, reader_id):
     page = client.get('/@reader').get_data(as_text=True)
 
     assert 'href="/auth/login?next=/@reader"' in page
+
+
+def sign_in_link(page: str) -> str:
+    return re.search(r'href="(/auth/login[^"]*)"', page).group(1)
+
+
+def test_the_way_back_keeps_the_address_as_the_browser_sent_it(client):
+    page = client.get('/nao%3Fexiste').get_data(as_text=True)
+
+    # The "?" of the address is part of the path, so it stays encoded.
+    assert sign_in_link(page) == '/auth/login?next=/nao%253Fexiste'
+
+
+def test_addresses_with_accents_keep_their_way_back(client):
+    page = client.get('/caf%C3%A9').get_data(as_text=True)
+
+    assert sign_in_link(page) == '/auth/login?next=/caf%25C3%25A9'
+
