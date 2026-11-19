@@ -61,9 +61,3 @@ export function formatDateTime(value) {
 export function formatCount(value) {
     return countFormat.format(value);
 }
-
-export function excerpt(text, maxLength = 220) {
-    const flat = (text || '').replace(/\s+/g, ' ').trim();
-    if (flat.length <= maxLength) return flat;
-    return `${flat.slice(0, maxLength).replace(/\s+\S*$/, '')}…`;
-}

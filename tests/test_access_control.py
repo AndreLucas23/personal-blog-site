@@ -1,10 +1,8 @@
-import pytest
-
 from db import get_db_connection
 from helpers import create_article
 from repositories import user_repository
 
-ARTICLE_PAYLOAD = {'new-title': 'Título', 'new-content': 'Conteúdo'}
+ARTICLE_PAYLOAD = {'title': 'Título', 'content': 'Conteúdo'}
 
 
 def write_requests(article_id: int):
@@ -16,12 +14,9 @@ def write_requests(article_id: int):
     ]
 
 
-@pytest.fixture
-def article_id(admin_id):
-    return create_article(admin_id)
+def test_visitor_gets_401_with_the_login_url_on_write_endpoints(client, admin_id):
+    article_id = create_article(admin_id)
 
-
-def test_visitor_gets_401_with_the_login_url_on_write_endpoints(client, article_id):
     for method, path, payload in write_requests(article_id):
         response = getattr(client, method)(path, json=payload)
 
@@ -32,25 +27,21 @@ def test_visitor_gets_401_with_the_login_url_on_write_endpoints(client, article_
         }
 
 
-def test_visitor_gets_401_on_like_endpoints(client, article_id):
+def test_visitor_gets_401_on_like_endpoints(client, admin_id):
+    article_id = create_article(admin_id)
+
     assert client.post(f'/api/articles/{article_id}/likes').status_code == 401
     assert client.delete(f'/api/articles/{article_id}/likes').status_code == 401
 
 
-def test_regular_user_gets_403_on_write_endpoints(reader_client, article_id):
-    for method, path, payload in write_requests(article_id):
-        response = getattr(reader_client, method)(path, json=payload)
+def test_members_cannot_change_other_members_articles(reader_client, admin_id):
+    article_id = create_article(admin_id)
 
-        assert response.status_code == 403, (method, path)
-        assert response.get_json() == {'message': 'Admin privileges required'}
+    for method, path, payload in write_requests(article_id)[1:]:
+        assert getattr(reader_client, method)(path, json=payload).status_code == 403, method
 
-
-def test_regular_user_cannot_change_articles(reader_client, article_id):
-    for method, path, payload in write_requests(article_id):
-        getattr(reader_client, method)(path, json=payload)
-
-    articles = reader_client.get('/api/articles').get_json()
-    assert [article['article_title'] for article in articles] == ['Título']
+    article = reader_client.get(f'/api/articles/{article_id}').get_json()
+    assert article['article_title'] == 'Título'
 
 
 def test_admin_panel_redirects_visitors_to_login(client):
@@ -71,7 +62,8 @@ def test_admin_panel_opens_for_admins(admin_client):
     assert 'Olá, Owner' in response.get_data(as_text=True)
 
 
-def test_revoking_the_admin_flag_applies_to_an_open_session(admin_client, admin_id):
+def test_revoking_the_admin_flag_applies_to_an_open_session(admin_client, admin_id, reader_id):
+    article_id = create_article(reader_id)
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('UPDATE USERS SET is_admin = 0 WHERE user_id = %s', (admin_id,))
@@ -80,11 +72,14 @@ def test_revoking_the_admin_flag_applies_to_an_open_session(admin_client, admin_
 
     assert user_repository.get_by_id(admin_id)['is_admin'] == 0
     assert admin_client.get('/admin').status_code == 403
-    assert admin_client.post('/api/articles', json=ARTICLE_PAYLOAD).status_code == 403
+    assert admin_client.delete(f'/api/articles/{article_id}').status_code == 403
 
 
-def test_public_reads_stay_open(client, article_id):
+def test_public_reads_stay_open(client, admin_id):
+    article_id = create_article(admin_id)
+
     assert client.get('/api/articles').status_code == 200
+    assert client.get(f'/api/articles/{article_id}').status_code == 200
     assert client.get(f'/api/articles/id/{article_id}').status_code == 200
     assert client.get('/api/articles/title/T').status_code == 200
     assert client.get(f'/open/{article_id}').status_code == 200

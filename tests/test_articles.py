@@ -1,12 +1,14 @@
 import pytest
 
+import article_validation
 from helpers import create_article
 from repositories import article_repository
 
 ARTICLE_FIELDS = {
-    'article_id', 'article_title', 'article_content', 'publish_date',
+    'article_id', 'article_title', 'summary', 'excerpt', 'reading_time', 'publish_date',
     'author', 'author_username', 'author_avatar_url', 'likes', 'liked',
 }
+NEW_ARTICLE = {'title': 'Olá', 'summary': 'Um resumo', 'content': '# Oi\n\nPrimeiro post'}
 
 
 def test_listing_returns_every_article_with_its_details(client, admin_id):
@@ -24,151 +26,202 @@ def test_listing_returns_every_article_with_its_details(client, admin_id):
     assert articles[0]['liked'] is False
 
 
-def test_admin_creates_an_article_as_its_author(admin_client):
-    response = admin_client.post(
-        '/api/articles', json={'new-title': 'Olá', 'new-content': 'Primeiro post'}
-    )
+def test_listing_shows_the_summary_or_an_excerpt(client, admin_id):
+    create_article(admin_id, title='Com resumo', summary='Resumo escrito')
+    create_article(admin_id, title='Sem resumo', content='**Texto** com _formato_.')
+
+    articles = {a['article_title']: a for a in client.get('/api/articles').get_json()}
+
+    assert articles['Com resumo']['excerpt'] == 'Resumo escrito'
+    assert articles['Sem resumo']['excerpt'] == 'Texto com formato.'
+    assert articles['Sem resumo']['reading_time'] == 1
+
+
+def test_any_member_creates_an_article_as_its_author(reader_client):
+    response = reader_client.post('/api/articles', json=NEW_ARTICLE)
 
     assert response.status_code == 201
-    articles = admin_client.get('/api/articles').get_json()
-    assert len(articles) == 1
-    assert articles[0]['article_content'] == 'Primeiro post'
-    assert articles[0]['author'] == 'Owner'
+    article = response.get_json()
+    assert article['article_title'] == 'Olá'
+    assert article['summary'] == 'Um resumo'
+    assert article['article_content'] == '# Oi\n\nPrimeiro post'
+    assert article['author_username'] == 'reader'
 
 
-@pytest.mark.parametrize(
-    'payload',
-    [
-        {'new-title': '', 'new-content': 'Conteúdo'},
-        {'new-title': 'x' * 31, 'new-content': 'Conteúdo'},
-        {'new-title': 'Título'},
-        {'new-title': 'Título', 'new-content': ''},
-        {'new-title': '   ', 'new-content': 'Conteúdo'},
-        {'new-title': 'Título', 'new-content': '   '},
-        {'new-title': 123, 'new-content': 'Conteúdo'},
-        {'new-title': 'Título', 'new-content': 123},
-        {},
-    ],
-)
-def test_creation_rejects_invalid_data(admin_client, payload):
-    response = admin_client.post('/api/articles', json=payload)
+def test_creation_normalizes_the_fields(reader_client):
+    article = reader_client.post('/api/articles', json={
+        'title': '  Um   título\n',
+        'summary': '',
+        'content': '\r\n    código\r\nfim  \r\n\r\n',
+    }).get_json()
+
+    assert article['article_title'] == 'Um título'
+    assert article['summary'] is None
+    assert article['article_content'] == '    código\nfim'
+
+
+def test_visitors_cannot_create_articles(client):
+    assert client.post('/api/articles', json=NEW_ARTICLE).status_code == 401
+
+
+@pytest.mark.parametrize(('payload', 'errors'), [
+    ({'title': '', 'content': 'x'}, {'title': 'title_required'}),
+    ({'title': '   ', 'content': 'x'}, {'title': 'title_required'}),
+    ({'title': 'x' * 151, 'content': 'x'}, {'title': 'title_too_long'}),
+    ({'title': 'Título'}, {'content': 'content_required'}),
+    ({'title': 'Título', 'content': '  \n '}, {'content': 'content_required'}),
+    ({'title': 'Título', 'content': 'x' * 50_001}, {'content': 'content_too_long'}),
+    ({'title': 'Título', 'content': 'x', 'summary': 'x' * 301}, {'summary': 'summary_too_long'}),
+    ({'title': 123, 'content': 'x'}, {'title': 'invalid'}),
+    ({'title': 'Título', 'content': ['x']}, {'content': 'invalid'}),
+    ({}, {'title': 'title_required', 'content': 'content_required'}),
+])
+def test_creation_rejects_invalid_data(reader_client, payload, errors):
+    response = reader_client.post('/api/articles', json=payload)
 
     assert response.status_code == 400
-    assert admin_client.get('/api/articles').get_json() == []
+    assert response.get_json() == {'message': 'Invalid article', 'errors': errors}
+    assert reader_client.get('/api/articles').get_json() == []
 
 
-def test_admin_updates_title_and_content(admin_client, admin_id):
-    article_id = create_article(admin_id)
+def test_limits_match_the_rules():
+    assert article_validation.MAX_TITLE_LENGTH == 150
+    assert article_validation.MAX_CONTENT_LENGTH == 50_000
 
-    response = admin_client.patch(
-        f'/api/articles/{article_id}', json={'title': 'Novo', 'content': 'Texto novo'}
-    )
+
+def test_reading_one_article_includes_its_content(client, admin_id):
+    article_id = create_article(admin_id, content='Texto inteiro')
+
+    article = client.get(f'/api/articles/{article_id}').get_json()
+
+    assert article['article_content'] == 'Texto inteiro'
+
+
+def test_reading_a_missing_article_answers_404(client):
+    assert client.get('/api/articles/999').status_code == 404
+
+
+def test_author_updates_the_fields(reader_client, reader_id):
+    article_id = create_article(reader_id)
+
+    response = reader_client.patch(f'/api/articles/{article_id}', json={
+        'title': 'Novo', 'summary': 'Novo resumo', 'content': 'Texto novo',
+    })
 
     assert response.status_code == 200
     article = article_repository.get_by_id(article_id)
     assert article['article_title'] == 'Novo'
+    assert article['summary'] == 'Novo resumo'
     assert article['article_content'] == 'Texto novo'
 
 
-def test_saving_an_unchanged_article_succeeds(admin_client, admin_id):
-    """Regression for #24: MySQL reported 0 changed rows and the API answered 404."""
-    article_id = create_article(admin_id, title='Mesmo', content='Igual')
+def test_author_clears_the_summary(reader_client, reader_id):
+    article_id = create_article(reader_id, summary='Antigo')
 
-    response = admin_client.patch(
+    reader_client.patch(f'/api/articles/{article_id}', json={'summary': None})
+
+    assert article_repository.get_by_id(article_id)['summary'] is None
+
+
+def test_saving_an_unchanged_article_succeeds(reader_client, reader_id):
+    """Regression for #24: MySQL reported 0 changed rows and the API answered 404."""
+    article_id = create_article(reader_id, title='Mesmo', content='Igual')
+
+    response = reader_client.patch(
         f'/api/articles/{article_id}', json={'title': 'Mesmo', 'content': 'Igual'}
     )
 
     assert response.status_code == 200
 
 
-def test_update_of_a_missing_article_answers_404(admin_client, admin_id):
-    response = admin_client.patch('/api/articles/999', json={'title': 'x'})
-
-    assert response.status_code == 404
-
-
-def test_update_without_fields_answers_400(admin_client, admin_id):
-    article_id = create_article(admin_id)
-
-    assert admin_client.patch(f'/api/articles/{article_id}', json={}).status_code == 400
-
-
-def test_update_rejects_a_title_that_is_too_long(admin_client, admin_id):
+def test_only_the_author_edits_an_article(admin_client, reader_client, admin_id):
     article_id = create_article(admin_id, title='Original')
 
-    response = admin_client.patch(
-        f'/api/articles/{article_id}', json={'title': 'x' * 31}
-    )
+    reader = reader_client.patch(f'/api/articles/{article_id}', json={'title': 'Outro'})
+    admin_of_another = create_article(admin_id)
 
-    assert response.status_code == 400
+    assert reader.status_code == 403
+    assert reader.get_json() == {'message': 'Only the author can edit this article'}
     assert article_repository.get_by_id(article_id)['article_title'] == 'Original'
+    assert admin_client.patch(f'/api/articles/{admin_of_another}', json={'title': 'x'}).status_code == 200
 
 
-def test_update_rejects_an_empty_title(admin_client, admin_id):
-    article_id = create_article(admin_id, title='Original')
+def test_admins_do_not_edit_other_members_articles(admin_client, reader_id):
+    article_id = create_article(reader_id, title='Da leitora')
 
-    response = admin_client.patch(f'/api/articles/{article_id}', json={'title': ''})
+    response = admin_client.patch(f'/api/articles/{article_id}', json={'title': 'Do admin'})
 
-    assert response.status_code == 400
-    assert article_repository.get_by_id(article_id)['article_title'] == 'Original'
-
-
-def test_update_rejects_empty_content(admin_client, admin_id):
-    article_id = create_article(admin_id, content='Original')
-
-    response = admin_client.patch(f'/api/articles/{article_id}', json={'content': ''})
-
-    assert response.status_code == 400
-    assert article_repository.get_by_id(article_id)['article_content'] == 'Original'
+    assert response.status_code == 403
+    assert article_repository.get_by_id(article_id)['article_title'] == 'Da leitora'
 
 
-def test_update_rejects_a_title_that_is_not_text(admin_client, admin_id):
-    article_id = create_article(admin_id)
+def test_update_of_a_missing_article_answers_404(reader_client):
+    assert reader_client.patch('/api/articles/999', json={'title': 'x'}).status_code == 404
 
-    response = admin_client.patch(f'/api/articles/{article_id}', json={'title': 123})
+
+def test_update_without_fields_answers_400(reader_client, reader_id):
+    article_id = create_article(reader_id)
+
+    response = reader_client.patch(f'/api/articles/{article_id}', json={'author_id': 1})
 
     assert response.status_code == 400
+    assert response.get_json() == {'message': 'No fields to update'}
 
 
-def test_update_rejects_a_blank_title(admin_client, admin_id):
-    article_id = create_article(admin_id, title='Original')
+@pytest.mark.parametrize(('payload', 'errors'), [
+    ({'title': ''}, {'title': 'title_required'}),
+    ({'title': '   '}, {'title': 'title_required'}),
+    ({'title': 'x' * 151}, {'title': 'title_too_long'}),
+    ({'content': ''}, {'content': 'content_required'}),
+    ({'title': 123}, {'title': 'invalid'}),
+    ({'content': 123}, {'content': 'invalid'}),
+])
+def test_update_rejects_invalid_fields_and_changes_nothing(reader_client, reader_id, payload, errors):
+    article_id = create_article(reader_id, title='Original', content='Original')
 
-    response = admin_client.patch(f'/api/articles/{article_id}', json={'title': '   '})
-
-    assert response.status_code == 400
-    assert article_repository.get_by_id(article_id)['article_title'] == 'Original'
-
-
-def test_update_rejects_content_that_is_not_text(admin_client, admin_id):
-    article_id = create_article(admin_id, content='Original')
-
-    response = admin_client.patch(
-        f'/api/articles/{article_id}', json={'content': 123}
-    )
+    response = reader_client.patch(f'/api/articles/{article_id}', json=payload)
 
     assert response.status_code == 400
-    assert article_repository.get_by_id(article_id)['article_content'] == 'Original'
+    assert response.get_json()['errors'] == errors
+    article = article_repository.get_by_id(article_id)
+    assert article['article_title'] == 'Original'
+    assert article['article_content'] == 'Original'
 
 
-def test_write_endpoints_reject_a_body_that_is_not_an_object(admin_client, admin_id):
-    article_id = create_article(admin_id)
+def test_write_endpoints_reject_a_body_that_is_not_an_object(reader_client, reader_id):
+    article_id = create_article(reader_id)
 
-    assert admin_client.post('/api/articles', json=['Título']).status_code == 400
-    response = admin_client.patch(f'/api/articles/{article_id}', json=['x'])
-
-    assert response.status_code == 400
+    assert reader_client.post('/api/articles', json=['Título']).status_code == 400
+    assert reader_client.patch(f'/api/articles/{article_id}', json=['x']).status_code == 400
 
 
-def test_admin_removes_an_article(admin_client, admin_id):
-    article_id = create_article(admin_id)
+def test_author_removes_their_article(reader_client, reader_id):
+    article_id = create_article(reader_id)
 
-    response = admin_client.delete(f'/api/articles/{article_id}')
+    response = reader_client.delete(f'/api/articles/{article_id}')
 
     assert response.status_code == 200
     assert article_repository.get_by_id(article_id) is None
 
 
-def test_removing_a_missing_article_answers_404(admin_client, admin_id):
+def test_admin_removes_any_article(admin_client, reader_id):
+    article_id = create_article(reader_id)
+
+    assert admin_client.delete(f'/api/articles/{article_id}').status_code == 200
+    assert article_repository.get_by_id(article_id) is None
+
+
+def test_members_cannot_remove_other_members_articles(reader_client, admin_id):
+    article_id = create_article(admin_id)
+
+    response = reader_client.delete(f'/api/articles/{article_id}')
+
+    assert response.status_code == 403
+    assert response.get_json() == {'message': 'Only the author or an admin can remove this article'}
+    assert article_repository.get_by_id(article_id) is not None
+
+
+def test_removing_a_missing_article_answers_404(admin_client):
     assert admin_client.delete('/api/articles/999').status_code == 404
 
 
