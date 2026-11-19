@@ -45,7 +45,7 @@ export function bindFollowButton(button, { onChange } = {}) {
 }
 
 /** The follow button of a member drawn by a script, like the one the pages draw. */
-export function createFollowButton({ username, display_name: name, followed }, size = 'btn--sm') {
+export function createFollowButton({ username, display_name: name, followed }, { size = 'btn--sm', onChange } = {}) {
     const button = el(
         'button',
         {
@@ -56,6 +56,23 @@ export function createFollowButton({ username, display_name: name, followed }, s
         el('span', { class: 'follow-btn__text', text: followed ? 'Seguindo' : 'Seguir' }),
         el('span', { class: 'u-visually-hidden', text: ` ${name}` }),
     );
-    bindFollowButton(button);
+    bindFollowButton(button, { onChange });
     return button;
+}
+
+/**
+ * What the viewer can do about a member drawn by a script, as partials/follow_button.html
+ * does in the pages: nothing for themselves, a link to sign in for visitors and the button
+ * for members. viewer is the username of the member reading, empty for visitors.
+ */
+export function createFollowAction(member, { viewer, loginUrl, onChange }) {
+    if (!viewer) {
+        return el(
+            'a',
+            { class: 'btn btn--primary btn--sm follow-btn', href: loginUrl },
+            'Seguir',
+            el('span', { class: 'u-visually-hidden', text: ` ${member.display_name}` }),
+        );
+    }
+    return viewer === member.username ? null : createFollowButton(member, { onChange });
 }
