@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, request, url_for
+from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
 from werkzeug.exceptions import RequestEntityTooLarge
 
@@ -8,8 +8,8 @@ import uploads
 import user_validation as validation
 from auth import current_user_id
 from media import media_url
+from links import article_url
 from repositories import article_repository, like_repository, user_repository
-from slugs import slugify
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -23,11 +23,7 @@ def _article_json(article: dict, *, with_content: bool = False) -> dict:
     plain = markdown_render.plain_text(content)
     shown = {
         'article_id': article['article_id'],
-        'url': url_for(
-            'views.article',
-            article_id=article['article_id'],
-            slug=slugify(article['article_title']),
-        ),
+        'url': article_url(article),
         'article_title': article['article_title'],
         'summary': article['summary'],
         'excerpt': article['summary'] or markdown_render.excerpt(plain),

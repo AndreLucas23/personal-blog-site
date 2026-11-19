@@ -6,8 +6,8 @@ import markdown_render
 import uploads
 import user_validation as validation
 from auth import admin_required, current_user_id
+from links import article_url
 from repositories import article_repository, user_repository
-from slugs import slugify
 
 views_bp = Blueprint('views', __name__)
 
@@ -19,11 +19,6 @@ def home():
 @admin_required
 def admin():
     return render_template('admin.html')
-
-def article_url(article: dict) -> str:
-    return url_for(
-        'views.article', article_id=article['article_id'], slug=slugify(article['article_title'])
-    )
 
 @views_bp.route('/articles/<int:article_id>')
 @views_bp.route('/articles/<int:article_id>/<slug>')
@@ -52,6 +47,7 @@ def _editor(article: dict | None):
     return render_template(
         'editor.html',
         article=article,
+        back_url=article_url(article) if article else url_for('views.home'),
         max_title=article_validation.MAX_TITLE_LENGTH,
         max_summary=article_validation.MAX_SUMMARY_LENGTH,
         max_content=article_validation.MAX_CONTENT_LENGTH,
