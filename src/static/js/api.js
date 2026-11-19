@@ -26,6 +26,8 @@ async function request(endpoint, { method = 'GET', json } = {}) {
 
     if (res.status === 401) {
         window.location.assign(body.login_url || '/auth/login');
+        // The page is leaving, so callers must not react as if the request failed.
+        return new Promise(() => {});
     }
     if (!res.ok) {
         throw new ApiError(res.status, body.message || `Erro ${res.status}`);
