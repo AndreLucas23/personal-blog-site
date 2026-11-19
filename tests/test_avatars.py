@@ -182,3 +182,11 @@ def test_any_decoding_failure_reads_as_an_invalid_image(reader_client, monkeypat
 
     assert response.status_code == 400
     assert response.get_json()['errors'] == {'avatar': uploads.IMAGE_INVALID}
+
+
+def test_upload_names_must_match_entirely():
+    name = 'a' * 32 + '.webp'
+
+    assert uploads.is_upload_name(name)
+    assert not uploads.is_upload_name(name + '\n')
+    assert not uploads.is_upload_name('x' + name)
