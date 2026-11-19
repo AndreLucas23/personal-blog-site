@@ -57,9 +57,11 @@ def _read_page():
             return None, None, (jsonify({'message': 'Invalid cursor'}), 400)
     limit = pagination.read_limit(request.args.get('limit'))
     if limit is None:
-        message = f'The limit must be from 1 to {pagination.MAX_PAGE_SIZE}'
-        return None, None, (jsonify({'message': message}), 400)
+        return None, None, _invalid_limit(pagination.MAX_PAGE_SIZE)
     return after, limit, None
+
+def _invalid_limit(maximum: int):
+    return jsonify({'message': f'The limit must be from 1 to {maximum}'}), 400
 
 def _next_cursor(rows: list[dict], limit: int, date_key: str, id_key: str) -> str | None:
     """The cursor of the next page, when the rows hold one more than the page."""
@@ -492,12 +494,13 @@ def list_following(username):
 @login_required
 def suggested_members():
     """Members to follow, first those the people you follow follow, then recent authors."""
-    value = request.args.get('limit', str(follow_repository.SUGGESTIONS))
-    if not value.isdecimal() or not 1 <= int(value) <= follow_repository.MAX_SUGGESTIONS:
-        message = f'The limit must be from 1 to {follow_repository.MAX_SUGGESTIONS}'
-        return jsonify({'message': message}), 400
+    limit = pagination.read_limit(
+        request.args.get('limit'), follow_repository.SUGGESTIONS, follow_repository.MAX_SUGGESTIONS
+    )
+    if limit is None:
+        return _invalid_limit(follow_repository.MAX_SUGGESTIONS)
 
-    members = follow_repository.suggestions(current_user.user_id, int(value))
+    members = follow_repository.suggestions(current_user.user_id, limit)
     return jsonify({'members': [_member_json(member) for member in members]})
 
 @api_bp.route('/users/<string:username>/follow', methods=['PUT', 'DELETE'])
