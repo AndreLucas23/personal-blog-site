@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% set editing = article is not none %}
+
+{% block title %}{{ 'Editar artigo' if editing else 'Escrever artigo' }} | Social Blog{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/editor.css') }}">
+{% endblock %}
+
+{% block page_class %}page--editor{% endblock %}
+
+{% block page %}
+<main id="main" class="page__main">
+    <form class="editor"
+    id="editor"
+    novalidate
+    data-article-id="{{ article['article_id'] if editing else '' }}">
+        <header class="editor__header">
+            <a class="back-link" href="{{ url_for('views.article', article_id=article['article_id']) if editing else url_for('views.home') }}">
+                {{ icon('arrow-left', 'icon--sm') }}
+                {{ 'Voltar para o artigo' if editing else 'Voltar para o início' }}
+            </a>
+
+            <div class="editor__actions">
+                <span class="editor__status" id="editor-status" aria-live="polite"></span>
+                <button class="btn btn--primary" id="editor-submit" type="submit">
+                    {{ 'Salvar alterações' if editing else 'Publicar' }}
+                </button>
+            </div>
+        </header>
+
+        <div class="card editor__card">
+            <div class="field">
+                <label class="u-visually-hidden" for="title">Título</label>
+                <textarea class="editor__title"
+                id="title"
+                name="title"
+                rows="1"
+                maxlength="{{ max_title }}"
+                placeholder="Título"
+                aria-describedby="title-error"
+                required>{{ article['article_title'] if editing else '' }}</textarea>
+                <span class="field__error" id="title-error" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+                <label class="u-visually-hidden" for="summary">Resumo</label>
+                <textarea class="editor__summary"
+                id="summary"
+                name="summary"
+                rows="1"
+                maxlength="{{ max_summary }}"
+                placeholder="Resumo opcional: uma ou duas frases que aparecem nos cards"
+                aria-describedby="summary-error">{{ (article['summary'] or '') if editing else '' }}</textarea>
+                <div class="field__row">
+                    <span class="field__error" id="summary-error" aria-live="polite"></span>
+                    <span class="field__counter" id="summary-counter"></span>
+                </div>
+            </div>
+
+            <div class="editor__body">
+                <div class="tabs" role="tablist" aria-label="Modo do editor">
+                    <button class="tab" id="tab-write" type="button" role="tab" aria-selected="true" aria-controls="panel-write">Escrever</button>
+                    <button class="tab" id="tab-preview" type="button" role="tab" aria-selected="false" aria-controls="panel-preview" tabindex="-1">Pré-visualizar</button>
+                </div>
+
+                <div class="editor__panel" id="panel-write" role="tabpanel" aria-labelledby="tab-write">
+                    <div class="editor__toolbar" role="toolbar" aria-label="Formatação" aria-controls="content">
+                        <button class="icon-btn" type="button" data-format="bold" title="Negrito (Ctrl+B)" aria-label="Negrito">{{ icon('bold') }}</button>
+                        <button class="icon-btn" type="button" data-format="italic" title="Itálico (Ctrl+I)" aria-label="Itálico">{{ icon('italic') }}</button>
+                        <button class="icon-btn" type="button" data-format="heading" title="Subtítulo" aria-label="Subtítulo">{{ icon('heading') }}</button>
+                        <button class="icon-btn" type="button" data-format="link" title="Link (Ctrl+K)" aria-label="Link">{{ icon('link') }}</button>
+                        <button class="icon-btn" type="button" data-format="quote" title="Citação" aria-label="Citação">{{ icon('quote') }}</button>
+                        <button class="icon-btn" type="button" data-format="list" title="Lista" aria-label="Lista">{{ icon('list') }}</button>
+                        <button class="icon-btn" type="button" data-format="ordered" title="Lista numerada" aria-label="Lista numerada">{{ icon('list-ordered') }}</button>
+                        <button class="icon-btn" type="button" data-format="code" title="Código" aria-label="Código">{{ icon('code') }}</button>
+                    </div>
+
+                    <label class="u-visually-hidden" for="content">Conteúdo</label>
+                    <textarea class="editor__content"
+                    id="content"
+                    name="content"
+                    maxlength="{{ max_content }}"
+                    placeholder="Escreva seu artigo. Use Markdown ou a barra acima para formatar."
+                    aria-describedby="content-hint content-error"
+                    required>{{ article['article_content'] if editing else '' }}</textarea>
+
+                    <div class="field__row">
+                        <span class="field__hint" id="content-hint">**negrito**, _itálico_, ## subtítulo, - lista, &gt; citação, [link](https://…), `código`</span>
+                        <span class="field__counter" id="content-counter"></span>
+                    </div>
+                    <span class="field__error" id="content-error" aria-live="polite"></span>
+                </div>
+
+                <div class="editor__panel editor__preview prose" id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" tabindex="0" hidden></div>
+            </div>
+        </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/editor.js') }}"></script>
+{% endblock %}

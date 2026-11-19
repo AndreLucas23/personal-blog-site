@@ -1,20 +1,5 @@
 /* Article reading page */
 
-.back-link {
-    align-items: center;
-    align-self: flex-start;
-    color: var(--text-secondary);
-    display: inline-flex;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    gap: var(--space-2);
-}
-
-.back-link:hover {
-    color: var(--brand);
-    text-decoration: none;
-}
-
 .article {
     display: flex;
     flex-direction: column;

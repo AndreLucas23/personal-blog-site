@@ -115,7 +115,7 @@ def test_member_content_is_escaped(client, admin_id):
 
 @pytest.mark.parametrize('path', [
     '/', '/auth/login', '/auth/register', '/admin', '/articles/{article_id}/titulo',
-    '/@owner', '/settings/profile',
+    '/@owner', '/settings/profile', '/write', '/write/{article_id}',
 ])
 def test_pages_have_no_inline_code(admin_client, admin_id, path):
     article_id = create_article(admin_id)
