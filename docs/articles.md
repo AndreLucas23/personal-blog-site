@@ -24,6 +24,12 @@ An article is a draft or published. A draft needs only its title, so members can
 - Changing the title, the summary, the content or the tags records when the article was updated, while saving them unchanged or only moving between draft and published does not. The article page mentions the update when it happened on a later day than the publication.
 - Your profile has a Rascunhos tab with your drafts, the most recently edited first, and only published articles collect likes.
 
+## Covers
+
+An article may have a cover: a JPEG, PNG or WebP image of up to 5 MB, cropped to 1200 by 630 pixels, the shape of link previews, and stored as WebP in the uploads volume like avatars. Cards and the article page show it above the title.
+
+The editor shows the chosen cover at once and sends it when the article is saved, like the words, so a new cover reaches readers only with Publicar or Salvar alterações. If the article is saved but the cover is not, the editor keeps the reason next to the cover; an article published that way opens again in its editor to try once more. Replacing or removing a cover, or deleting the article, deletes the old file. Changing the cover does not count as an update of the text.
+
 ## Tags
 
 An article has up to 5 tags, given in the editor as chips and kept in the order given. Tags are normalized to lowercase words joined by hyphens, with accents kept and repeats dropped: `Banco de Dados` becomes `banco-de-dados` and `#Python` becomes `python`. Each tag has 2 to 30 characters. Variants with and without accents, such as `programação` and `programacao`, are the same tag, which keeps the spelling it was first given.
@@ -58,15 +64,19 @@ The article page shows Editar and the delete button to the author, and Remover t
 
 | Method | Path | Access | Description |
 | --- | --- | --- | --- |
-| `GET` | `/api/articles` | Everyone | List the articles, or one member's with `?author=<username>` |
+| `GET` | `/api/articles` | Everyone | A page of published articles, newest first, or of one member's with `?author=<username>` |
 | `GET` | `/api/articles/<id>` | Everyone | One article with its content |
 | `POST` | `/api/articles` | Signed in | Create an article with `title`, `summary`, `content`, `tags` and `status` |
 | `PATCH` | `/api/articles/<id>` | The author | Change any of `title`, `summary`, `content`, `tags` and `status` |
 | `DELETE` | `/api/articles/<id>` | The author or an admin | Delete the article |
+| `PUT` | `/api/articles/<id>/cover` | The author | Set the cover, sent as a `multipart/form-data` field named `cover` |
+| `DELETE` | `/api/articles/<id>/cover` | The author | Remove the cover |
 | `GET` | `/api/users/me/drafts` | Signed in | Your drafts, the most recently edited first |
 | `POST` | `/api/previews` | Signed in | The HTML of the Markdown in `content`, as `{"html": "..."}` |
 
-Lists give each article `article_id`, `url`, `article_title`, `summary`, `tags`, `excerpt`, `reading_time`, `status`, `publish_date` (`null` for a draft that was never published), `created_at`, `updated_at`, `author`, `author_username`, `author_avatar_url`, `likes` and `liked`. A single article, and the answers of `POST` and `PATCH`, also carry `article_content`.
+`GET /api/articles` answers one page at a time, as `{"articles": [...], "next_cursor": "..."}`. `limit` sets the number of articles, from 1 to 50 and 20 by default, and `next_cursor`, passed back as `?cursor=`, asks for the next page; it is `null` on the last one. A cursor holds the position of the last article shown, so articles published in the meantime do not repeat or skip any. An invalid cursor or limit answers `400`. The searches by title and by id answer every match in a list, and so does the list of drafts.
+
+Lists give each article `article_id`, `url`, `article_title`, `summary`, `cover_url`, `tags`, `excerpt`, `reading_time`, `status`, `publish_date` (`null` for a draft that was never published), `created_at`, `updated_at`, `author`, `author_username`, `author_avatar_url`, `likes` and `liked`. A single article, and the answers of `POST`, `PATCH` and the cover endpoints, also carry `article_content`.
 
 Invalid fields answer `400` with a code for each one:
 
@@ -75,3 +85,5 @@ Invalid fields answer `400` with a code for each one:
 ```
 
 The codes are `title_required`, `title_too_long`, `summary_too_long`, `content_required`, `content_too_long`, `tags_too_many`, `tag_too_short`, `tag_too_long` and `invalid` for a value of the wrong type, such as tags that are not a list of text or an unknown status. A missing article answers `404`, and an action the member may not take answers `403` with a message that says why.
+
+A cover that cannot be used answers `400`, or `413` when the request is too large, with the code under `cover`: `image_missing`, `image_invalid`, `image_format` or `image_too_large`.
