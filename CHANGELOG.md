@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - A social network layout on every page: a top bar with the main destinations and an account menu, three columns on wide screens and one on phones, and shared components for cards, forms, menus, dialogs and messages (#70).
 - Light and dark themes that follow the system, with a theme choice in the account menu (#70).
+- Error pages in the new layout for 400, 403, 404, 405, 413, 429 and 500, and JSON errors with a `message` for every error under `/api` (#71).
 - Dependabot checks the Python packages, the Docker base image and the GitHub Actions for updates every week (#37).
 - Security policy in `SECURITY.md`, with the supported versions and how to report a vulnerability privately (#37).
 - Database migrations: numbered SQL files in `migrations/`, applied by `python src/migrate.py` and every time the web container starts, so the schema can change without discarding the data (#36).
@@ -20,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - The product is now called Social Blog (#70).
 - Pages use system fonts and one SVG icon sprite instead of Google Fonts and inline icons, so they make no requests to other sites (#70).
+- A database error on a page shows the error page instead of JSON (#71).
 - **Breaking:** `POST`, `PATCH` and `DELETE` requests must send the CSRF token of the session, in the `csrf_token` form field or the `X-CSRF-Token` header (#19).
 - **Breaking:** logout is `POST /auth/logout` instead of `GET` (#19).
 - **Breaking:** the API sends CORS headers only to the origins listed in `CORS_ORIGINS`, and to none by default. It used to allow every origin (#19).
@@ -32,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Every response carries a Content Security Policy that allows only the application's own scripts, styles, images and forms, plus `nosniff`, frame denial, a strict referrer policy, a permissions policy and same-origin isolation headers (#71).
+- `SESSION_COOKIE_SECURE=1` also sends `Strict-Transport-Security` (#71).
 - State-changing requests are protected against cross-site request forgery (#19).
 - The login answers `429` after five failed attempts for the same email from the same address within fifteen minutes (#19).
 - The container runs as an unprivileged user instead of root (#19).
