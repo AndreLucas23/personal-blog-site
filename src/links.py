@@ -6,16 +6,18 @@ from flask import request, url_for
 
 from slugs import slugify
 
-# One slash, then printable ASCII without spaces: "//host" and "/\host" would take the
-# browser to another site, and so could the spaces and controls browsers drop.
-LOCAL_PATH = re.compile(r'/(?![/\\])[!-~]*')
+# One slash, then printable ASCII without spaces or backslashes: "//host" and "/\host"
+# would take the browser to another site, and so could the spaces and controls browsers drop.
+LOCAL_PATH = re.compile(r'/(?!/)[!-\[\]-~]*')
+# The API answers JSON and the sign-in pages lead nowhere new, so a sign-in never ends there.
+NOT_PAGES = ('/api/', '/auth/')
 # What a path keeps as it is; the rest is percent-encoded, as browsers send it.
 PATH_CHARACTERS = "/:@!$&'()*+,;=~"
 
 
 def local_path(target: str | None) -> str | None:
-    """The target when it is a path on this site, the only place a sign-in leads back to."""
-    if target and LOCAL_PATH.fullmatch(target) and '\\' not in target:
+    """The target when it is a page of this site, the only place a sign-in leads back to."""
+    if target and LOCAL_PATH.fullmatch(target) and not target.startswith(NOT_PAGES):
         return target
     return None
 

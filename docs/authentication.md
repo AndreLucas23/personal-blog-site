@@ -26,7 +26,7 @@ Changing the value signs every user out.
 
 Every `POST` needs the CSRF token described below.
 
-Both forms take an optional `next`, in the address or as a form field, with the page to return to after signing in. Only a path on this site is accepted: it starts with one `/`, followed by printable ASCII without spaces or backslashes. Anything else, such as `https://other.site`, `//other.site` or `/\other.site`, is ignored and the member goes to the home page, so the login cannot be used to send people to another site. The forms keep `next` through failed attempts and pass it to each other.
+Both forms take an optional `next`, in the address or as a form field, with the page to return to after signing in. Only a page on this site is accepted: a path that starts with one `/`, followed by printable ASCII without spaces or backslashes, outside `/api/` and `/auth/`. Anything else, such as `https://other.site`, `//other.site` or `/\other.site`, is ignored and the member goes to the home page, so the login cannot be used to send people to another site. The forms keep `next` through failed attempts and pass it to each other.
 
 The session cookie is `HttpOnly` and `SameSite=Lax`. With `SESSION_COOKIE_SECURE=1` it is also `Secure`, so browsers send it only over HTTPS. Switch it on whenever the application is served over HTTPS.
 
