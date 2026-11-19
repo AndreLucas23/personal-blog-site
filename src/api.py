@@ -126,10 +126,6 @@ def search_by_title(search_title):
     return _articles_json(search_articles), 200
 
 
-# Optional profile fields are stored as NULL when a member leaves them empty.
-OPTIONAL_PROFILE_FIELDS = ('headline', 'bio', 'location', 'website')
-
-
 def _normalize_profile_field(field: str, value: str) -> str:
     if field == 'username':
         return validation.normalize_username(value)
@@ -172,11 +168,11 @@ def update_own_profile():
         return jsonify({'message': 'Invalid request body'}), 400
 
     changes = {}
-    for field in user_repository.PROFILE_COLUMNS:
+    for field in validation.PROFILE_FIELDS:
         if field not in data:
             continue
         value = data[field]
-        if value is None and field in OPTIONAL_PROFILE_FIELDS:
+        if value is None and field in validation.OPTIONAL_PROFILE_FIELDS:
             value = ''
         if not isinstance(value, str):
             return jsonify({'message': 'Invalid profile', 'errors': {field: 'invalid'}}), 400
@@ -190,7 +186,7 @@ def update_own_profile():
         return jsonify({'message': 'Invalid profile', 'errors': errors}), 400
 
     stored = {
-        field: (value or None) if field in OPTIONAL_PROFILE_FIELDS else value
+        field: (value or None) if field in validation.OPTIONAL_PROFILE_FIELDS else value
         for field, value in changes.items()
     }
     try:

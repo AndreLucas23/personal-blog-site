@@ -37,6 +37,10 @@ OPTIONAL_TEXT_LIMITS = {
     'bio': (MAX_BIO_LENGTH, BIO_TOO_LONG),
     'location': (MAX_LOCATION_LENGTH, LOCATION_TOO_LONG),
 }
+# The fields members change on their profile, in the order of the form. Optional
+# ones are stored as NULL when left empty.
+OPTIONAL_PROFILE_FIELDS = (*OPTIONAL_TEXT_LIMITS, 'website')
+PROFILE_FIELDS = ('display_name', 'username', *OPTIONAL_PROFILE_FIELDS)
 
 # Names that would clash with /api/users/me or pass for the staff.
 # migrations/003_add_usernames.sql renames existing accounts with the same list.
