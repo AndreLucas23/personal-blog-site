@@ -67,9 +67,9 @@ def test_plain_text_drops_the_formatting():
 
 
 def test_excerpt_cuts_at_a_word():
-    text = 'palavra ' * 100
+    plain = ('palavra ' * 100).strip()
 
-    excerpt = markdown_render.excerpt(text, length=30)
+    excerpt = markdown_render.excerpt(plain, length=30)
 
     assert excerpt == 'palavra palavra palavra…'
     assert markdown_render.excerpt('curto') == 'curto'
@@ -77,7 +77,16 @@ def test_excerpt_cuts_at_a_word():
 
 @pytest.mark.parametrize(('words', 'minutes'), [(10, 1), (200, 1), (400, 2), (1000, 5)])
 def test_reading_minutes(words, minutes):
-    assert markdown_render.reading_minutes('palavra ' * words) == minutes
+    assert markdown_render.reading_minutes(('palavra ' * words).strip()) == minutes
+
+
+def test_render_with_plain_text_matches_the_separate_calls():
+    text = '# Título\n\nUm **texto** com [link](https://a.dev).'
+
+    html, plain = markdown_render.render_with_plain_text(text)
+
+    assert html == markdown_render.render(text)
+    assert plain == markdown_render.plain_text(text)
 
 
 def test_preview_needs_a_session(client):

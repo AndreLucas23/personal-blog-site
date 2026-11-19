@@ -38,14 +38,14 @@ def article(article_id, slug=None):
     if url_for('views.article', article_id=article_id, slug=slug) != canonical:
         return redirect(canonical, 301)
 
-    content = found['article_content']
+    content_html, plain = markdown_render.render_with_plain_text(found['article_content'])
     return render_template(
         'article.html',
         article=found,
         canonical_url=canonical,
-        description=found['summary'] or markdown_render.excerpt(content),
-        content_html=markdown_render.render(content),
-        reading_minutes=markdown_render.reading_minutes(content),
+        description=found['summary'] or markdown_render.excerpt(plain),
+        content_html=content_html,
+        reading_minutes=markdown_render.reading_minutes(plain),
     )
 
 def _editor(article: dict | None):

@@ -20,6 +20,7 @@ def _json_object() -> dict | None:
 def _article_json(article: dict, *, with_content: bool = False) -> dict:
     """An article as the API shows it. Lists leave the content out, which can be long."""
     content = article['article_content']
+    plain = markdown_render.plain_text(content)
     shown = {
         'article_id': article['article_id'],
         'url': url_for(
@@ -29,8 +30,8 @@ def _article_json(article: dict, *, with_content: bool = False) -> dict:
         ),
         'article_title': article['article_title'],
         'summary': article['summary'],
-        'excerpt': article['summary'] or markdown_render.excerpt(content),
-        'reading_time': markdown_render.reading_minutes(content),
+        'excerpt': article['summary'] or markdown_render.excerpt(plain),
+        'reading_time': markdown_render.reading_minutes(plain),
         'publish_date': article['publish_date'],
         'author': article['author'],
         'author_username': article['author_username'],
