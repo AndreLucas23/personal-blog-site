@@ -71,7 +71,7 @@ def test_current_page_is_marked_in_the_navigation(admin_client):
     assert not re.search(r'href="/"\s+aria-current="page"', page)
 
 
-def test_only_admins_get_the_edit_button(admin_client, reader_client, admin_id):
+def test_only_the_author_gets_the_edit_button(admin_client, reader_client, admin_id):
     article_id = create_article(admin_id)
 
     assert 'id="edit-btn"' in admin_client.get(f'/open/{article_id}').get_data(as_text=True)
