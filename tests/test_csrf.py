@@ -99,9 +99,13 @@ def test_api_accepts_the_token_in_a_header(client, reader_id, admin_id):
     assert response.get_json() == {'liked': True, 'likes': 1}
 
 
-@pytest.mark.parametrize('method', ['post', 'patch', 'delete'])
-def test_every_state_changing_method_requires_the_token(client, method):
-    response = getattr(client, method)('/api/articles/1')
+@pytest.mark.parametrize('method, path', [
+    ('post', '/api/articles'),
+    ('patch', '/api/articles/1'),
+    ('delete', '/api/articles/1'),
+])
+def test_every_state_changing_method_requires_the_token(client, method, path):
+    response = getattr(client, method)(path)
 
     assert response.status_code == 400
 
@@ -158,3 +162,23 @@ def test_forms_carry_the_token(client, reader_id, admin_id):
     client.post('/auth/logout', data={'csrf_token': token})
     assert field in client.get('/auth/login').get_data(as_text=True)
     assert field in client.get('/auth/register').get_data(as_text=True)
+
+
+def test_requests_that_match_no_route_get_the_routing_error(client):
+    wrong_method = client.put('/api/articles')
+    missing_api = client.post('/api/nao-existe')
+    missing_page = client.post('/nao-existe')
+
+    assert wrong_method.status_code == 405
+    assert wrong_method.get_json() == {'message': 'Method not allowed'}
+    assert missing_api.status_code == 404
+    assert missing_api.get_json() == {'message': 'Not found'}
+    assert missing_page.status_code == 404
+    assert 'Página não encontrada' in missing_page.get_data(as_text=True)
+
+
+def test_api_requests_without_a_token_get_json_in_english(client, reader_id):
+    response = client.post('/api/articles/1/likes')
+
+    assert response.status_code == 400
+    assert response.get_json() == {'message': csrf.API_MESSAGE}
