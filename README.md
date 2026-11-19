@@ -8,7 +8,7 @@ Social Blog is a social network for publishing and reading articles, built with 
 
 - Anyone can read and search articles, each with its author, date and like count.
 - Visitors can create an account with a name and a unique username, and sign in with the email or the username.
-- Every member has a public profile with a headline, a bio, a location, a website and a photo, which the API reads and changes.
+- Every member has a public profile at `/@username` with a headline, a bio, a location, a website, a photo and their articles, edited at `/settings/profile`. Photos appear next to the member's name across the site.
 - Signed-in users can like and unlike articles.
 - Admins create, search and remove articles in the admin panel at `/admin`, and edit them on the article page.
 - Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
@@ -148,7 +148,7 @@ src/
   uploads.py            Checking, resizing and storing uploaded images
   security_headers.py   Content Security Policy and browser hardening headers
   template_helpers.py   Icons, avatars and dates for the templates
-  views.py              Pages: home, article and admin panel
+  views.py              Pages: home, article, profile, profile settings and admin panel
   api.py                JSON API under /api
   auth.py               Login, logout, registration and the admin check
   csrf.py               CSRF token for state-changing requests
