@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, jsonify, redirect, url_for
 from flask_cors import CORS
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 import csrf
 import errors
@@ -33,7 +33,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # Browsers send a Secure cookie only over HTTPS, so it stays off for plain HTTP.
 app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE')
 
-login_manager = LoginManager(app)
+login_manager = LoginManager(app, add_context_processor=False)
 csrf.init_app(app)
 errors.init_app(app)
 security_headers.init_app(app)
@@ -42,6 +42,13 @@ template_helpers.init_app(app)
 app.register_blueprint(views_bp)
 app.register_blueprint(api_bp)
 app.register_blueprint(auth_bp)
+
+
+@app.context_processor
+def inject_current_user() -> dict:
+    # Flask-Login's own processor loads the member for every template. The proxy loads
+    # it only when a template reads it, so error pages can be drawn without the database.
+    return {'current_user': current_user}
 
 
 @login_manager.user_loader
