@@ -488,6 +488,18 @@ def list_followers(username):
 def list_following(username):
     return _member_list(username, 'following')
 
+@api_bp.route('/users/me/suggestions', methods=['GET'])
+@login_required
+def suggested_members():
+    """Members to follow, first those the people you follow follow, then recent authors."""
+    value = request.args.get('limit', str(follow_repository.SUGGESTIONS))
+    if not value.isdecimal() or not 1 <= int(value) <= follow_repository.MAX_SUGGESTIONS:
+        message = f'The limit must be from 1 to {follow_repository.MAX_SUGGESTIONS}'
+        return jsonify({'message': message}), 400
+
+    members = follow_repository.suggestions(current_user.user_id, int(value))
+    return jsonify({'members': [_member_json(member) for member in members]})
+
 @api_bp.route('/users/<string:username>/follow', methods=['PUT', 'DELETE'])
 @login_required
 def follow_member(username):
