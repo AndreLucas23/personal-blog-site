@@ -7,12 +7,13 @@ Social Blog is a social network for publishing and reading articles, built with 
 ## Features
 
 - Anyone can read and search articles, each with its author, date and like count.
-- Visitors can create an account, sign in and sign out.
+- Visitors can create an account with a name and a unique username, and sign in with the email or the username.
+- Every member has a public profile with a headline, a bio, a location, a website and a photo, which the API reads and changes.
 - Signed-in users can like and unlike articles.
 - Admins create, search and remove articles in the admin panel at `/admin`, and edit them on the article page.
 - Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
 
-How accounts, sessions and permissions work is described in [docs/authentication.md](docs/authentication.md), and likes in [docs/likes.md](docs/likes.md).
+How accounts, sessions and permissions work is described in [docs/authentication.md](docs/authentication.md), profiles and avatars in [docs/profiles.md](docs/profiles.md), and likes in [docs/likes.md](docs/likes.md).
 
 ## Stack
 
@@ -39,7 +40,7 @@ Requirements: Docker with the Compose plugin.
    docker compose up --build
    ```
 
-3. Create the first admin. The command asks for the username, the email and the password:
+3. Create the first admin. The command asks for the name, the username, the email and the password:
 
    ```bash
    docker compose exec web python src/create_user.py --admin
@@ -70,6 +71,7 @@ Variables are read from `.env`, which is never committed. `TEMPLATE.env` lists a
 | `FLASK_DEBUG` | `1` runs the development server with the debugger and the reloader | `1` |
 | `CORS_ORIGINS` | Origins allowed to call the API from a browser, separated by commas | Empty: none |
 | `SESSION_COOKIE_SECURE` | `1` makes browsers send the session cookie only over HTTPS | `0` |
+| `UPLOAD_DIR` | Directory of the uploaded images, kept in the `uploads_data` volume | `/data/uploads` |
 
 The defaults exist only for local development. Always set your own values outside of it.
 
@@ -137,11 +139,13 @@ docker compose --profile test run --rm tests sh -c "pip install -q -r requiremen
 
 ```text
 migrations/             Database schema, one numbered SQL file per change
-docs/                   Authentication and likes
+docs/                   Authentication, profiles and likes
 tests/                  Automated tests, run with the test profile
 src/
   app.py                Application entry point and sessions
   errors.py             Error pages and JSON errors
+  media.py              Serving the uploaded images under /media
+  uploads.py            Checking, resizing and storing uploaded images
   security_headers.py   Content Security Policy and browser hardening headers
   template_helpers.py   Icons, avatars and dates for the templates
   views.py              Pages: home, article and admin panel
@@ -166,7 +170,7 @@ src/
 
 | Method | Path | Access | Description |
 | --- | --- | --- | --- |
-| `GET` | `/api/articles` | Everyone | List all articles |
+| `GET` | `/api/articles` | Everyone | List all articles, or one member's with `?author=<username>` |
 | `GET` | `/api/articles/id/<id>` | Everyone | Search articles by id, partial match |
 | `GET` | `/api/articles/title/<title>` | Everyone | Search articles by title, partial match |
 | `POST` | `/api/articles` | Admins | Create an article with `new-title` and `new-content` |
@@ -174,8 +178,13 @@ src/
 | `DELETE` | `/api/articles/<id>` | Admins | Remove an article |
 | `POST` | `/api/articles/<id>/likes` | Signed in | Like an article |
 | `DELETE` | `/api/articles/<id>/likes` | Signed in | Remove your like |
+| `GET` | `/api/users/<username>` | Everyone | A member's public profile |
+| `GET` | `/api/users/me` | Signed in | Your profile, with your email |
+| `PATCH` | `/api/users/me` | Signed in | Change your name, username, headline, bio, location or website |
+| `PUT` | `/api/users/me/avatar` | Signed in | Upload your avatar as a `multipart/form-data` field named `avatar` |
+| `DELETE` | `/api/users/me/avatar` | Signed in | Remove your avatar |
 
-Each article has `article_id`, `article_title`, `article_content`, `publish_date`, `author`, `likes` and `liked`, which tells whether the signed-in viewer liked it. Titles are limited to 30 characters.
+Each article has `article_id`, `article_title`, `article_content`, `publish_date`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it. Titles are limited to 30 characters. [docs/profiles.md](docs/profiles.md#api) describes the profile endpoints and their errors.
 
 Without a session the protected endpoints answer `401` with the login page URL, and regular users get `403` from the admin endpoints.
 
