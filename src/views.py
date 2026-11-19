@@ -1,6 +1,7 @@
 from flask import Blueprint, abort, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
+import uploads
 import user_validation as validation
 from auth import admin_required, current_user_id
 from repositories import article_repository, user_repository
@@ -44,4 +45,9 @@ def profile(username):
 @login_required
 def profile_settings():
     member = user_repository.get_profile_by_id(current_user.user_id)
-    return render_template('settings_profile.html', member=member)
+    return render_template(
+        'settings_profile.html',
+        member=member,
+        max_image_bytes=uploads.MAX_IMAGE_BYTES,
+        max_image_mb=uploads.MAX_IMAGE_BYTES // (1024 * 1024),
+    )

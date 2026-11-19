@@ -5,7 +5,6 @@ import { bindCounter, setFieldError } from '../ui/forms.js';
 import { showToast } from '../ui/toast.js';
 
 const FIELDS = ['display_name', 'username', 'headline', 'location', 'website', 'bio'];
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const PROFILE_ERRORS = {
     name_required: 'Informe seu nome.',
@@ -24,11 +23,14 @@ const PROFILE_ERRORS = {
     invalid: 'Confira este campo.',
 };
 
+// The server sets the limit, so this page reads it instead of keeping a copy.
+const MAX_IMAGE_BYTES = Number(document.getElementById('avatar-input').dataset.maxBytes);
+
 const IMAGE_ERRORS = {
     image_missing: 'Escolha uma imagem.',
     image_invalid: 'Não foi possível ler essa imagem. Tente outro arquivo.',
     image_format: 'Use uma imagem JPEG, PNG ou WebP.',
-    image_too_large: 'A imagem pode ter até 5 MB.',
+    image_too_large: `A imagem pode ter até ${Math.floor(MAX_IMAGE_BYTES / (1024 * 1024))} MB.`,
 };
 
 const form = document.getElementById('profile-form');
