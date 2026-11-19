@@ -8,12 +8,17 @@ USERNAME_KEY = 'uq_users_username'
 ACCOUNT_COLUMNS = (
     'user_id, username, display_name, email, password_hash, is_admin, headline, avatar_path'
 )
+# The first placeholder is the viewer id, used to tell whether they follow the member.
 PROFILE_QUERY = (
     'SELECT u.user_id, u.username, u.display_name, u.email, u.headline, u.bio, '
     'u.location, u.website, u.avatar_path, u.created_at, '
     # Drafts are private, so profiles count only what was published.
     "(SELECT COUNT(*) FROM ARTICLES a WHERE a.author_id = u.user_id AND a.status = 'published') "
-    'AS article_count '
+    'AS article_count, '
+    '(SELECT COUNT(*) FROM FOLLOWS f WHERE f.followed_id = u.user_id) AS follower_count, '
+    '(SELECT COUNT(*) FROM FOLLOWS f WHERE f.follower_id = u.user_id) AS following_count, '
+    'EXISTS(SELECT 1 FROM FOLLOWS f WHERE f.follower_id = %s AND f.followed_id = u.user_id) '
+    'AS followed '
     'FROM USERS u'
 )
 
@@ -41,15 +46,21 @@ def get_by_username(username: str) -> dict | None:
         cursor.execute(f'SELECT {ACCOUNT_COLUMNS} FROM USERS WHERE username = %s', (username,))
         return cursor.fetchone()
 
-def get_profile(username: str) -> dict | None:
+def get_profile(username: str, viewer_id: int | None = None) -> dict | None:
     with db_cursor(dictionary=True) as cursor:
-        cursor.execute(PROFILE_QUERY + ' WHERE u.username = %s', (username,))
-        return cursor.fetchone()
+        cursor.execute(PROFILE_QUERY + ' WHERE u.username = %s', (viewer_id, username))
+        return _with_follow_flag(cursor.fetchone())
 
 def get_profile_by_id(user_id: int) -> dict | None:
+    """A member's own profile: members never follow themselves."""
     with db_cursor(dictionary=True) as cursor:
-        cursor.execute(PROFILE_QUERY + ' WHERE u.user_id = %s', (user_id,))
-        return cursor.fetchone()
+        cursor.execute(PROFILE_QUERY + ' WHERE u.user_id = %s', (None, user_id))
+        return _with_follow_flag(cursor.fetchone())
+
+def _with_follow_flag(profile: dict | None) -> dict | None:
+    if profile is not None:
+        profile['followed'] = bool(profile['followed'])
+    return profile
 
 def update_profile(user_id: int, changes: dict[str, str | None]) -> None:
     # Only profile columns can be written, whatever the caller passes.

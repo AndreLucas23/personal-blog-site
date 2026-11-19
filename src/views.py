@@ -90,7 +90,7 @@ def open_article(article_id):
 @views_bp.route('/@<username>')
 def profile(username):
     canonical = validation.normalize_username(username)
-    member = user_repository.get_profile(canonical)
+    member = user_repository.get_profile(canonical, current_user_id())
     if member is None:
         abort(404)
 
