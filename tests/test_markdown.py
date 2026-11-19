@@ -34,7 +34,8 @@ def test_raw_html_is_shown_as_text():
 
 
 @pytest.mark.parametrize('target', [
-    'javascript:alert(1)', 'JAVASCRIPT:alert(1)', 'vbscript:msgbox(1)', 'data:text/html,<b>x</b>',
+    'javascript:alert(1)', 'JAVASCRIPT:alert(1)', ' javascript:alert(1)', 'vbscript:msgbox(1)',
+    'file:///etc/passwd', 'data:text/html,<b>x</b>', 'data:image/png;base64,iVBORw0KGgo=',
 ])
 def test_dangerous_link_targets_are_not_links(target):
     assert 'href' not in html(f'[clique]({target})')
@@ -108,3 +109,8 @@ def test_preview_renders_the_markdown(reader_client):
 def test_preview_rejects_a_body_without_text(reader_client):
     assert reader_client.post('/api/previews', json={'content': 3}).status_code == 400
     assert reader_client.post('/api/previews', json=['x']).status_code == 400
+
+
+@pytest.mark.parametrize('target', ['https://a.dev', 'http://a.dev', 'mailto:ana@a.dev', '/articles/1', '#secao'])
+def test_ordinary_links_stay_links(target):
+    assert 'href=' in html(f'[x]({target})')
