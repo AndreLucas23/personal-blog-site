@@ -25,12 +25,12 @@ def _with_like_flag(article: dict | None) -> dict | None:
     return article
 
 # Lists show published articles only; a draft is reached by its author alone.
-PUBLISHED = " WHERE a.status = 'published'"
+ONLY_PUBLISHED = " WHERE a.status = 'published'"
 # Placeholder: the viewer id. Without a viewer the comparison is NULL, so only published.
-VISIBLE = " AND (a.status = 'published' OR a.author_id = %s)"
+VISIBLE_TO_VIEWER = " AND (a.status = 'published' OR a.author_id = %s)"
 
 def get_all(viewer_id: int | None = None, author_username: str | None = None) -> list[dict]:
-    query, params = ARTICLE_DETAILS_QUERY + PUBLISHED, [viewer_id]
+    query, params = ARTICLE_DETAILS_QUERY + ONLY_PUBLISHED, [viewer_id]
     if author_username is not None:
         query += ' AND u.username = %s'
         params.append(author_username)
@@ -43,7 +43,7 @@ def get_by_id(article_id: int, viewer_id: int | None = None) -> dict | None:
     """The article, if it is published or the viewer wrote it."""
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(
-            ARTICLE_DETAILS_QUERY + ' WHERE a.article_id = %s' + VISIBLE,
+            ARTICLE_DETAILS_QUERY + ' WHERE a.article_id = %s' + VISIBLE_TO_VIEWER,
             (viewer_id, article_id, viewer_id)
         )
         return _with_like_flag(cursor.fetchone())
@@ -127,7 +127,7 @@ def update(
 def search_by_id(search_id: int, viewer_id: int | None = None) -> list[dict]:
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(
-            ARTICLE_DETAILS_QUERY + PUBLISHED + ' AND a.article_id LIKE %s',
+            ARTICLE_DETAILS_QUERY + ONLY_PUBLISHED + ' AND a.article_id LIKE %s',
             (viewer_id, f'%{search_id}%')
         )
         return [_with_like_flag(article) for article in cursor.fetchall()]
@@ -135,7 +135,7 @@ def search_by_id(search_id: int, viewer_id: int | None = None) -> list[dict]:
 def search_by_title(search_title: str, viewer_id: int | None = None) -> list[dict]:
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(
-            ARTICLE_DETAILS_QUERY + PUBLISHED + ' AND a.article_title LIKE %s',
+            ARTICLE_DETAILS_QUERY + ONLY_PUBLISHED + ' AND a.article_title LIKE %s',
             (viewer_id, f'%{search_title}%')
         )
         return [_with_like_flag(article) for article in cursor.fetchall()]
