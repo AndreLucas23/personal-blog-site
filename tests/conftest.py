@@ -107,13 +107,16 @@ def client(app):
 @pytest.fixture
 def admin_id() -> int:
     return create_user(
-        ADMIN['username'], ADMIN['email'], ADMIN['password'], is_admin=True
+        ADMIN['display_name'], ADMIN['username'], ADMIN['email'], ADMIN['password'],
+        is_admin=True,
     )
 
 
 @pytest.fixture
 def reader_id() -> int:
-    return create_user(READER['username'], READER['email'], READER['password'])
+    return create_user(
+        READER['display_name'], READER['username'], READER['email'], READER['password']
+    )
 
 
 @pytest.fixture

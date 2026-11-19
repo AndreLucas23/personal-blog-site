@@ -14,9 +14,9 @@
     <section class="card profile-card">
         <div class="profile-card__cover"></div>
         <div class="profile-card__body">
-            {{ avatar(current_user.username, 'lg') }}
-            <p class="profile-card__name">{{ current_user.username }}</p>
-            <p class="profile-card__detail">{{ current_user.email }}</p>
+            {{ avatar(current_user.display_name, 'lg') }}
+            <p class="profile-card__name">{{ current_user.display_name }}</p>
+            <p class="profile-card__detail">@{{ current_user.username }}</p>
         </div>
     </section>
     {% else %}

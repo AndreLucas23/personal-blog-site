@@ -53,7 +53,7 @@ def test_members_see_their_account_menu_without_the_admin_link(reader_client):
 
     assert 'id="account-menu"' in page
     assert 'Reader' in page
-    assert 'reader@example.com' in page
+    assert '@reader' in page
     assert 'href="/admin"' not in page
     assert 'class="topnav__guest"' not in page
 

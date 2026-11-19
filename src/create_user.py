@@ -8,10 +8,21 @@ import user_validation as validation
 from repositories import user_repository
 
 ERROR_MESSAGES = {
+    validation.NAME_REQUIRED: 'A name is required.',
+    validation.NAME_TOO_LONG: (
+        f'The name can have at most {validation.MAX_DISPLAY_NAME_LENGTH} characters.'
+    ),
     validation.USERNAME_REQUIRED: 'A username is required.',
+    validation.USERNAME_TOO_SHORT: (
+        f'The username needs at least {validation.MIN_USERNAME_LENGTH} characters.'
+    ),
     validation.USERNAME_TOO_LONG: (
         f'The username can have at most {validation.MAX_USERNAME_LENGTH} characters.'
     ),
+    validation.USERNAME_INVALID: (
+        'The username can only have lowercase letters, digits and underscores.'
+    ),
+    validation.USERNAME_RESERVED: 'This username is reserved.',
     validation.EMAIL_TOO_LONG: (
         f'The email can have at most {validation.MAX_EMAIL_LENGTH} characters.'
     ),
@@ -26,8 +37,9 @@ ERROR_MESSAGES = {
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Create a blog user.')
-    parser.add_argument('--username', help='display name, asked for when omitted')
+    parser = argparse.ArgumentParser(description='Create a Social Blog user.')
+    parser.add_argument('--name', help='display name, asked for when omitted')
+    parser.add_argument('--username', help='unique username, asked for when omitted')
     parser.add_argument('--email', help='login email, asked for when omitted')
     parser.add_argument('--admin', action='store_true', help='grant admin privileges')
     return parser.parse_args()
@@ -50,19 +62,26 @@ def ask_password() -> str:
 
 def main() -> None:
     args = parse_args()
-    username = (args.username or input('Username: ')).strip()
+    display_name = (args.name or input('Name: ')).strip()
+    exit_on_error(validation.validate_display_name(display_name))
+    username = validation.normalize_username(args.username or input('Username: '))
+    exit_on_error(validation.validate_username(username))
     email = (args.email or input('Email: ')).strip()
-    exit_on_error(validation.validate_identity(username, email))
+    exit_on_error(validation.validate_email(email))
 
     password_hash = generate_password_hash(ask_password())
 
     try:
-        user_id = user_repository.create(username, email, password_hash, args.admin)
+        user_id = user_repository.create(
+            display_name, username, email, password_hash, args.admin
+        )
+    except user_repository.DuplicateUsernameError:
+        sys.exit(f'The username {username} is already taken.')
     except user_repository.DuplicateEmailError:
         sys.exit(f'A user with the email {email} already exists.')
 
     role = 'admin' if args.admin else 'regular user'
-    print(f'Created {role} {username} <{email}> with id {user_id}.')
+    print(f'Created {role} {display_name} (@{username}) <{email}> with id {user_id}.')
 
 
 if __name__ == '__main__':
