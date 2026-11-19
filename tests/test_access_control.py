@@ -82,4 +82,4 @@ def test_public_reads_stay_open(client, admin_id):
     assert client.get(f'/api/articles/{article_id}').status_code == 200
     assert client.get(f'/api/articles/id/{article_id}').status_code == 200
     assert client.get('/api/articles/title/T').status_code == 200
-    assert client.get(f'/open/{article_id}').status_code == 200
+    assert client.get(f'/articles/{article_id}/titulo').status_code == 200

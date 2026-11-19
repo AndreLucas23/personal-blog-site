@@ -121,7 +121,7 @@ def test_article_byline_links_to_the_author(client, admin_id):
     article_id = create_article(admin_id)
     user_repository.set_avatar(admin_id, AVATAR)
 
-    page = client.get(f'/open/{article_id}').get_data(as_text=True)
+    page = client.get(f'/open/{article_id}', follow_redirects=True).get_data(as_text=True)
 
     assert '<a class="byline__name" href="/@owner">Owner</a>' in page
     assert f'src="/media/{AVATAR}"' in page

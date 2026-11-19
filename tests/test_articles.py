@@ -5,7 +5,7 @@ from helpers import create_article
 from repositories import article_repository
 
 ARTICLE_FIELDS = {
-    'article_id', 'article_title', 'summary', 'excerpt', 'reading_time', 'publish_date',
+    'article_id', 'url', 'article_title', 'summary', 'excerpt', 'reading_time', 'publish_date',
     'author', 'author_username', 'author_avatar_url', 'likes', 'liked',
 }
 NEW_ARTICLE = {'title': 'Olá', 'summary': 'Um resumo', 'content': '# Oi\n\nPrimeiro post'}
@@ -276,3 +276,11 @@ def test_search_results_carry_the_author_fields(client, admin_id):
 
     assert result['author_username'] == 'owner'
     assert 'author_avatar_path' not in result
+
+
+def test_articles_carry_their_readable_address(client, admin_id):
+    article_id = create_article(admin_id, title='Olá, mundo!')
+
+    article = client.get(f'/api/articles/{article_id}').get_json()
+
+    assert article['url'] == f'/articles/{article_id}/ola-mundo'

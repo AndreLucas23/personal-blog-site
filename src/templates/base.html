@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="color-scheme" content="light dark">
     <title>{% block title %}Social Blog{% endblock %}</title>
+    {% block head %}{% endblock %}
     <link rel="icon" href="{{ url_for('static', filename='imgs/logo.svg') }}" type="image/svg+xml">
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">

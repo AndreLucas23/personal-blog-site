@@ -6,6 +6,11 @@
 
 {% block title %}{{ article['article_title'] }} | Social Blog{% endblock %}
 
+{% block head %}
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ canonical_url }}">
+{% endblock %}
+
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/article.css') }}">
 {% endblock %}
