@@ -30,7 +30,7 @@
 
         <div class="settings-photo__body">
             <h2 class="card__title" id="photo-title">Foto</h2>
-            <p class="field__hint">JPEG, PNG ou WebP de até 5 MB. O centro da imagem vira um quadrado.</p>
+            <p class="field__hint">JPEG, PNG ou WebP de até {{ max_image_mb }} MB. O centro da imagem vira um quadrado.</p>
 
             <div class="settings-photo__actions">
                 <button class="btn btn--secondary btn--sm" id="avatar-pick" type="button">
@@ -48,6 +48,7 @@
                 id="avatar-input"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                data-max-bytes="{{ max_image_bytes }}"
                 tabindex="-1"
                 aria-hidden="true">
             </div>
