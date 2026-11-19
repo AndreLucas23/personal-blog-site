@@ -10,7 +10,7 @@ const searchInput = document.getElementById('feed-search');
 const statusEl = document.getElementById('feed-status');
 const more = createLoadMore(document.getElementById('feed-more'), {
     fetchPage: (cursor) => API.fetchAll(cursor),
-    add: (articles) => appendArticles(feed, articles),
+    add: ({ articles }) => appendArticles(feed, articles),
 });
 
 let searchTimer = null;
