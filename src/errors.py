@@ -1,6 +1,6 @@
 """Error responses: JSON with a message under /api, a styled page everywhere else."""
 import mysql.connector
-from flask import Flask, current_app, jsonify, render_template, request, session
+from flask import Flask, Response, current_app, jsonify, make_response, render_template, request, session
 from werkzeug.exceptions import HTTPException, InternalServerError
 
 DATABASE_MESSAGE = 'An internal error occurred while accessing the database'
@@ -37,7 +37,12 @@ def _custom_description(error: HTTPException) -> str | None:
     return None
 
 
-def _render_page(status: int, message: str | None = None, *, with_account: bool = True):
+def _error_headers(error: HTTPException) -> list[tuple[str, str]]:
+    # Headers such as Allow on a 405 must survive; the body and its type are ours.
+    return [(name, value) for name, value in error.get_headers() if name.lower() != 'content-type']
+
+
+def _render_page(status: int, message: str | None = None, *, with_account: bool = True) -> Response:
     title, default_message = PAGE_MESSAGES.get(status, PAGE_MESSAGES[500])
     try:
         page = render_template(
@@ -50,18 +55,22 @@ def _render_page(status: int, message: str | None = None, *, with_account: bool 
         )
     except Exception:
         current_app.logger.exception('Could not render the error page')
-        return f'{status} {title}', status, {'Content-Type': 'text/plain; charset=utf-8'}
-    return page, status
+        return make_response(f'{status} {title}', status, {'Content-Type': 'text/plain; charset=utf-8'})
+    return make_response(page, status)
 
 
-def handle_http_error(error: HTTPException):
+def handle_http_error(error: HTTPException) -> Response:
     status = error.code or 500
     description = _custom_description(error)
 
     if is_api_request():
         message = description or API_MESSAGES.get(status, error.name)
-        return jsonify({'message': message}), status
-    return _render_page(status, description)
+        response = make_response(jsonify({'message': message}), status)
+    else:
+        response = _render_page(status, description)
+
+    response.headers.extend(_error_headers(error))
+    return response
 
 
 def handle_internal_error(error: InternalServerError):
