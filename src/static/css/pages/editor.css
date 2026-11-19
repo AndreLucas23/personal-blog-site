@@ -1,0 +1,125 @@
+/* Article editor */
+
+.page--editor {
+    max-width: 52rem;
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.editor__header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: space-between;
+}
+
+.editor__actions {
+    align-items: center;
+    display: flex;
+    gap: var(--space-3);
+}
+
+.editor__status {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+
+.editor__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-6) var(--space-5);
+}
+
+.editor__title,
+.editor__summary,
+.editor__content {
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    padding: 0;
+    width: 100%;
+}
+
+.editor__title,
+.editor__summary {
+    overflow: hidden;
+    resize: none;
+}
+
+.editor__title {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.editor__summary {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+}
+
+.editor__title::placeholder,
+.editor__summary::placeholder,
+.editor__content::placeholder {
+    color: var(--text-muted);
+}
+
+.editor__body {
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--space-2);
+}
+
+.editor__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.editor__toolbar {
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: var(--space-2) 0;
+}
+
+.editor__content {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    min-height: 24rem;
+    padding: var(--space-4) 0;
+    resize: vertical;
+}
+
+.editor__preview {
+    min-height: 24rem;
+    padding: var(--space-5) 0;
+}
+
+.editor__preview[aria-busy="true"] {
+    opacity: 0.6;
+}
+
+.editor__empty {
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+}
+
+@media (max-width: 639px) {
+    .editor__card {
+        padding: var(--space-5) var(--space-4) var(--space-4);
+    }
+
+    .editor__title {
+        font-size: var(--text-2xl);
+    }
+}
