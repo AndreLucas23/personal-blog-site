@@ -52,7 +52,7 @@
             aria-pressed="{{ 'true' if article['liked'] else 'false' }}">
                 {{ icon('heart') }}
                 <span class="like-btn__count" aria-hidden="true">{{ article['likes'] }}</span>
-                <span class="like-btn__label visually-hidden">
+                <span class="like-btn__label u-visually-hidden">
                     {{ 'Descurtir' if article['liked'] else 'Curtir' }}. {{ article['likes'] }} curtida{{ '' if article['likes'] == 1 else 's' }}
                 </span>
             </button>

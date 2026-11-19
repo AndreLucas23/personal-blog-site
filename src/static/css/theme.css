@@ -260,19 +260,7 @@ a:hover {
     display: none !important;
 }
 
-/* Utilities */
-
-.visually-hidden {
-    border: 0;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    white-space: nowrap;
-    width: 1px;
-}
+/* Skip link for keyboard users */
 
 .skip-link {
     background: var(--brand);
@@ -289,8 +277,18 @@ a:hover {
     top: var(--space-2);
 }
 
-.text-muted {
-    color: var(--text-muted);
+/* Utilities */
+
+.u-visually-hidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
 }
 
 @media (prefers-reduced-motion: reduce) {
