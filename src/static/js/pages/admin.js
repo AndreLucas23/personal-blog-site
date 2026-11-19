@@ -82,7 +82,7 @@ async function loadArticles() {
     const run = ++currentRun;
 
     try {
-        const loaded = await API.fetchAll();
+        const { articles: loaded } = await API.fetchAll();
         if (run !== currentRun) return;
         articles = loaded;
         // A search typed while loading stays on screen.
