@@ -14,12 +14,27 @@ let draftsLoaded = false;
 
 const followButton = document.querySelector('.profile button[data-follow]');
 if (followButton) {
-    const followers = document.getElementById('profile-followers');
+    const followersCount = document.getElementById('profile-followers');
     const followersLabel = document.getElementById('profile-followers-label');
+    const showFollowers = (count) => {
+        followersCount.textContent = count;
+        followersLabel.textContent = count === 1 ? 'seguidor' : 'seguidores';
+    };
+    // The last count the server gave, and whether the viewer followed at that point.
+    let confirmed = {
+        followers: Number(followersCount.textContent),
+        followed: followButton.dataset.followed === 'true',
+    };
+
     bindFollowButton(followButton, {
-        onChange({ followers: count }) {
-            followers.textContent = count;
-            followersLabel.textContent = count === 1 ? 'seguidor' : 'seguidores';
+        onChange({ followed, followers }) {
+            if (followers === null) {
+                // The count moves with the button, until the server gives the real one.
+                showFollowers(confirmed.followers + Number(followed) - Number(confirmed.followed));
+                return;
+            }
+            confirmed = { followers, followed };
+            showFollowers(followers);
         },
     });
 }
