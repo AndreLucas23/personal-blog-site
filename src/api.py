@@ -453,7 +453,8 @@ def follow_member(username):
 
     followed = request.method == 'PUT'
     if followed:
-        follow_repository.follow(current_user.user_id, member['user_id'])
+        if not follow_repository.follow(current_user.user_id, member['user_id']):
+            return jsonify({'message': 'User not found'}), 404
     else:
         follow_repository.unfollow(current_user.user_id, member['user_id'])
     return jsonify({'followed': followed, 'followers': follow_repository.count_followers(member['user_id'])})
