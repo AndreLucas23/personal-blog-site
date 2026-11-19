@@ -74,7 +74,7 @@ def test_articles_report_whether_the_viewer_liked_them(
 def test_article_page_shows_the_viewer_like(reader_client, article_id):
     reader_client.post(likes_url(article_id))
 
-    page = reader_client.get(f'/open/{article_id}').get_data(as_text=True)
+    page = reader_client.get(f'/open/{article_id}', follow_redirects=True).get_data(as_text=True)
 
     assert 'aria-pressed="true"' in page
 
