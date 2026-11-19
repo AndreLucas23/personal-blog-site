@@ -5,8 +5,9 @@ from helpers import create_article
 from repositories import article_repository
 
 ARTICLE_FIELDS = {
-    'article_id', 'url', 'article_title', 'summary', 'excerpt', 'reading_time', 'publish_date',
-    'author', 'author_username', 'author_avatar_url', 'likes', 'liked',
+    'article_id', 'url', 'article_title', 'summary', 'excerpt', 'reading_time', 'status',
+    'publish_date', 'created_at', 'updated_at', 'author', 'author_username', 'author_avatar_url',
+    'likes', 'liked',
 }
 NEW_ARTICLE = {'title': 'Olá', 'summary': 'Um resumo', 'content': '# Oi\n\nPrimeiro post'}
 
