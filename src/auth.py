@@ -64,12 +64,17 @@ def admin_required(view):
     return wrapped
 
 
-def normalize_login(value: str) -> str:
-    """An email stays as typed; anything else is read as a username, with or without the @."""
-    value = value.strip()
+def find_account(login_value: str) -> tuple[str, dict | None]:
+    """Read the login field as an email or a username, and find the account.
+
+    Returns the login as the form and the failed attempts keep it, and the account.
+    """
+    value = login_value.strip()
     if '@' in value.removeprefix('@'):
-        return value
-    return validation.normalize_username(value)
+        return value, user_repository.get_by_email(value)
+
+    username = validation.normalize_username(value)
+    return username, user_repository.get_by_username(username)
 
 
 def current_user_id() -> int | None:
@@ -84,11 +89,10 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    login_name = normalize_login(request.form.get('login', ''))
+    login_name, user = find_account(request.form.get('login', ''))
     password = request.form.get('password', '')
     ip_address = request.remote_addr or ''
 
-    user = user_repository.get_by_login(login_name)
     # Attempts on an account count together, whether its email or its username was typed.
     attempt_key = user['email'] if user else login_name
 

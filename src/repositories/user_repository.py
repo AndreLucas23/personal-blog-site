@@ -76,12 +76,6 @@ def set_avatar(user_id: int, avatar_path: str | None) -> str | None:
         )
         return row[0] if row else None
 
-def get_by_login(login: str) -> dict | None:
-    """Find a member by email or by username, as the login form accepts either one."""
-    if '@' in login:
-        return get_by_email(login)
-    return get_by_username(login)
-
 def create(
     display_name: str,
     username: str,
