@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from flask import Flask, jsonify, redirect, url_for
 from flask_cors import CORS
@@ -6,13 +7,17 @@ from flask_login import LoginManager, current_user
 
 import csrf
 import errors
+import media
 import security_headers
 import template_helpers
+import uploads
 from api import api_bp
 from auth import auth_bp
 from auth_user import AuthUser
 from settings import env_flag, env_list
 from views import views_bp
+
+DEFAULT_UPLOAD_DIR = '/data/uploads'
 
 secret_key = os.environ.get('SECRET_KEY')
 if not secret_key:
@@ -32,12 +37,15 @@ app.secret_key = secret_key
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # Browsers send a Secure cookie only over HTTPS, so it stays off for plain HTTP.
 app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE')
+app.config['UPLOAD_DIR'] = Path(os.environ.get('UPLOAD_DIR') or DEFAULT_UPLOAD_DIR)
+app.config['MAX_CONTENT_LENGTH'] = uploads.MAX_REQUEST_BYTES
 
 login_manager = LoginManager(app, add_context_processor=False)
 csrf.init_app(app)
 errors.init_app(app)
 security_headers.init_app(app)
 template_helpers.init_app(app)
+media.init_app(app)
 
 app.register_blueprint(views_bp)
 app.register_blueprint(api_bp)
