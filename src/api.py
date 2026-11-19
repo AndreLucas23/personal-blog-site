@@ -327,25 +327,32 @@ def get_own_drafts():
     return _articles_json(article_repository.get_drafts(current_user.user_id))
 
 
+def _invalid_image(field: str, code: str, status: int = 400):
+    return jsonify({'message': 'Invalid image', 'errors': {field: code}}), status
+
+def _uploaded_image(field: str):
+    """The file sent in a form field, and the answer to give when there is none to take."""
+    try:
+        image = request.files.get(field)
+    except RequestEntityTooLarge:
+        # Same code as a file over the image limit, so clients handle one case.
+        return None, _invalid_image(field, uploads.IMAGE_TOO_LARGE, 413)
+    if image is None:
+        return None, _invalid_image(field, uploads.IMAGE_MISSING)
+    return image, None
+
 @api_bp.route('/users/me/avatar', methods=['PUT'])
 @login_required
 def upload_avatar():
-    try:
-        image = request.files.get('avatar')
-    except RequestEntityTooLarge:
-        # Same code as a file over the image limit, so clients handle one case.
-        return jsonify({
-            'message': 'Invalid image',
-            'errors': {'avatar': uploads.IMAGE_TOO_LARGE},
-        }), 413
-    if image is None:
-        return jsonify({'message': 'Invalid image', 'errors': {'avatar': uploads.IMAGE_MISSING}}), 400
+    image, refused = _uploaded_image('avatar')
+    if refused:
+        return refused
 
     upload_dir = current_app.config['UPLOAD_DIR']
     try:
         file_name = uploads.save_avatar(image.stream, upload_dir)
     except uploads.ImageError as error:
-        return jsonify({'message': 'Invalid image', 'errors': {'avatar': error.code}}), 400
+        return _invalid_image('avatar', error.code)
 
     try:
         previous = user_repository.set_avatar(current_user.user_id, file_name)
