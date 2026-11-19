@@ -5,7 +5,7 @@ from repositories import article_repository
 
 ARTICLE_FIELDS = {
     'article_id', 'article_title', 'article_content', 'publish_date',
-    'author', 'likes', 'liked',
+    'author', 'author_username', 'author_avatar_url', 'likes', 'liked',
 }
 
 
@@ -18,6 +18,8 @@ def test_listing_returns_every_article_with_its_details(client, admin_id):
     assert [article['article_title'] for article in articles] == ['Primeiro', 'Segundo']
     assert set(articles[0]) == ARTICLE_FIELDS
     assert articles[0]['author'] == 'Owner'
+    assert articles[0]['author_username'] == 'owner'
+    assert articles[0]['author_avatar_url'] is None
     assert articles[0]['likes'] == 0
     assert articles[0]['liked'] is False
 
@@ -190,3 +192,34 @@ def test_search_by_id_returns_the_article_with_its_details(client, admin_id):
 
 def test_search_without_matches_returns_an_empty_list(client):
     assert client.get('/api/articles/title/nada').get_json() == []
+
+
+def test_listing_filters_by_author(client, admin_id, reader_id):
+    create_article(admin_id, title='Do admin')
+    create_article(reader_id, title='Da leitora')
+
+    response = client.get('/api/articles?author=@Reader')
+
+    assert response.status_code == 200
+    assert [article['article_title'] for article in response.get_json()] == ['Da leitora']
+    assert client.get('/api/articles?author=owner').get_json()[0]['article_title'] == 'Do admin'
+
+
+def test_listing_by_an_unknown_author_answers_404(client):
+    response = client.get('/api/articles?author=ghost')
+
+    assert response.status_code == 404
+    assert response.get_json() == {'message': 'User not found'}
+
+
+def test_member_without_articles_gets_an_empty_list(client, reader_id):
+    assert client.get('/api/articles?author=reader').get_json() == []
+
+
+def test_search_results_carry_the_author_fields(client, admin_id):
+    create_article(admin_id, title='Busca')
+
+    result = client.get('/api/articles/title/Bus').get_json()[0]
+
+    assert result['author_username'] == 'owner'
+    assert 'author_avatar_path' not in result
