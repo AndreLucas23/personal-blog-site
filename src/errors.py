@@ -1,7 +1,9 @@
 """Error responses: JSON with a message under /api, a styled page everywhere else."""
+from typing import NoReturn
+
 import mysql.connector
 from flask import Flask, Response, current_app, jsonify, make_response, render_template, request, session
-from werkzeug.exceptions import HTTPException, InternalServerError
+from werkzeug.exceptions import HTTPException, InternalServerError, default_exceptions
 
 DATABASE_MESSAGE = 'An internal error occurred while accessing the database'
 
@@ -30,11 +32,17 @@ def is_api_request() -> bool:
     return request.blueprint == 'api' or request.path == '/api' or request.path.startswith('/api/')
 
 
-def _custom_description(error: HTTPException) -> str | None:
-    """The description passed to abort(), or None when Werkzeug's default text is used."""
-    if error.description and error.description != type(error).description:
-        return error.description
-    return None
+def abort_with_message(status: int, message: str) -> NoReturn:
+    """Abort with a message chosen by the application, which the error response shows."""
+    error = default_exceptions[status](description=message)
+    # Descriptions from Werkzeug or other libraries can carry internal details, so
+    # only messages marked here reach the client.
+    error.public_message = message
+    raise error
+
+
+def _public_message(error: HTTPException) -> str | None:
+    return getattr(error, 'public_message', None)
 
 
 def _error_headers(error: HTTPException) -> list[tuple[str, str]]:
@@ -61,13 +69,12 @@ def _render_page(status: int, message: str | None = None, *, with_account: bool 
 
 def handle_http_error(error: HTTPException) -> Response:
     status = error.code or 500
-    description = _custom_description(error)
+    message = _public_message(error)
 
     if is_api_request():
-        message = description or API_MESSAGES.get(status, error.name)
-        response = make_response(jsonify({'message': message}), status)
+        response = make_response(jsonify({'message': message or API_MESSAGES.get(status, error.name)}), status)
     else:
-        response = _render_page(status, description)
+        response = _render_page(status, message)
 
     response.headers.extend(_error_headers(error))
     return response
