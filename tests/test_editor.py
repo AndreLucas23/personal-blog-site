@@ -83,3 +83,5 @@ def test_editor_starts_with_the_tags(reader_client, reader_id):
 
     assert page.index('data-tag="sql"') < page.index('data-tag="python"')
     assert 'data-max="5"' in page
+    # A pasted list is longer than one tag, so the length is checked per tag instead.
+    assert 'data-min-length="2"' in page and 'data-max-length="30"' in page

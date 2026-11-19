@@ -58,6 +58,7 @@ def _editor(article: dict | None):
         max_summary=article_validation.MAX_SUMMARY_LENGTH,
         max_content=article_validation.MAX_CONTENT_LENGTH,
         max_tags=article_validation.MAX_TAGS,
+        min_tag_length=article_validation.MIN_TAG_LENGTH,
         max_tag_length=article_validation.MAX_TAG_LENGTH,
     )
 
