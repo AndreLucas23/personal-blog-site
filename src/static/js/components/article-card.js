@@ -3,9 +3,6 @@ import { el, icon } from '../ui/dom.js';
 import { formatDateTime, isoString, timeAgo } from '../ui/format.js';
 import { createLikeButton } from './like-button.js';
 
-export function articleUrl(article) {
-    return `/open/${article.article_id}`;
-}
 
 export function profileUrl(username) {
     return `/@${encodeURIComponent(username)}`;
@@ -38,7 +35,7 @@ function createAuthor(article) {
 }
 
 export function createArticleCard(article) {
-    const url = articleUrl(article);
+    const { url } = article;
     const titleId = `article-title-${article.article_id}`;
 
     return el(
