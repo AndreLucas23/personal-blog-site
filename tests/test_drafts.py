@@ -117,6 +117,22 @@ def test_edits_record_when_they_happened(reader_client, reader_id):
     assert article_repository.get_by_id(article_id)['updated_at'] is not None
 
 
+def test_saving_what_is_already_there_is_not_an_edit(reader_client):
+    created = reader_client.post('/api/articles', json={
+        'title': 'Título', 'content': 'Conteúdo', 'tags': ['sql'],
+    }).get_json()
+    url = f"/api/articles/{created['article_id']}"
+    # What the editor sends on every save.
+    unchanged = {'title': 'Título', 'summary': '', 'content': 'Conteúdo', 'tags': ['sql']}
+
+    saved = reader_client.patch(url, json=unchanged)
+    reader_client.patch(url, json={**unchanged, 'status': 'draft'})
+    republished = reader_client.patch(url, json={**unchanged, 'status': 'published'})
+
+    assert saved.status_code == 200
+    assert republished.get_json()['updated_at'] is None
+
+
 def test_own_drafts_list(reader_client, reader_id, admin_id):
     first = draft_of(reader_id, title='Primeiro')
     second = draft_of(reader_id, title='Segundo')
