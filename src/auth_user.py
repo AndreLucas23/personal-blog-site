@@ -27,3 +27,11 @@ class AuthUser(UserMixin):
     @property
     def email(self) -> str:
         return self._user['email']
+
+    @property
+    def headline(self) -> str | None:
+        return self._user.get('headline')
+
+    @property
+    def avatar_path(self) -> str | None:
+        return self._user.get('avatar_path')
