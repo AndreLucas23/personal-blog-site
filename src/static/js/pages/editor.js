@@ -41,7 +41,8 @@ function replaceSelection(text, selectStart, selectEnd) {
     contentInput.focus();
     if (!document.execCommand('insertText', false, text)) {
         contentInput.setRangeText(text, start, contentInput.selectionEnd, 'end');
-        contentInput.dispatchEvent(new Event('input'));
+        // Bubbling, so the form also learns there are unsaved changes.
+        contentInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
     contentInput.setSelectionRange(start + selectStart, start + selectEnd);
 }
