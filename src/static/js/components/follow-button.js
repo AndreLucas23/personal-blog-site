@@ -8,9 +8,16 @@ function renderFollowState(button, followed) {
     button.querySelector('.follow-btn__text').textContent = followed ? 'Seguindo' : 'Seguir';
 }
 
-/** Follow or unfollow on click. onChange gets the answer, with the new count of followers. */
+/**
+ * Follow or unfollow on click. onChange gets every state the button shows: at once with
+ * followers null, then with the count the server gives, or again when it is undone.
+ */
 export function bindFollowButton(button, { onChange } = {}) {
     let busy = false;
+    const show = (followed, followers = null) => {
+        renderFollowState(button, followed);
+        onChange?.({ followed, followers });
+    };
 
     button.addEventListener('click', async () => {
         // Not disabled while it waits, which would take the focus away from keyboard users.
@@ -18,16 +25,15 @@ export function bindFollowButton(button, { onChange } = {}) {
         busy = true;
         const wasFollowed = button.dataset.followed === 'true';
         // Show the result at once and undo it if the server refuses.
-        renderFollowState(button, !wasFollowed);
+        show(!wasFollowed);
 
         try {
             const username = button.dataset.follow;
             const result = wasFollowed ? await API.unfollow(username) : await API.follow(username);
-            renderFollowState(button, result.followed);
-            onChange?.(result);
+            show(result.followed, result.followers);
         } catch (error) {
             console.error(error);
-            renderFollowState(button, wasFollowed);
+            show(wasFollowed);
             showToast(wasFollowed
                 ? 'Não foi possível deixar de seguir agora. Tente de novo.'
                 : 'Não foi possível seguir agora. Tente de novo.', { type: 'error' });
