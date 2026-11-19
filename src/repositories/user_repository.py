@@ -5,7 +5,7 @@ from user_validation import PROFILE_FIELDS
 
 DUPLICATE_ENTRY_ERROR = 1062
 USERNAME_KEY = 'uq_users_username'
-ACCOUNT_COLUMNS = 'user_id, username, display_name, email, password_hash, is_admin, avatar_path'
+ACCOUNT_COLUMNS = 'user_id, username, display_name, email, password_hash, is_admin'
 PROFILE_QUERY = (
     'SELECT u.user_id, u.username, u.display_name, u.email, u.headline, u.bio, '
     'u.location, u.website, u.avatar_path, u.created_at, '
