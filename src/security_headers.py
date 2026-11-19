@@ -2,12 +2,11 @@
 from flask import Flask, Response, current_app
 
 # Only this application's own files may run, style the pages, load or receive data.
-# Images may also be data: or blob: URLs, for previews of files picked on the device.
 CONTENT_SECURITY_POLICY = '; '.join((
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self'",
-    "img-src 'self' data: blob:",
+    "img-src 'self'",
     "font-src 'self'",
     "connect-src 'self'",
     "object-src 'none'",
