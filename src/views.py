@@ -62,7 +62,7 @@ def write():
 @views_bp.route('/write/<int:article_id>')
 @login_required
 def edit_article(article_id):
-    found = article_repository.get_by_id(article_id)
+    found = article_repository.get_by_id(article_id, current_user.user_id)
     if found is None:
         abort(404)
     if found['author_id'] != current_user.user_id:
@@ -72,7 +72,7 @@ def edit_article(article_id):
 @views_bp.route('/open/<int:article_id>')
 def open_article(article_id):
     """The address articles had before they got readable ones."""
-    found = article_repository.get_by_id(article_id)
+    found = article_repository.get_by_id(article_id, current_user_id())
     if found is None:
         abort(404)
     return redirect(article_url(found), 301)

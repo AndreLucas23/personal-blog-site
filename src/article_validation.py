@@ -10,6 +10,10 @@ CONTENT_REQUIRED = 'content_required'
 CONTENT_TOO_LONG = 'content_too_long'
 INVALID = 'invalid'
 
+DRAFT = 'draft'
+PUBLISHED = 'published'
+STATUSES = (DRAFT, PUBLISHED)
+
 # The fields members write, in the order of the editor. Optional ones are stored as
 # NULL when left empty.
 ARTICLE_FIELDS = ('title', 'summary', 'content')
@@ -24,15 +28,16 @@ def normalize(field: str, value: str) -> str:
     return ' '.join(value.split())
 
 
-def validate(fields: dict[str, str], *, require_all: bool) -> dict[str, str]:
+def validate(fields: dict[str, str], *, title_required: bool, content_required: bool) -> dict[str, str]:
     """Check normalized fields and return the error code of each invalid one.
 
-    With require_all, as when an article is created, a missing title or content is an error.
+    A title that is sent cannot be empty. The content is required only to publish,
+    so a draft can start with just its title.
     """
     errors = {}
 
-    if require_all or 'title' in fields:
-        title = fields.get('title', '')
+    title = fields.get('title')
+    if title is not None or title_required:
         if not title:
             errors['title'] = TITLE_REQUIRED
         elif len(title) > MAX_TITLE_LENGTH:
@@ -41,11 +46,10 @@ def validate(fields: dict[str, str], *, require_all: bool) -> dict[str, str]:
     if len(fields.get('summary', '')) > MAX_SUMMARY_LENGTH:
         errors['summary'] = SUMMARY_TOO_LONG
 
-    if require_all or 'content' in fields:
-        content = fields.get('content', '')
-        if not content.strip():
-            errors['content'] = CONTENT_REQUIRED
-        elif len(content) > MAX_CONTENT_LENGTH:
-            errors['content'] = CONTENT_TOO_LONG
+    content = fields.get('content', '')
+    if len(content) > MAX_CONTENT_LENGTH:
+        errors['content'] = CONTENT_TOO_LONG
+    elif content_required and not content.strip():
+        errors['content'] = CONTENT_REQUIRED
 
     return errors

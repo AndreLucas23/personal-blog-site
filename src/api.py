@@ -28,7 +28,10 @@ def _article_json(article: dict, *, with_content: bool = False) -> dict:
         'summary': article['summary'],
         'excerpt': article['summary'] or markdown_render.excerpt(plain),
         'reading_time': markdown_render.reading_minutes(plain),
+        'status': article['status'],
         'publish_date': article['publish_date'],
+        'created_at': article['created_at'],
+        'updated_at': article['updated_at'],
         'author': article['author'],
         'author_username': article['author_username'],
         'author_avatar_url': media_url(article['author_avatar_path']),
@@ -70,6 +73,14 @@ def _read_article_fields(data: dict) -> tuple[dict[str, str], dict[str, str]]:
         fields[field] = article_validation.normalize(field, value)
     return fields, errors
 
+def _read_status(data: dict) -> tuple[str | None, dict[str, str]]:
+    """The status a request body asks for, if any, and an error when it is not one."""
+    if 'status' not in data:
+        return None, {}
+    if data['status'] not in article_validation.STATUSES:
+        return None, {'status': article_validation.INVALID}
+    return data['status'], {}
+
 def _stored(fields: dict[str, str]) -> dict[str, str | None]:
     return {
         field: (value or None) if field in article_validation.OPTIONAL_FIELDS else value
@@ -90,14 +101,24 @@ def create_article():
         return jsonify({'message': 'Invalid request body'}), 400
 
     fields, errors = _read_article_fields(data)
+    status, status_errors = _read_status(data)
+    status = status or article_validation.PUBLISHED
     # A value that is not text says more than "required", so it wins.
-    errors = article_validation.validate(fields, require_all=True) | errors
+    errors = article_validation.validate(
+        fields,
+        title_required=True,
+        content_required=status == article_validation.PUBLISHED,
+    ) | errors | status_errors
     if errors:
         return _invalid_article(errors)
 
     stored = _stored(fields)
     article_id = article_repository.create(
-        stored['title'], stored.get('summary'), stored['content'], current_user.user_id
+        stored['title'],
+        stored.get('summary'),
+        stored.get('content') or '',
+        current_user.user_id,
+        status,
     )
     article = article_repository.get_by_id(article_id, current_user.user_id)
     # The author may delete it from another tab before this read.
@@ -115,7 +136,7 @@ def get_article(article_id):
 @api_bp.route('/articles/<int:article_id>', methods=['PATCH'])
 @login_required
 def update_article(article_id):
-    article = article_repository.get_by_id(article_id)
+    article = article_repository.get_by_id(article_id, current_user.user_id)
     if article is None:
         return _article_not_found()
     # Admins moderate by removing; changing someone's words is only for the author.
@@ -127,14 +148,25 @@ def update_article(article_id):
         return jsonify({'message': 'Invalid request body'}), 400
 
     fields, errors = _read_article_fields(data)
-    if not fields and not errors:
+    status, status_errors = _read_status(data)
+    if not fields and not errors and status is None and not status_errors:
         return jsonify({'message': 'No fields to update'}), 400
-    errors = article_validation.validate(fields, require_all=False) | errors
+
+    errors = article_validation.validate(
+        fields, title_required=False, content_required=False
+    ) | errors | status_errors
+    # A published article needs content, whether it is published now or stays published.
+    publishing = (status or article['status']) == article_validation.PUBLISHED
+    if publishing and not fields.get('content', article['article_content']).strip():
+        errors.setdefault('content', article_validation.CONTENT_REQUIRED)
     if errors:
         return _invalid_article(errors)
 
+    changes = _stored(fields)
+    if status is not None:
+        changes['status'] = status
     # An admin may remove the article between the checks above and this save.
-    if not article_repository.update(article_id, _stored(fields)):
+    if not article_repository.update(article_id, changes):
         return _article_not_found()
     article = article_repository.get_by_id(article_id, current_user.user_id)
     if article is None:
@@ -144,7 +176,8 @@ def update_article(article_id):
 @api_bp.route('/articles/<int:article_id>', methods=['DELETE'])
 @login_required
 def delete_article(article_id):
-    article = article_repository.get_by_id(article_id)
+    # Drafts are private, so admins cannot reach the drafts of others either.
+    article = article_repository.get_by_id(article_id, current_user.user_id)
     if article is None:
         return _article_not_found()
     if article['author_id'] != current_user.user_id and not current_user.is_admin:
@@ -167,7 +200,9 @@ def preview_markdown():
 @api_bp.route('/articles/<int:article_id>/likes', methods=['POST', 'DELETE'])
 @login_required
 def article_likes(article_id):
-    if article_repository.get_by_id(article_id) is None:
+    article = article_repository.get_by_id(article_id, current_user.user_id)
+    # Only published articles collect likes.
+    if article is None or article['status'] != article_validation.PUBLISHED:
         return jsonify({'message': 'Article not found'}), 404
 
     is_like = request.method == 'POST'
@@ -261,6 +296,12 @@ def update_own_profile():
 
     profile = user_repository.get_profile_by_id(current_user.user_id)
     return jsonify(_profile_json(profile, include_email=True))
+
+
+@api_bp.route('/users/me/drafts', methods=['GET'])
+@login_required
+def get_own_drafts():
+    return _articles_json(article_repository.get_drafts(current_user.user_id))
 
 
 @api_bp.route('/users/me/avatar', methods=['PUT'])
