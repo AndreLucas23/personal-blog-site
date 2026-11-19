@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Profile pages at `/@<username>` with the member's photo, details, bio and articles, and the profile settings at `/settings/profile` with the photo upload (#76).
+- Member photos in the top bar, the account menu, the profile card, the article cards and the byline, which link to the profile (#76).
 - Every member has a unique username and a display name. Existing accounts get a username derived from their name (#75).
 - Sign in with the email or the username (#75).
 - Profile fields: headline, bio, location and website, with `GET /api/users/<username>`, and `GET` and `PATCH /api/users/me` (#75).
