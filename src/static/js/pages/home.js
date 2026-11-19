@@ -1,9 +1,8 @@
 import { ApiError, API } from '../api.js';
-import { foundLabel, newestFirst } from '../articles.js';
-import { createArticleCard, createArticleSkeleton, createEmptyState } from '../components/article-card.js';
+import { foundLabel } from '../articles.js';
+import { showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
 
 const SEARCH_DELAY_MS = 250;
-const SKELETONS = 3;
 
 const feed = document.getElementById('feed');
 const searchInput = document.getElementById('feed-search');
@@ -13,35 +12,21 @@ let searchTimer = null;
 // Every load and search takes a number. Only the latest one may draw the feed.
 let currentRun = 0;
 
-function render(articles, emptyState) {
-    feed.replaceChildren(...(articles.length
-        ? newestFirst(articles).map(createArticleCard)
-        : [createEmptyState(emptyState)]));
-}
-
 async function loadArticles() {
     const run = ++currentRun;
     statusEl.textContent = '';
-    feed.setAttribute('aria-busy', 'true');
-    feed.replaceChildren(...Array.from({ length: SKELETONS }, createArticleSkeleton));
+    showSkeletons(feed);
 
     try {
         const articles = await API.fetchAll();
         if (run !== currentRun) return;
-        render(articles, {
+        showArticles(feed, articles, {
             title: 'Nenhum artigo por aqui ainda',
             text: 'Quando alguém publicar, os artigos aparecem aqui.',
         });
     } catch (error) {
         console.error(error);
-        if (run !== currentRun) return;
-        feed.replaceChildren(createEmptyState({
-            iconName: 'alert',
-            title: 'Não foi possível carregar os artigos',
-            text: 'Verifique sua conexão e recarregue a página.',
-        }));
-    } finally {
-        if (run === currentRun) feed.removeAttribute('aria-busy');
+        if (run === currentRun) showLoadError(feed);
     }
 }
 
@@ -63,19 +48,18 @@ async function search(query) {
         const results = await API.searchByTitle(query);
         if (run !== currentRun) return;
         statusEl.textContent = results.length ? foundLabel(results.length) : '';
-        render(results, noResults);
+        showArticles(feed, results, noResults);
     } catch (error) {
         if (run !== currentRun) return;
         // The search route answers 404 for queries it cannot take, such as one with a slash.
         if (error instanceof ApiError && error.status === 404) {
             statusEl.textContent = '';
-            render([], noResults);
+            showArticles(feed, [], noResults);
             return;
         }
         console.error(error);
         statusEl.textContent = 'Não foi possível buscar agora. Tente de novo em instantes.';
-    } finally {
-        if (run === currentRun) feed.removeAttribute('aria-busy');
+        feed.removeAttribute('aria-busy');
     }
 }
 
