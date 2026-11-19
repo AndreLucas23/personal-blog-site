@@ -41,7 +41,11 @@
                 <div class="byline__text">
                     <a class="byline__name" href="{{ author_url }}">{{ author }}</a>
                     <span class="byline__meta">
+                        {% if article['publish_date'] %}
                         <time datetime="{{ article['publish_date'] | iso_datetime }}" data-local-date>{{ article['publish_date'] | long_date }}</time>
+                        {% else %}
+                        Rascunho
+                        {% endif %}
                         · {{ reading_minutes }} min de leitura
                     </span>
                 </div>
