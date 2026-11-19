@@ -1,10 +1,9 @@
 import { API } from '../api.js';
-import { foundLabel, newestFirst, readArticleFields } from '../articles.js';
+import { foundLabel, newestFirst } from '../articles.js';
 import { createEmptyState } from '../components/article-card.js';
-import { bindDialog, confirmDialog } from '../ui/dialog.js';
+import { confirmDialog } from '../ui/dialog.js';
 import { el, icon } from '../ui/dom.js';
 import { formatDate } from '../ui/format.js';
-import { bindCounter } from '../ui/forms.js';
 import { showToast } from '../ui/toast.js';
 
 const SEARCH_DELAY_MS = 250;
@@ -75,7 +74,7 @@ function renderAll() {
     statusEl.textContent = '';
     render(articles, {
         title: 'Nenhum artigo publicado',
-        text: 'Use o botão Novo artigo para publicar o primeiro.',
+        text: 'Os artigos dos membros aparecem aqui.',
     });
 }
 
@@ -134,7 +133,7 @@ async function runSearch() {
 async function removeArticle(article) {
     const confirmed = await confirmDialog({
         title: 'Remover artigo?',
-        message: `“${article.article_title}” e as curtidas dele serão apagados. Essa ação não pode ser desfeita.`,
+        message: `“${article.article_title}”, de ${article.author}, e as curtidas dele serão apagados. Use para conteúdo que viola as regras.`,
         confirmLabel: 'Remover',
         danger: true,
     });
@@ -152,57 +151,10 @@ async function removeArticle(article) {
     loadArticles();
 }
 
-function setUpNewArticle() {
-    const dialog = document.getElementById('new-article-dialog');
-    const form = document.getElementById('new-article-form');
-    const titleInput = document.getElementById('new-title');
-    const contentInput = document.getElementById('new-content');
-    const submitButton = document.getElementById('new-article-submit');
-    const updateTitleCounter = bindCounter(titleInput, document.getElementById('new-title-counter'));
-    const updateContentCounter = bindCounter(contentInput, document.getElementById('new-content-counter'));
-
-    bindDialog(dialog);
-
-    document.getElementById('new-article-btn').addEventListener('click', () => {
-        dialog.showModal();
-        titleInput.focus();
-    });
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const fields = readArticleFields(titleInput, contentInput);
-        if (!fields) return;
-
-        submitButton.classList.add('is-loading');
-        submitButton.disabled = true;
-
-        try {
-            await API.createArticle({ title: fields.title, content: fields.content });
-        } catch (error) {
-            console.error(error);
-            showToast('Não foi possível publicar o artigo. Tente de novo.', { type: 'error' });
-            return;
-        } finally {
-            submitButton.classList.remove('is-loading');
-            submitButton.disabled = false;
-        }
-
-        form.reset();
-        updateTitleCounter();
-        updateContentCounter();
-        dialog.close();
-        showToast('Artigo publicado.', { type: 'success' });
-        // A failure here only affects the list, which shows its own error.
-        loadArticles();
-    });
-}
-
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(runSearch, SEARCH_DELAY_MS);
 });
 searchType.addEventListener('change', runSearch);
 
-setUpNewArticle();
 loadArticles();

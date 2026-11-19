@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Painel | Social Blog{% endblock %}
+{% block title %}Moderação | Social Blog{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/admin.css') }}">
@@ -12,14 +12,9 @@
 <main id="main" class="page__main">
     <header class="admin-header">
         <div>
-            <h1 class="section-title">Painel</h1>
-            <p class="section-subtitle">Olá, {{ current_user.display_name }}. Aqui você cria, busca e remove artigos.</p>
+            <h1 class="section-title">Moderação</h1>
+            <p class="section-subtitle">Olá, {{ current_user.display_name }}. Busque artigos e remova os que violam as regras da comunidade.</p>
         </div>
-
-        <button class="btn btn--primary" id="new-article-btn" type="button">
-            {{ icon('plus') }}
-            Novo artigo
-        </button>
     </header>
 
     <section class="card" aria-labelledby="admin-articles-title">
@@ -52,56 +47,6 @@
     </section>
 </main>
 
-<dialog class="dialog" id="new-article-dialog" aria-labelledby="new-article-title">
-    <form class="dialog__panel" id="new-article-form" novalidate>
-        <div class="dialog__header">
-            <h2 class="dialog__title" id="new-article-title">Novo artigo</h2>
-            <button class="icon-btn" type="button" aria-label="Fechar" data-dialog-close>
-                {{ icon('close') }}
-            </button>
-        </div>
-
-        <div class="dialog__body form">
-            <div class="field">
-                <div class="field__row">
-                    <label class="field__label" for="new-title">Título</label>
-                    <span class="field__counter" id="new-title-counter">0 / 150</span>
-                </div>
-                <input class="input"
-                id="new-title"
-                name="new-title"
-                type="text"
-                maxlength="150"
-                placeholder="Um título curto e claro"
-                autocomplete="off"
-                aria-describedby="new-title-error"
-                required>
-                <span class="field__error" id="new-title-error" aria-live="polite"></span>
-            </div>
-
-            <div class="field">
-                <div class="field__row">
-                    <label class="field__label" for="new-content">Conteúdo</label>
-                    <span class="field__counter" id="new-content-counter">0 / 50000</span>
-                </div>
-                <textarea class="textarea"
-                id="new-content"
-                name="new-content"
-                rows="10"
-                maxlength="50000"
-                placeholder="Escreva o artigo"
-                aria-describedby="new-content-error"
-                required></textarea>
-                <span class="field__error" id="new-content-error" aria-live="polite"></span>
-            </div>
-        </div>
-
-        <div class="dialog__footer">
-            <button class="btn btn--ghost" type="button" data-dialog-close>Cancelar</button>
-            <button class="btn btn--primary" type="submit" id="new-article-submit">Publicar</button>
-        </div>
-    </form>
-</dialog>
 {% endblock %}
 
 {% block scripts %}
