@@ -15,7 +15,7 @@ MAX_REQUEST_BYTES = 6 * 1024 * 1024
 # Decoding is what costs memory, so huge dimensions are refused before it.
 MAX_IMAGE_PIXELS = 40_000_000
 AVATAR_SIZE = 400
-FILE_NAME = re.compile(r'^[0-9a-f]{32}\.webp$')
+FILE_NAME = re.compile(r'[0-9a-f]{32}\.webp')
 
 IMAGE_MISSING = 'image_missing'
 IMAGE_INVALID = 'image_invalid'
@@ -32,7 +32,8 @@ class ImageError(Exception):
 
 
 def is_upload_name(name: str) -> bool:
-    return bool(FILE_NAME.match(name))
+    # fullmatch, because $ in match() also accepts a trailing newline.
+    return bool(FILE_NAME.fullmatch(name))
 
 
 def _mode_for(image: Image.Image) -> str:
