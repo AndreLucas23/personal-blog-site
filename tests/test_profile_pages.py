@@ -98,6 +98,8 @@ def test_settings_start_with_the_current_profile(reader_client, reader_id):
     assert 'value="Engenheira"' in page
     assert '>Linha 1</textarea>' in page
     assert 'id="avatar-remove"' in page
+    assert f'data-max-bytes="{5 * 1024 * 1024}"' in page
+    assert 'de até 5 MB' in page
 
 
 def test_account_menu_links_to_the_profile_and_the_settings(reader_client):
