@@ -21,6 +21,7 @@ PAGE_MESSAGES = {
     403: ('Acesso negado', 'Você não tem permissão para ver esta página.'),
     404: ('Página não encontrada', 'O endereço pode estar errado ou o conteúdo foi removido.'),
     405: ('Ação não permitida', 'Esta página não aceita essa ação.'),
+    413: ('Envio grande demais', 'O que você enviou passa do limite de 6 MB.'),
     500: ('Algo deu errado', 'Tivemos um problema do nosso lado. Tente de novo em instantes.'),
 }
 
