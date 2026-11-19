@@ -146,7 +146,9 @@ def test_database_error_page_skips_the_account_of_a_signed_in_member(reader_clie
     response = reader_client.get('/open/1')
 
     assert response.status_code == 500
+    assert response.mimetype == 'text/html'
     page = response.get_data(as_text=True)
+    assert 'class="topbar"' in page
     assert 'Algo deu errado' in page
     assert 'id="account-menu"' not in page
     assert 'topnav__guest' not in page
@@ -181,3 +183,28 @@ def test_library_error_details_never_reach_the_pages(client, monkeypatch):
     page = response.get_data(as_text=True)
     assert 'Requisição inválida' in page
     assert 'internal detail' not in page
+
+
+def test_error_page_drops_the_account_menu_when_the_database_fails(reader_client, monkeypatch):
+    monkeypatch.setattr(db, 'get_db_connection', fail_to_connect)
+
+    response = reader_client.get('/nao-existe')
+
+    assert response.status_code == 404
+    assert response.mimetype == 'text/html'
+    page = response.get_data(as_text=True)
+    assert 'class="topbar"' in page
+    assert 'Página não encontrada' in page
+    assert 'id="account-menu"' not in page
+
+
+def test_unexpected_error_keeps_the_account_menu_when_the_database_works(
+    reader_client, monkeypatch, unhandled_errors_answer_500
+):
+    from repositories import article_repository
+    monkeypatch.setattr(article_repository, 'get_by_id', explode)
+
+    response = reader_client.get('/open/1')
+
+    assert response.status_code == 500
+    assert 'id="account-menu"' in response.get_data(as_text=True)

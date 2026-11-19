@@ -52,19 +52,17 @@ def _error_headers(error: HTTPException) -> list[tuple[str, str]]:
 
 def _render_page(status: int, message: str | None = None, *, with_account: bool = True) -> Response:
     title, default_message = PAGE_MESSAGES.get(status, PAGE_MESSAGES[500])
-    try:
-        page = render_template(
-            'error.html',
-            status=status,
-            title=title,
-            message=message or default_message,
-            # The account menu loads the user from the database, which may be the failing part.
-            skip_account=not with_account,
-        )
-    except Exception:
-        current_app.logger.exception('Could not render the error page')
-        return make_response(f'{status} {title}', status, {'Content-Type': 'text/plain; charset=utf-8'})
-    return make_response(page, status)
+    context = {'status': status, 'title': title, 'message': message or default_message}
+
+    # The account menu loads the member from the database, which may be the failing part,
+    # so a page that cannot be drawn with it is drawn again without it.
+    for skip_account in ((False, True) if with_account else (True,)):
+        try:
+            return make_response(render_template('error.html', skip_account=skip_account, **context), status)
+        except Exception:
+            current_app.logger.exception('Could not render the error page')
+
+    return make_response(f'{status} {title}', status, {'Content-Type': 'text/plain; charset=utf-8'})
 
 
 def handle_http_error(error: HTTPException) -> Response:
@@ -84,7 +82,7 @@ def handle_internal_error(error: InternalServerError):
     # Flask already logged the original exception with its traceback.
     if is_api_request():
         return jsonify({'message': API_MESSAGES[500]}), 500
-    return _render_page(500, with_account=False)
+    return _render_page(500)
 
 
 def handle_database_error(error: mysql.connector.Error):
