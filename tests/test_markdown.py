@@ -75,6 +75,11 @@ def test_excerpt_cuts_at_a_word():
     assert markdown_render.excerpt('curto') == 'curto'
 
 
+def test_excerpt_keeps_a_word_that_ends_at_the_cut():
+    # Seven characters end right after "dois", before a space.
+    assert markdown_render.excerpt('um dois três', length=7) == 'um dois…'
+
+
 @pytest.mark.parametrize(('words', 'minutes'), [(10, 1), (200, 1), (400, 2), (1000, 5)])
 def test_reading_minutes(words, minutes):
     assert markdown_render.reading_minutes(('palavra ' * words).strip()) == minutes
