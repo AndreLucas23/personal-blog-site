@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Every member has a unique username and a display name. Existing accounts get a username derived from their name (#75).
+- Sign in with the email or the username (#75).
+- Profile fields: headline, bio, location and website, with `GET /api/users/<username>`, and `GET` and `PATCH /api/users/me` (#75).
+- Avatar upload with `PUT` and `DELETE /api/users/me/avatar`: JPEG, PNG or WebP up to 5 MB, stored as a 400 px WebP square in the `uploads_data` volume and served from `/media` (#75).
+- Articles in the API carry `author_username` and `author_avatar_url`, and `GET /api/articles?author=<username>` lists one member's articles (#75).
+- `UPLOAD_DIR` sets the directory of the uploaded images (#75).
 - A social network layout on every page: a top bar with the main destinations and an account menu, three columns on wide screens and one on phones, and shared components for cards, forms, menus, dialogs and messages (#70).
 - Light and dark themes that follow the system, with a theme choice in the account menu (#70).
 - Error pages in the new layout for 400, 403, 404, 405 and 500, and JSON errors with a `message` for every error under `/api` (#71).
@@ -19,6 +25,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Breaking:** the login form field is `login` instead of `email`, and registration asks for `display_name` and `username` (#75).
+- **Breaking:** `create_user.py` takes `--name` for the display name, and `--username` is now the unique username (#75).
+- `author` in the API and the pages is the display name of the author (#75).
+- The failed-login limit counts the attempts on an account together, whether its email or its username was typed (#75).
+- Requests larger than 6 MB answer `413` (#75).
 - The product is now called Social Blog (#70).
 - Pages use system fonts and one SVG icon sprite instead of Google Fonts and inline icons, so they make no requests to other sites (#70).
 - A database error on a page shows the error page instead of JSON (#71).

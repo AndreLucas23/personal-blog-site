@@ -19,9 +19,9 @@ Changing the value signs every user out.
 | Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/auth/login` | Login page. Redirects to the home page when the user is already signed in |
-| `POST` | `/auth/login` | Form fields `email` and `password`. Redirects to the home page on success and answers `401` with the login page otherwise, or `429` after too many failed attempts |
+| `POST` | `/auth/login` | Form fields `login`, the email or the username, and `password`. Redirects to the home page on success and answers `401` with the login page otherwise, or `429` after too many failed attempts |
 | `GET` | `/auth/register` | Registration page. Redirects to the home page when the user is already signed in |
-| `POST` | `/auth/register` | Form fields `username`, `email` and `password`. Creates a regular user, signs them in and redirects to the home page. Answers `400` for invalid data and `409` for an email that is already registered, both with the registration page |
+| `POST` | `/auth/register` | Form fields `display_name`, `username`, `email` and `password`. Creates a regular user, signs them in and redirects to the home page. Answers `400` for invalid data and `409` for an email or a username that is already registered, both with the registration page |
 | `POST` | `/auth/logout` | Ends the session and redirects to the home page. Requires a session |
 
 Every `POST` needs the CSRF token described below.
@@ -41,9 +41,9 @@ Logout is a `POST` for the same reason: a link that ends the session could be tr
 
 ## Login attempts
 
-After five failed attempts for the same email from the same address within fifteen minutes, the login answers `429` and asks the visitor to wait, even when the password is right. The block ends when the oldest of those attempts is fifteen minutes old, and a successful login clears the count.
+After five failed attempts on the same account from the same address within fifteen minutes, the login answers `429` and asks the visitor to wait, even when the password is right. The block ends when the oldest of those attempts is fifteen minutes old, and a successful login clears the count.
 
-The limit also applies to emails that have no account, so the answer does not reveal which emails are registered. The attempts are stored in the `FAILED_LOGINS` table and removed once they no longer count.
+Attempts on an account count together whether its email or its username was typed. Logins that match no account are limited by what was typed, so the answer does not reveal which emails or usernames are registered. The attempts are stored in the `FAILED_LOGINS` table and removed once they no longer count.
 
 ## Registration
 
@@ -53,7 +53,8 @@ The same rules apply to registration and to the create-user command:
 
 | Field | Rule |
 | --- | --- |
-| Username | Required and up to 50 characters, with surrounding spaces removed |
+| Name | Required and up to 50 characters, with surrounding spaces removed |
+| Username | 3 to 30 lowercase letters without accents, digits and underscores, unique and not reserved, as [profiles.md](profiles.md#usernames) describes |
 | Email | A valid address of up to 255 characters, unique regardless of letter case |
 | Password | Between 8 and 128 characters |
 
@@ -79,8 +80,8 @@ Pages that need a session redirect anonymous visitors to `/auth/login`. API rout
 | `/` | Everyone | The article list with authors and like buttons, and the search by title. Articles cannot be changed from it |
 | `/open/<id>` | Everyone | The article, its author and its like button. Admins also see the Editar button |
 | `/admin` | Admins | The article list with the controls to create, search and remove articles |
-| `/auth/login` | Visitors | The login form. After an invalid attempt the email is kept and the password is asked again |
-| `/auth/register` | Visitors | The registration form. After an error the username and email are kept, and the browser already blocks passwords shorter than 8 characters |
+| `/auth/login` | Visitors | The login form, with the email or the username. After an invalid attempt the login is kept and the password is asked again |
+| `/auth/register` | Visitors | The registration form. After an error the name, the username and the email are kept, and the browser already blocks passwords shorter than 8 characters |
 
 The top bar shows Entrar and Criar conta to visitors, and the login and registration pages link to each other. Signed-in users get an account menu with their name, the theme choice and Sair, and admins also see Painel in the top bar.
 
@@ -92,7 +93,7 @@ The database starts empty: no account exists until you create one. With the stac
 docker compose exec web python src/create_user.py --admin
 ```
 
-The command asks for the username, the email and the password, which is typed twice and never shown. Pass `--username` and `--email` to skip those questions, and leave out `--admin` to create a regular user. The command follows the rules listed under Registration. The password is stored as a Werkzeug hash, never in plain text. An email that is already registered is reported and nothing is created.
+The command asks for the name, the username, the email and the password, which is typed twice and never shown. Pass `--name`, `--username` and `--email` to skip those questions, and leave out `--admin` to create a regular user. The command follows the rules listed under Registration. The password is stored as a Werkzeug hash, never in plain text. An email or a username that is already registered is reported and nothing is created.
 
 ## Trying it
 
@@ -100,13 +101,13 @@ The command asks for the username, the email and the password, which is typed tw
 token=$(curl -s -c cookies.txt http://localhost:5000/auth/login \
   | grep -o 'name="csrf-token" content="[^"]*"' | cut -d'"' -f4)
 curl -b cookies.txt -c cookies.txt --data-urlencode "csrf_token=$token" \
-  -d 'email=you@example.com&password=your-password' http://localhost:5000/auth/login
+  -d 'login=you@example.com&password=your-password' http://localhost:5000/auth/login
 curl -b cookies.txt -H "X-CSRF-Token: $token" -H 'Content-Type: application/json' \
   -d '{"new-title": "Hello", "new-content": "First post"}' \
   http://localhost:5000/api/articles
 ```
 
-The first command opens a session and reads its CSRF token from the login page. Use the email and password of the admin you created.
+The first command opens a session and reads its CSRF token from the login page. Use the email or the username and the password of the admin you created.
 
 ## Databases created before this change
 
