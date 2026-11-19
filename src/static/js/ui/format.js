@@ -19,8 +19,20 @@ export function toDate(value) {
     return value instanceof Date ? value : new Date(value);
 }
 
+function isValid(date) {
+    return !Number.isNaN(date.getTime());
+}
+
+/** The date in ISO 8601, or null when the value is not a date. */
+export function isoString(value) {
+    const date = toDate(value);
+    return isValid(date) ? date.toISOString() : null;
+}
+
 export function timeAgo(value) {
     const date = toDate(value);
+    if (!isValid(date)) return '';
+
     let amount = (date.getTime() - Date.now()) / 1000;
 
     if (Math.abs(amount) >= RELATIVE_LIMIT_DAYS * 24 * 60 * 60) {
@@ -37,11 +49,13 @@ export function timeAgo(value) {
 }
 
 export function formatDate(value) {
-    return dateFormat.format(toDate(value));
+    const date = toDate(value);
+    return isValid(date) ? dateFormat.format(date) : '';
 }
 
 export function formatDateTime(value) {
-    return dateTimeFormat.format(toDate(value));
+    const date = toDate(value);
+    return isValid(date) ? dateTimeFormat.format(date) : '';
 }
 
 export function formatCount(value) {
