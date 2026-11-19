@@ -20,6 +20,9 @@ MEMBER_COLUMNS = (
     f'{VIEWER_FOLLOWS} AS followed'
 )
 
+# Suggestions leave out everyone the viewer follows, so none of them is followed yet.
+SUGGESTION_COLUMNS = 'u.user_id, u.username, u.display_name, u.headline, u.avatar_path, FALSE AS followed'
+
 # For each list: the column of the member whose list it is, and of the members listed.
 LISTS = {
     'followers': ('f.followed_id', 'f.follower_id'),
@@ -103,12 +106,12 @@ def suggestions(user_id: int, limit: int = SUGGESTIONS) -> list[dict]:
     with db_cursor(dictionary=True) as cursor:
         # The more of the people you follow follow someone, the earlier they come.
         cursor.execute(
-            f'SELECT {MEMBER_COLUMNS} FROM FOLLOWS yours '
+            f'SELECT {SUGGESTION_COLUMNS} FROM FOLLOWS yours '
             'JOIN FOLLOWS theirs ON theirs.follower_id = yours.followed_id '
             'JOIN USERS u ON u.user_id = theirs.followed_id '
             f'WHERE yours.follower_id = %s AND {new_to_you} '
             'GROUP BY u.user_id ORDER BY COUNT(*) DESC, u.user_id DESC LIMIT %s',
-            (user_id, user_id, user_id, user_id, limit),
+            (user_id, user_id, user_id, limit),
         )
         chosen = cursor.fetchall()
 
@@ -116,11 +119,11 @@ def suggestions(user_id: int, limit: int = SUGGESTIONS) -> list[dict]:
             ids = [member['user_id'] for member in chosen]
             not_chosen = f' AND u.user_id NOT IN ({", ".join(["%s"] * len(ids))})' if ids else ''
             cursor.execute(
-                f'SELECT {MEMBER_COLUMNS} FROM USERS u '
+                f'SELECT {SUGGESTION_COLUMNS} FROM USERS u '
                 "JOIN ARTICLES a ON a.author_id = u.user_id AND a.status = 'published' "
                 f'WHERE {new_to_you}{not_chosen} '
                 'GROUP BY u.user_id ORDER BY MAX(a.publish_date) DESC, u.user_id DESC LIMIT %s',
-                (user_id, user_id, user_id, *ids, limit - len(chosen)),
+                (user_id, user_id, *ids, limit - len(chosen)),
             )
             chosen += cursor.fetchall()
 
