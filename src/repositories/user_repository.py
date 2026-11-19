@@ -1,6 +1,7 @@
 import mysql.connector
 
 from db import db_cursor
+from repositories import follow_repository
 from user_validation import PROFILE_FIELDS
 
 DUPLICATE_ENTRY_ERROR = 1062
@@ -17,8 +18,7 @@ PROFILE_QUERY = (
     'AS article_count, '
     '(SELECT COUNT(*) FROM FOLLOWS f WHERE f.followed_id = u.user_id) AS follower_count, '
     '(SELECT COUNT(*) FROM FOLLOWS f WHERE f.follower_id = u.user_id) AS following_count, '
-    'EXISTS(SELECT 1 FROM FOLLOWS f WHERE f.follower_id = %s AND f.followed_id = u.user_id) '
-    'AS followed '
+    f'{follow_repository.VIEWER_FOLLOWS} AS followed '
     'FROM USERS u'
 )
 
@@ -49,18 +49,13 @@ def get_by_username(username: str) -> dict | None:
 def get_profile(username: str, viewer_id: int | None = None) -> dict | None:
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(PROFILE_QUERY + ' WHERE u.username = %s', (viewer_id, username))
-        return _with_follow_flag(cursor.fetchone())
+        return follow_repository.with_follow_flag(cursor.fetchone())
 
 def get_profile_by_id(user_id: int) -> dict | None:
     """A member's own profile: members never follow themselves."""
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(PROFILE_QUERY + ' WHERE u.user_id = %s', (None, user_id))
-        return _with_follow_flag(cursor.fetchone())
-
-def _with_follow_flag(profile: dict | None) -> dict | None:
-    if profile is not None:
-        profile['followed'] = bool(profile['followed'])
-    return profile
+        return follow_repository.with_follow_flag(cursor.fetchone())
 
 def update_profile(user_id: int, changes: dict[str, str | None]) -> None:
     # Only profile columns can be written, whatever the caller passes.

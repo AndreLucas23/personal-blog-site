@@ -9,11 +9,15 @@ MISSING_REFERENCE_ERROR = 1452
 SUGGESTIONS = 3
 MAX_SUGGESTIONS = 10
 
+# Whether the viewer, the placeholder, follows the member u. Profiles and lists share it,
+# so they never disagree.
+VIEWER_FOLLOWS = (
+    'EXISTS(SELECT 1 FROM FOLLOWS mine WHERE mine.follower_id = %s AND mine.followed_id = u.user_id)'
+)
 # The first placeholder is the viewer id, to tell whether they follow each member listed.
 MEMBER_COLUMNS = (
     'u.user_id, u.username, u.display_name, u.headline, u.avatar_path, '
-    'EXISTS(SELECT 1 FROM FOLLOWS mine WHERE mine.follower_id = %s '
-    'AND mine.followed_id = u.user_id) AS followed'
+    f'{VIEWER_FOLLOWS} AS followed'
 )
 
 # For each list: the column of the member whose list it is, and of the members listed.
@@ -83,7 +87,7 @@ def get_members(
 
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(query, tuple(params))
-        return [_with_follow_flag(member) for member in cursor.fetchall()]
+        return [with_follow_flag(member) for member in cursor.fetchall()]
 
 
 def suggestions(user_id: int, limit: int = SUGGESTIONS) -> list[dict]:
@@ -120,11 +124,13 @@ def suggestions(user_id: int, limit: int = SUGGESTIONS) -> list[dict]:
             )
             chosen += cursor.fetchall()
 
-    return [_with_follow_flag(member) for member in chosen]
+    return [with_follow_flag(member) for member in chosen]
 
 
-def _with_follow_flag(member: dict) -> dict:
-    member['followed'] = bool(member['followed'])
+def with_follow_flag(member: dict | None) -> dict | None:
+    """The member with followed as a bool, as MySQL answers 0 or 1."""
+    if member is not None:
+        member['followed'] = bool(member['followed'])
     return member
 
 
