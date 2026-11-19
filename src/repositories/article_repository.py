@@ -3,7 +3,7 @@ from repositories import tag_repository
 
 # The first placeholder is the viewer id, used to tell whether they liked each article.
 ARTICLE_DETAILS_QUERY = (
-    'SELECT a.article_id, a.author_id, a.article_title, a.summary, a.article_content, '
+    'SELECT a.article_id, a.author_id, a.article_title, a.summary, a.cover_path, a.article_content, '
     'a.status, a.publish_date, a.created_at, a.updated_at, '
     'u.display_name AS author, u.username AS author_username, '
     'u.avatar_path AS author_avatar_path, '
@@ -82,10 +82,29 @@ def create(
             tag_repository.replace_article_tags(cursor, article_id, tags)
         return article_id
 
-def delete(article_id: int) -> bool:
+def delete(article_id: int) -> tuple[bool, str | None]:
+    """Delete the article. Whether it existed, and its cover, so the file can be removed."""
     with db_cursor() as cursor:
-        cursor.execute('DELETE FROM ARTICLES WHERE ARTICLE_ID = %s', (article_id,))
-        return cursor.rowcount > 0
+        # The lock keeps a cover uploaded at the same moment from outliving the article.
+        cursor.execute('SELECT cover_path FROM ARTICLES WHERE article_id = %s FOR UPDATE', (article_id,))
+        row = cursor.fetchone()
+        if row is None:
+            return False, None
+        cursor.execute('DELETE FROM ARTICLES WHERE article_id = %s', (article_id,))
+        return True, row[0]
+
+def set_cover(article_id: int, cover_path: str | None) -> tuple[bool, str | None]:
+    """Store the new cover. Whether the article exists, and its previous cover."""
+    with db_cursor() as cursor:
+        # The lock keeps two uploads at once from losing track of a file.
+        cursor.execute('SELECT cover_path FROM ARTICLES WHERE article_id = %s FOR UPDATE', (article_id,))
+        row = cursor.fetchone()
+        if row is None:
+            return False, None
+        cursor.execute(
+            'UPDATE ARTICLES SET cover_path = %s WHERE article_id = %s', (cover_path, article_id)
+        )
+        return True, row[0]
 
 def update(
     article_id: int,
