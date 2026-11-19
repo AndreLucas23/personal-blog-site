@@ -2,6 +2,7 @@ import { ApiError, API } from '../api.js';
 import { foundLabel } from '../articles.js';
 import { appendArticles, showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
 import { createLoadMore } from '../components/load-more.js';
+import { createMemberRow } from '../components/member-row.js';
 
 const SEARCH_DELAY_MS = 250;
 
@@ -72,9 +73,25 @@ async function search(query) {
     }
 }
 
+async function loadSuggestions(card) {
+    const list = document.getElementById('suggestions-list');
+    try {
+        const { members } = await API.fetchSuggestions();
+        if (!members.length) return;
+        list.replaceChildren(...members.map((member) => createMemberRow(member, { viewer: list.dataset.viewer })));
+        card.hidden = false;
+    } catch (error) {
+        // The card is an extra, so the page goes on without it.
+        console.error(error);
+    }
+}
+
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => search(searchInput.value.trim()), SEARCH_DELAY_MS);
 });
 
 loadArticles();
+
+const suggestions = document.getElementById('suggestions');
+if (suggestions) loadSuggestions(suggestions);
