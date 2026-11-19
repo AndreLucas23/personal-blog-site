@@ -48,17 +48,32 @@ def _article_json(article: dict, *, with_content: bool = False) -> dict:
 def _articles_json(articles: list[dict]):
     return jsonify([_article_json(article) for article in articles])
 
-@api_bp.route('/articles', methods=['GET'])
-def get_articles():
-    """A page of published articles, newest first, and the cursor of the next one."""
+def _read_page():
+    """The position and the size of the page a list asks for, and the answer to an invalid one."""
     after = None
     if 'cursor' in request.args:
         after = pagination.decode_cursor(request.args['cursor'])
         if after is None:
-            return jsonify({'message': 'Invalid cursor'}), 400
+            return None, None, (jsonify({'message': 'Invalid cursor'}), 400)
     limit = pagination.read_limit(request.args.get('limit'))
     if limit is None:
-        return jsonify({'message': f'The limit must be from 1 to {pagination.MAX_PAGE_SIZE}'}), 400
+        message = f'The limit must be from 1 to {pagination.MAX_PAGE_SIZE}'
+        return None, None, (jsonify({'message': message}), 400)
+    return after, limit, None
+
+def _next_cursor(rows: list[dict], limit: int, date_key: str, id_key: str) -> str | None:
+    """The cursor of the next page, when the rows hold one more than the page."""
+    if len(rows) <= limit:
+        return None
+    last = rows[limit - 1]
+    return pagination.encode_cursor(last[date_key], last[id_key])
+
+@api_bp.route('/articles', methods=['GET'])
+def get_articles():
+    """A page of published articles, newest first, and the cursor of the next one."""
+    after, limit, refused = _read_page()
+    if refused:
+        return refused
 
     author = request.args.get('author')
     username = None if author is None else validation.normalize_username(author)
@@ -68,11 +83,10 @@ def get_articles():
     if username is not None and not articles and user_repository.get_by_username(username) is None:
         return jsonify({'message': 'User not found'}), 404
 
-    page = articles[:limit]
-    next_cursor = None
-    if len(articles) > limit:
-        next_cursor = pagination.encode_cursor(page[-1]['publish_date'], page[-1]['article_id'])
-    return jsonify({'articles': [_article_json(article) for article in page], 'next_cursor': next_cursor})
+    return jsonify({
+        'articles': [_article_json(article) for article in articles[:limit]],
+        'next_cursor': _next_cursor(articles, limit, 'publish_date', 'article_id'),
+    })
 
 def _read_article_fields(data: dict) -> tuple[dict[str, str], dict[str, str]]:
     """The article fields of a request body, normalized, and the ones that are not text."""
