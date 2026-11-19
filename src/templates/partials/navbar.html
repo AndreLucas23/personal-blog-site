@@ -12,7 +12,9 @@
                 <span class="topnav__label">Início</span>
             </a>
 
-            {% if current_user.is_authenticated %}
+            {% if skip_account %}
+            {# Error pages caused by the database cannot load the member. #}
+            {% elif current_user.is_authenticated %}
             {% if current_user.is_admin %}
             <a class="topnav__link" href="{{ url_for('views.admin') }}"
             {% if request.endpoint == 'views.admin' %}aria-current="page"{% endif %}>

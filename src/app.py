@@ -1,11 +1,11 @@
 import os
 
-import mysql.connector
-from flask import Flask, jsonify, redirect, request, session, url_for
+from flask import Flask, jsonify, redirect, url_for
 from flask_cors import CORS
 from flask_login import LoginManager
 
 import csrf
+import errors
 import template_helpers
 from api import api_bp
 from auth import auth_bp
@@ -34,6 +34,7 @@ app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE')
 
 login_manager = LoginManager(app)
 csrf.init_app(app)
+errors.init_app(app)
 template_helpers.init_app(app)
 
 app.register_blueprint(views_bp)
@@ -48,39 +49,15 @@ def load_user(user_id: str) -> AuthUser | None:
     return AuthUser(user) if user else None
 
 
-def is_api_request() -> bool:
-    return request.blueprint == 'api'
-
-
 @login_manager.unauthorized_handler
 def handle_unauthorized():
     login_url = url_for('auth.login')
-    if is_api_request():
+    if errors.is_api_request():
         return jsonify({
             'message': 'Authentication required',
             'login_url': login_url,
         }), 401
     return redirect(login_url)
-
-
-@app.errorhandler(403)
-def handle_forbidden(error):
-    if is_api_request():
-        return jsonify({'message': 'Admin privileges required'}), 403
-    return error
-
-
-@app.errorhandler(mysql.connector.Error)
-def handle_db_error(error):
-    # Use the session id: loading the user would query the failing database again.
-    app.logger.error(
-        'Database error on %s %s (user %s): [%s] %s',
-        request.method, request.path, session.get('_user_id'), error.errno, error.msg,
-    )
-    return jsonify({
-        'status': 'error',
-        'message': 'An internal error occurred while accessing the database',
-    }), 500
 
 
 if __name__ == '__main__':
