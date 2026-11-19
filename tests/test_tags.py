@@ -1,8 +1,10 @@
+import mysql.connector
 import pytest
 
 import article_validation
 from db import db_cursor
 from helpers import create_article
+from repositories import article_repository
 
 
 def tag_count() -> int:
@@ -99,3 +101,23 @@ def test_removing_an_article_removes_its_tags_but_keeps_the_topic(reader_client,
         cursor.execute('SELECT COUNT(*) FROM ARTICLE_TAGS')
         assert cursor.fetchone()[0] == 0
     assert tag_count() == 1
+
+
+# A tag longer than its column fails in the database, after the article row is written.
+TOO_LONG_FOR_THE_COLUMN = ['x' * 31]
+
+
+def test_an_article_is_not_created_when_its_tags_fail(reader_id):
+    with pytest.raises(mysql.connector.Error):
+        article_repository.create('Com tags', None, 'Conteúdo', reader_id, tags=TOO_LONG_FOR_THE_COLUMN)
+
+    assert article_repository.get_all() == []
+
+
+def test_an_article_keeps_its_fields_when_its_tags_fail(reader_id):
+    article_id = create_article(reader_id, title='Antes')
+
+    with pytest.raises(mysql.connector.Error):
+        article_repository.update(article_id, {'title': 'Depois'}, TOO_LONG_FOR_THE_COLUMN)
+
+    assert article_repository.get_by_id(article_id)['article_title'] == 'Antes'

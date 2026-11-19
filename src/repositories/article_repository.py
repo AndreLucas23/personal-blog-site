@@ -1,4 +1,5 @@
 from db import db_cursor
+from repositories import tag_repository
 
 # The first placeholder is the viewer id, used to tell whether they liked each article.
 ARTICLE_DETAILS_QUERY = (
@@ -67,6 +68,7 @@ def create(
     content: str,
     author_id: int,
     status: str = 'published',
+    tags: list[str] | None = None,
 ) -> int:
     with db_cursor() as cursor:
         cursor.execute(
@@ -75,23 +77,29 @@ def create(
             "VALUES (%s, %s, %s, %s, %s, IF(%s = 'published', CURRENT_TIMESTAMP, NULL))",
             (title, summary, content, author_id, status, status)
         )
-        return cursor.lastrowid
+        article_id = cursor.lastrowid
+        if tags:
+            tag_repository.replace_article_tags(cursor, article_id, tags)
+        return article_id
 
 def delete(article_id: int) -> bool:
     with db_cursor() as cursor:
         cursor.execute('DELETE FROM ARTICLES WHERE ARTICLE_ID = %s', (article_id,))
         return cursor.rowcount > 0
 
-def update(article_id: int, changes: dict[str, str | None], edited: bool = False) -> bool:
-    """Change the fields named as in COLUMNS and the status. False for a missing article.
+def update(
+    article_id: int,
+    changes: dict[str, str | None],
+    tags: list[str] | None = None,
+) -> bool:
+    """Change the fields named as in COLUMNS, the status and, unless None, the tags.
 
-    Changing a field marks the article as edited, and so does edited, for changes
-    such as tags that live in other tables.
+    Changing a field or the tags marks the article as edited. False for a missing article.
     """
     fields = [field for field in COLUMNS if field in changes]
     assignments = [f'{COLUMNS[field]} = %s' for field in fields]
     values = [changes[field] for field in fields]
-    if fields or edited:
+    if fields or tags is not None:
         assignments.append('updated_at = CURRENT_TIMESTAMP')
 
     if 'status' in changes:
@@ -110,7 +118,11 @@ def update(article_id: int, changes: dict[str, str | None], edited: bool = False
             f'UPDATE ARTICLES SET {", ".join(assignments)} WHERE article_id = %s',
             (*values, article_id)
         )
-        return cursor.rowcount > 0
+        if cursor.rowcount == 0:
+            return False
+        if tags is not None:
+            tag_repository.replace_article_tags(cursor, article_id, tags)
+        return True
 
 def search_by_id(search_id: int, viewer_id: int | None = None) -> list[dict]:
     with db_cursor(dictionary=True) as cursor:
