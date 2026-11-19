@@ -70,7 +70,9 @@ def excerpt(plain: str, length: int = EXCERPT_LENGTH) -> str:
     """The start of a plain text, cut at a word, for cards and page descriptions."""
     if len(plain) <= length:
         return plain
-    return plain[:length].rsplit(' ', 1)[0] + '…'
+    # A cut that falls just before a space already ends at a whole word.
+    start = plain[:length] if plain[length] == ' ' else plain[:length].rsplit(' ', 1)[0]
+    return start + '…'
 
 
 def reading_minutes(plain: str) -> int:
