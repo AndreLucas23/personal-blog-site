@@ -123,3 +123,57 @@
         font-size: var(--text-2xl);
     }
 }
+
+.tag-input {
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    min-height: 2.5rem;
+    padding: var(--space-1) var(--space-2);
+}
+
+.tag-input:focus-within {
+    border-color: var(--brand);
+    box-shadow: var(--focus-ring);
+}
+
+.tag-input__list {
+    display: contents;
+    list-style: none;
+}
+
+.tag-input__chip {
+    font-size: var(--text-sm);
+    padding: 2px 2px 2px var(--space-2);
+}
+
+.tag-input__remove {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-full);
+    color: inherit;
+    display: inline-flex;
+    padding: 2px;
+}
+
+.tag-input__remove:hover {
+    background: var(--surface-hover);
+    color: var(--danger);
+}
+
+.tag-input__field {
+    background: transparent;
+    border: 0;
+    flex: 1;
+    min-width: 10rem;
+    padding: var(--space-1);
+}
+
+.tag-input__field:focus {
+    box-shadow: none;
+    outline: none;
+}

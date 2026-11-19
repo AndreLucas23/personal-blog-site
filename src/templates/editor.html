@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% set editing = article is not none %}
+{% set published = editing and article['status'] == 'published' %}
 
 {% block title %}{{ 'Editar artigo' if editing else 'Escrever artigo' }} | Social Blog{% endblock %}
 
@@ -15,7 +16,8 @@
     <form class="editor"
     id="editor"
     novalidate
-    data-article-id="{{ article['article_id'] if editing else '' }}">
+    data-article-id="{{ article['article_id'] if editing else '' }}"
+    data-status="{{ article['status'] if editing else 'new' }}">
         <header class="editor__header">
             <a class="back-link" href="{{ back_url }}">
                 {{ icon('arrow-left', 'icon--sm') }}
@@ -23,10 +25,16 @@
             </a>
 
             <div class="editor__actions">
-                <span class="editor__status" id="editor-status" aria-live="polite"></span>
-                <button class="btn btn--primary" id="editor-submit" type="submit">
-                    {{ 'Salvar alterações' if editing else 'Publicar' }}
-                </button>
+                <span class="editor__status" id="editor-status" aria-live="polite">
+                    {%- if published %}Publicado{% elif editing %}Rascunho{% endif -%}
+                </span>
+                {% if published %}
+                <button class="btn btn--ghost" id="editor-unpublish" type="button">Mover para rascunhos</button>
+                <button class="btn btn--primary" id="editor-submit" type="submit">Salvar alterações</button>
+                {% else %}
+                <button class="btn btn--secondary" id="editor-draft" type="button">Salvar rascunho</button>
+                <button class="btn btn--primary" id="editor-submit" type="submit">Publicar</button>
+                {% endif %}
             </div>
         </header>
 
@@ -57,6 +65,31 @@
                     <span class="field__error" id="summary-error" aria-live="polite"></span>
                     <span class="field__counter" id="summary-counter"></span>
                 </div>
+            </div>
+
+            <div class="field">
+                <label class="field__label" for="tag-input">Tags</label>
+                <div class="tag-input" id="tag-box">
+                    <ul class="tag-input__list" id="tag-list" aria-label="Tags do artigo">
+                        {% for tag in (article['tags'] if editing else []) %}
+                        <li class="chip tag-input__chip" data-tag="{{ tag }}">
+                            {{ tag }}
+                            <button class="tag-input__remove" type="button" aria-label="Remover a tag {{ tag }}">{{ icon('close', 'icon--sm') }}</button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <input class="tag-input__field"
+                    id="tag-input"
+                    type="text"
+                    maxlength="{{ max_tag_length }}"
+                    autocomplete="off"
+                    autocapitalize="none"
+                    placeholder="Adicione até {{ max_tags }} tags"
+                    data-max="{{ max_tags }}"
+                    aria-describedby="tags-hint tags-error">
+                </div>
+                <span class="field__hint" id="tags-hint">Enter ou vírgula para adicionar. Ex.: python, banco de dados, carreira.</span>
+                <span class="field__error" id="tags-error" aria-live="polite"></span>
             </div>
 
             <div class="editor__body">
