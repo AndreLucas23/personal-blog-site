@@ -35,6 +35,7 @@ def test_author_edits_with_the_current_fields(reader_client, reader_id):
     assert '>Resumo</textarea>' in page
     assert '>## Texto</textarea>' in page
     assert 'Salvar alterações' in page
+    assert f'href="/articles/{article_id}/meu-titulo"' in page
 
 
 def test_only_the_author_opens_the_editor_of_an_article(reader_client, admin_id):
