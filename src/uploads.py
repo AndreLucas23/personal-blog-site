@@ -46,6 +46,11 @@ def save_avatar(stream: BinaryIO, upload_dir: Path) -> str:
 
     Raises ImageError with a code when the file is not an image the site accepts.
     """
+    return _save_fitted(stream, upload_dir, (AVATAR_SIZE, AVATAR_SIZE))
+
+
+def _save_fitted(stream: BinaryIO, upload_dir: Path, size: tuple[int, int]) -> str:
+    """Store the image cropped to the shape of size and scaled to it, as WebP."""
     data = stream.read(MAX_IMAGE_BYTES + 1)
     if len(data) > MAX_IMAGE_BYTES:
         raise ImageError(IMAGE_TOO_LARGE)
@@ -59,9 +64,9 @@ def save_avatar(stream: BinaryIO, upload_dir: Path) -> str:
 
             # Phones store photos sideways with a rotation tag that browsers would ignore here.
             upright = ImageOps.exif_transpose(original)
-            avatar = ImageOps.fit(
+            fitted = ImageOps.fit(
                 upright.convert(_mode_for(upright)),
-                (AVATAR_SIZE, AVATAR_SIZE),
+                size,
                 Image.Resampling.LANCZOS,
             )
     except ImageError:
@@ -78,7 +83,7 @@ def save_avatar(stream: BinaryIO, upload_dir: Path) -> str:
     # A new random name per upload, so browsers can cache each file forever.
     name = f'{secrets.token_hex(16)}.webp'
     upload_dir.mkdir(parents=True, exist_ok=True)
-    avatar.save(upload_dir / name, 'WEBP', quality=85)
+    fitted.save(upload_dir / name, 'WEBP', quality=85)
     return name
 
 
