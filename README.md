@@ -9,7 +9,8 @@ Social Blog is a social network for publishing and reading articles, built with 
 - Anyone can read and search articles, each with its author, date and like count.
 - Visitors can create an account with a name and a unique username, and sign in with the email or the username.
 - Every member has a public profile at `/@username` with a headline, a bio, a location, a website, a photo and their articles, edited at `/settings/profile`. Photos appear next to the member's name across the site.
-- Every member writes articles in Markdown at `/write`, with a preview, tags and private drafts, and edits or deletes their own. Articles live at readable addresses such as `/articles/12/arquitetura-limpa`.
+- Every member writes articles in Markdown at `/write`, with a preview, a cover, tags and private drafts, and edits or deletes their own. Articles live at readable addresses such as `/articles/12/arquitetura-limpa`.
+- Lists come in pages, newest first, with Mais artigos to load the next one.
 - Signed-in users can like and unlike articles.
 - Admins search and remove articles that break the rules in the moderation panel at `/admin`.
 - Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
@@ -148,6 +149,7 @@ src/
   markdown_render.py    Safe HTML, plain text and reading time from Markdown
   slugs.py              Readable words for addresses
   links.py              Addresses of pages, shared by the pages and the API
+  pagination.py         Cursors and page sizes of the article lists
   errors.py             Error pages and JSON errors
   media.py              Serving the uploaded images under /media
   uploads.py            Checking, resizing and storing uploaded images
@@ -175,13 +177,15 @@ src/
 
 | Method | Path | Access | Description |
 | --- | --- | --- | --- |
-| `GET` | `/api/articles` | Everyone | List all articles, or one member's with `?author=<username>` |
+| `GET` | `/api/articles` | Everyone | A page of articles, newest first, or of one member's with `?author=<username>` |
 | `GET` | `/api/articles/<id>` | Everyone | One article with its content |
 | `GET` | `/api/articles/id/<id>` | Everyone | Search articles by id, partial match |
 | `GET` | `/api/articles/title/<title>` | Everyone | Search articles by title, partial match |
 | `POST` | `/api/articles` | Signed in | Create an article with `title`, `summary`, `content`, `tags` and `status` |
 | `PATCH` | `/api/articles/<id>` | The author | Change `title`, `summary`, `content`, `tags` or `status` |
 | `DELETE` | `/api/articles/<id>` | The author or an admin | Delete an article |
+| `PUT` | `/api/articles/<id>/cover` | The author | Upload the cover as a `multipart/form-data` field named `cover` |
+| `DELETE` | `/api/articles/<id>/cover` | The author | Remove the cover |
 | `GET` | `/api/users/me/drafts` | Signed in | Your drafts |
 | `POST` | `/api/previews` | Signed in | The HTML of a Markdown text |
 | `POST` | `/api/articles/<id>/likes` | Signed in | Like an article |
@@ -192,7 +196,9 @@ src/
 | `PUT` | `/api/users/me/avatar` | Signed in | Upload your avatar as a `multipart/form-data` field named `avatar` |
 | `DELETE` | `/api/users/me/avatar` | Signed in | Remove your avatar |
 
-Each article has `article_id`, `url`, `article_title`, `summary`, `tags`, `excerpt`, `reading_time`, `status`, `publish_date`, `created_at`, `updated_at`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it; a single article also has `article_content`. [docs/articles.md](docs/articles.md#api) describes the article endpoints and their errors, and [docs/profiles.md](docs/profiles.md#api) the profile ones.
+`GET /api/articles` answers `{"articles": [...], "next_cursor": "..."}`, with up to `limit` articles (20 by default, 50 at most); pass `next_cursor` back as `?cursor=` for the next page, until it is `null`.
+
+Each article has `article_id`, `url`, `article_title`, `summary`, `cover_url`, `tags`, `excerpt`, `reading_time`, `status`, `publish_date`, `created_at`, `updated_at`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it; a single article also has `article_content`. [docs/articles.md](docs/articles.md#api) describes the article endpoints and their errors, and [docs/profiles.md](docs/profiles.md#api) the profile ones.
 
 Without a session the protected endpoints answer `401` with the login page URL, and members get `403` for actions on articles that are not theirs.
 
@@ -204,7 +210,7 @@ Errors answer JSON with a `message`, such as `{"message": "Not found"}` for an u
 
 To report a vulnerability, follow the [security policy](SECURITY.md) instead of opening a public issue.
 
-Every response carries a Content Security Policy that only lets the application's own scripts, styles, images, fonts and forms run, and forbids framing the site. It also sends `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` that turns off the camera, microphone, location, payment and USB features, and `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` set to `same-origin`. The policy blocks inline code, so templates have no inline scripts, styles or event handler attributes.
+Every response carries a Content Security Policy that only lets the application's own scripts, styles, images, fonts and forms run, and forbids framing the site. Images may also come from `blob:` addresses, which the editor creates to show a chosen cover before it is sent. It also sends `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` that turns off the camera, microphone, location, payment and USB features, and `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` set to `same-origin`. The policy blocks inline code, so templates have no inline scripts, styles or event handler attributes.
 
 ## Contributing
 
