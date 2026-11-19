@@ -39,10 +39,9 @@ def render(text: str) -> Markup:
     return Markup(_markdown.render(text or ''))
 
 
-def plain_text(text: str) -> str:
-    """The words of a Markdown text without its formatting, on one line."""
+def _plain_text_of(tokens) -> str:
     blocks = []
-    for token in _markdown.parse(text or ''):
+    for token in tokens:
         if token.type == 'inline' and token.children:
             # Pieces of one paragraph touch each other, as in "código." after a code span.
             blocks.append(''.join(
@@ -55,13 +54,24 @@ def plain_text(text: str) -> str:
     return ' '.join(' '.join(blocks).split())
 
 
-def excerpt(text: str, length: int = EXCERPT_LENGTH) -> str:
-    """The start of the text, cut at a word, for cards and page descriptions."""
-    plain = plain_text(text)
+def plain_text(text: str) -> str:
+    """The words of a Markdown text without its formatting, on one line."""
+    return _plain_text_of(_markdown.parse(text or ''))
+
+
+def render_with_plain_text(text: str) -> tuple[Markup, str]:
+    """The HTML and the plain text of one parse, for pages that need both."""
+    tokens = _markdown.parse(text or '')
+    html = _markdown.renderer.render(tokens, _markdown.options, {})
+    return Markup(html), _plain_text_of(tokens)
+
+
+def excerpt(plain: str, length: int = EXCERPT_LENGTH) -> str:
+    """The start of a plain text, cut at a word, for cards and page descriptions."""
     if len(plain) <= length:
         return plain
     return plain[:length].rsplit(' ', 1)[0] + '…'
 
 
-def reading_minutes(text: str) -> int:
-    return max(1, round(len(plain_text(text).split()) / WORDS_PER_MINUTE))
+def reading_minutes(plain: str) -> int:
+    return max(1, round(len(plain.split()) / WORDS_PER_MINUTE))
