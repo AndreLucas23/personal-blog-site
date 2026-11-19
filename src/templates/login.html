@@ -21,6 +21,7 @@
 
         <form class="form" method="post" action="{{ url_for('auth.login') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if next_page %}<input type="hidden" name="next" value="{{ next_page }}">{% endif %}
 
             <div class="field">
                 <label class="field__label" for="login">E-mail ou nome de usuário</label>
@@ -69,7 +70,7 @@
 
     <p class="auth__switch">
         Novo no Social Blog?
-        <a href="{{ url_for('auth.register') }}">Criar uma conta</a>
+        <a href="{{ url_for('auth.register', next=next_page) if next_page else url_for('auth.register') }}">Criar uma conta</a>
     </p>
 </main>
 {% endblock %}

@@ -48,7 +48,8 @@ def test_admin_panel_redirects_visitors_to_login(client):
     response = client.get('/admin')
 
     assert response.status_code == 302
-    assert response.headers['Location'].endswith('/auth/login')
+    # Signing in leads back to the panel.
+    assert response.headers['Location'].endswith('/auth/login?next=/admin')
 
 
 def test_admin_panel_is_forbidden_for_regular_users(reader_client):

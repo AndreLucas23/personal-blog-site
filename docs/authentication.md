@@ -18,13 +18,15 @@ Changing the value signs every user out.
 
 | Method | Path | Description |
 | --- | --- | --- |
-| `GET` | `/auth/login` | Login page. Redirects to the home page when the user is already signed in |
-| `POST` | `/auth/login` | Form fields `login`, the email or the username, and `password`. Redirects to the home page on success and answers `401` with the login page otherwise, or `429` after too many failed attempts |
-| `GET` | `/auth/register` | Registration page. Redirects to the home page when the user is already signed in |
-| `POST` | `/auth/register` | Form fields `display_name`, `username`, `email` and `password`. Creates a regular user, signs them in and redirects to the home page. Answers `400` for invalid data and `409` for an email or a username that is already registered, both with the registration page |
+| `GET` | `/auth/login` | Login page. Redirects to the home page, or to `next`, when the user is already signed in |
+| `POST` | `/auth/login` | Form fields `login`, the email or the username, and `password`. Redirects to `next`, or to the home page, on success and answers `401` with the login page otherwise, or `429` after too many failed attempts |
+| `GET` | `/auth/register` | Registration page. Redirects to the home page, or to `next`, when the user is already signed in |
+| `POST` | `/auth/register` | Form fields `display_name`, `username`, `email` and `password`. Creates a regular user, signs them in and redirects to `next` or to the home page. Answers `400` for invalid data and `409` for an email or a username that is already registered, both with the registration page |
 | `POST` | `/auth/logout` | Ends the session and redirects to the home page. Requires a session |
 
 Every `POST` needs the CSRF token described below.
+
+Both forms take an optional `next`, in the address or as a form field, with the page to return to after signing in. Only a path on this site is accepted: it starts with one `/`, followed by printable ASCII without spaces or backslashes. Anything else, such as `https://other.site`, `//other.site` or `/\other.site`, is ignored and the member goes to the home page, so the login cannot be used to send people to another site. The forms keep `next` through failed attempts and pass it to each other.
 
 The session cookie is `HttpOnly` and `SameSite=Lax`. With `SESSION_COOKIE_SECURE=1` it is also `Secure`, so browsers send it only over HTTPS. Switch it on whenever the application is served over HTTPS.
 
@@ -73,7 +75,7 @@ Every `401` from the API has the body `{"message": "Authentication required", "l
 
 New articles are stored with the member who created them as author, as [articles.md](articles.md#permissions) describes. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
 
-Pages that need a session redirect anonymous visitors to `/auth/login`. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired or when a visitor clicks a like button, it opens the `login_url`.
+Pages that need a session redirect anonymous visitors to `/auth/login?next=<page>`, and the Entrar links of the pages lead back to them too. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired or when a visitor clicks a like button, it opens the `login_url` with the current page as `next`.
 
 ## Pages
 

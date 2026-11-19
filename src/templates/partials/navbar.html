@@ -90,7 +90,7 @@
             </div>
             {% else %}
             <div class="topnav__guest">
-                <a class="btn btn--ghost" href="{{ url_for('auth.login') }}">Entrar</a>
+                <a class="btn btn--ghost" href="{{ login_url() }}">Entrar</a>
                 <a class="btn btn--primary" href="{{ url_for('auth.register') }}">Criar conta</a>
             </div>
             {% endif %}

@@ -7,7 +7,7 @@ def test_editor_needs_a_session(client, admin_id):
     for path in ('/write', f'/write/{article_id}'):
         response = client.get(path)
         assert response.status_code == 302, path
-        assert response.headers['Location'].endswith('/auth/login')
+        assert response.headers['Location'].endswith(f'/auth/login?next={path}')
 
 
 def test_new_article_editor_starts_empty(reader_client):

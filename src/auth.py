@@ -7,6 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import user_validation as validation
 from auth_user import AuthUser
 from errors import abort_with_message, is_api_request
+from links import local_path
 from repositories import failed_login_repository, user_repository
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -83,11 +84,13 @@ def current_user_id() -> int | None:
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # Where the member was before signing in, kept by the form through every attempt.
+    next_page = local_path(request.values.get('next'))
     if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
+        return redirect(next_page or url_for('views.home'))
 
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', next_page=next_page)
 
     login_name, user = find_account(request.form.get('login', ''))
     password = request.form.get('password', '')
@@ -102,31 +105,32 @@ def login():
     )
     if failures >= MAX_FAILED_LOGINS:
         flash(TOO_MANY_LOGINS_MESSAGE)
-        return render_template('login.html', login=login_name), 429
+        return render_template('login.html', login=login_name, next_page=next_page), 429
 
     if not (user and check_password_hash(user['password_hash'], password)):
         failed_login_repository.add(attempt_key, ip_address, FAILED_LOGIN_WINDOW_MINUTES)
         flash(INVALID_LOGIN_MESSAGE)
-        return render_template('login.html', login=login_name), 401
+        return render_template('login.html', login=login_name, next_page=next_page), 401
 
     failed_login_repository.clear(attempt_key, ip_address)
     login_user(AuthUser(user))
-    return redirect(url_for('views.home'))
+    return redirect(next_page or url_for('views.home'))
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    next_page = local_path(request.values.get('next'))
     if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
+        return redirect(next_page or url_for('views.home'))
 
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('register.html', next_page=next_page)
 
     display_name = request.form.get('display_name', '').strip()
     username = validation.normalize_username(request.form.get('username', ''))
     email = request.form.get('email', '').strip()
     password = request.form.get('password', '')
-    form = {'display_name': display_name, 'username': username, 'email': email}
+    form = {'display_name': display_name, 'username': username, 'email': email, 'next_page': next_page}
 
     error_code = validation.validate_new_user(display_name, username, email, password)
     if error_code:
@@ -145,7 +149,7 @@ def register():
         return render_template('register.html', **form), 409
 
     login_user(AuthUser(user_repository.get_by_id(user_id)))
-    return redirect(url_for('views.home'))
+    return redirect(next_page or url_for('views.home'))
 
 
 @auth_bp.route('/logout', methods=['POST'])

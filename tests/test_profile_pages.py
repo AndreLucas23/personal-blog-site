@@ -85,7 +85,7 @@ def test_settings_need_a_session(client):
     response = client.get('/settings/profile')
 
     assert response.status_code == 302
-    assert response.headers['Location'].endswith('/auth/login')
+    assert response.headers['Location'].endswith('/auth/login?next=/settings/profile')
 
 
 def test_settings_start_with_the_current_profile(reader_client, reader_id):
