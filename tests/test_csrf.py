@@ -162,7 +162,7 @@ def test_forms_carry_the_token(client, reader_id, admin_id):
     home = client.get('/').get_data(as_text=True)
     assert field in home
     assert 'action="/auth/logout"' in home
-    assert page_token(client, f'/open/{article_id}') == token
+    assert page_token(client, f'/articles/{article_id}/titulo') == token
 
     client.post('/auth/logout', data={'csrf_token': token})
     assert field in client.get('/auth/login').get_data(as_text=True)

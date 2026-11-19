@@ -1,10 +1,12 @@
 from flask import Blueprint, abort, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
+import markdown_render
 import uploads
 import user_validation as validation
 from auth import admin_required, current_user_id
 from repositories import article_repository, user_repository
+from slugs import slugify
 
 views_bp = Blueprint('views', __name__)
 
@@ -17,14 +19,38 @@ def home():
 def admin():
     return render_template('admin.html')
 
-@views_bp.route('/open/<int:article_id>')
-def open_article(article_id):
-    article = article_repository.get_by_id(article_id, current_user_id())
+def article_url(article: dict) -> str:
+    return url_for(
+        'views.article', article_id=article['article_id'], slug=slugify(article['article_title'])
+    )
 
-    if article is None:
+@views_bp.route('/articles/<int:article_id>')
+@views_bp.route('/articles/<int:article_id>/<slug>')
+def article(article_id, slug=None):
+    found = article_repository.get_by_id(article_id, current_user_id())
+    if found is None:
         abort(404)
 
-    return render_template('article.html', article=article), 200
+    # The id finds the article; the words follow its current title, so links shared
+    # before a new title, or without the words, still arrive.
+    canonical = article_url(found)
+    if url_for('views.article', article_id=article_id, slug=slug) != canonical:
+        return redirect(canonical, 301)
+
+    return render_template(
+        'article.html',
+        article=found,
+        canonical_url=canonical,
+        description=found['summary'] or markdown_render.excerpt(found['article_content']),
+    )
+
+@views_bp.route('/open/<int:article_id>')
+def open_article(article_id):
+    """The address articles had before they got readable ones."""
+    found = article_repository.get_by_id(article_id)
+    if found is None:
+        abort(404)
+    return redirect(article_url(found), 301)
 
 @views_bp.route('/@<username>')
 def profile(username):

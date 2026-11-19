@@ -20,7 +20,7 @@ let searchTimer = null;
 let currentRun = 0;
 
 function createRow(article) {
-    const url = `/open/${article.article_id}`;
+    const { url } = article;
 
     return el(
         'li',
