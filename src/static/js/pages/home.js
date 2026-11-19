@@ -73,6 +73,15 @@ async function search(query) {
     }
 }
 
+// layout.css shows the right column from this width. Below it the card joins the feed,
+// so members on phones and tablets get their suggestions too.
+const WIDE_LAYOUT = window.matchMedia('(min-width: 1100px)');
+
+function placeSuggestions(card) {
+    if (WIDE_LAYOUT.matches) document.querySelector('.page__right').prepend(card);
+    else document.querySelector('.feed-header').before(card);
+}
+
 async function loadSuggestions(card) {
     const list = document.getElementById('suggestions-list');
     try {
@@ -94,4 +103,8 @@ searchInput.addEventListener('input', () => {
 loadArticles();
 
 const suggestions = document.getElementById('suggestions');
-if (suggestions) loadSuggestions(suggestions);
+if (suggestions) {
+    placeSuggestions(suggestions);
+    WIDE_LAYOUT.addEventListener('change', () => placeSuggestions(suggestions));
+    loadSuggestions(suggestions);
+}
