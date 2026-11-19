@@ -60,3 +60,26 @@ def test_editor_content_is_escaped(reader_client, reader_id):
 def test_members_see_the_write_link_and_visitors_do_not(client, reader_client):
     assert 'href="/write"' in reader_client.get('/').get_data(as_text=True)
     assert 'href="/write"' not in client.get('/').get_data(as_text=True)
+
+
+def test_editor_offers_the_actions_of_the_article_state(reader_client, reader_id):
+    draft = create_article(reader_id, status='draft')
+    published = create_article(reader_id)
+
+    new_page = reader_client.get('/write').get_data(as_text=True)
+    draft_page = reader_client.get(f'/write/{draft}').get_data(as_text=True)
+    published_page = reader_client.get(f'/write/{published}').get_data(as_text=True)
+
+    assert 'id="editor-draft"' in new_page and 'id="editor-unpublish"' not in new_page
+    assert 'id="editor-draft"' in draft_page and 'data-status="draft"' in draft_page
+    assert 'id="editor-unpublish"' in published_page and 'id="editor-draft"' not in published_page
+
+
+def test_editor_starts_with_the_tags(reader_client, reader_id):
+    article_id = create_article(reader_id)
+    reader_client.patch(f'/api/articles/{article_id}', json={'tags': ['sql', 'python']})
+
+    page = reader_client.get(f'/write/{article_id}').get_data(as_text=True)
+
+    assert page.index('data-tag="sql"') < page.index('data-tag="python"')
+    assert 'data-max="5"' in page
