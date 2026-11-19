@@ -65,7 +65,13 @@ def save_avatar(stream: BinaryIO, upload_dir: Path) -> str:
             )
     except ImageError:
         raise
-    except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError) as error:
+    except (UnidentifiedImageError, Image.DecompressionBombError) as error:
+        raise ImageError(IMAGE_INVALID) from error
+    except Exception as error:
+        # Broken or crafted files make decoders fail in many ways (EOFError,
+        # SyntaxError, struct.error...). They are the sender's problem, not a 500,
+        # but the log keeps them visible in case one is a bug.
+        logger.warning('Could not decode an uploaded image', exc_info=True)
         raise ImageError(IMAGE_INVALID) from error
 
     # A new random name per upload, so browsers can cache each file forever.

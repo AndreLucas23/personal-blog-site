@@ -169,3 +169,16 @@ def test_delete_upload_ignores_missing_and_foreign_names(tmp_path):
     uploads.delete_upload(None, tmp_path)
 
     assert outside.exists()
+
+
+@pytest.mark.parametrize('failure', [EOFError, SyntaxError, IndexError])
+def test_any_decoding_failure_reads_as_an_invalid_image(reader_client, monkeypatch, failure):
+    def broken_convert(self, *args, **kwargs):
+        raise failure('broken file')
+
+    monkeypatch.setattr(Image.Image, 'convert', broken_convert)
+
+    response = upload(reader_client, image_bytes())
+
+    assert response.status_code == 400
+    assert response.get_json()['errors'] == {'avatar': uploads.IMAGE_INVALID}
