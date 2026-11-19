@@ -8,6 +8,9 @@ from pagination import PAGE_SIZE
 MISSING_REFERENCE_ERROR = 1452
 SUGGESTIONS = 3
 MAX_SUGGESTIONS = 10
+# Recent authors come from this many of the latest articles, which the index of lists
+# reads in order, instead of from every article ever published.
+RECENT_ARTICLES = 200
 
 # Whether the viewer, the placeholder, follows the member u. Profiles and lists share it,
 # so they never disagree.
@@ -119,11 +122,15 @@ def suggestions(user_id: int, limit: int = SUGGESTIONS) -> list[dict]:
             ids = [member['user_id'] for member in chosen]
             not_chosen = f' AND u.user_id NOT IN ({", ".join(["%s"] * len(ids))})' if ids else ''
             cursor.execute(
-                f'SELECT {SUGGESTION_COLUMNS} FROM USERS u '
-                "JOIN ARTICLES a ON a.author_id = u.user_id AND a.status = 'published' "
+                f'SELECT {SUGGESTION_COLUMNS} FROM USERS u JOIN ('
+                'SELECT author_id, MAX(publish_date) AS latest FROM ('
+                "SELECT author_id, publish_date FROM ARTICLES WHERE status = 'published' "
+                'ORDER BY publish_date DESC LIMIT %s'
+                ') recent GROUP BY author_id'
+                ') authors ON authors.author_id = u.user_id '
                 f'WHERE {new_to_you}{not_chosen} '
-                'GROUP BY u.user_id ORDER BY MAX(a.publish_date) DESC, u.user_id DESC LIMIT %s',
-                (user_id, user_id, *ids, limit - len(chosen)),
+                'ORDER BY authors.latest DESC, u.user_id DESC LIMIT %s',
+                (RECENT_ARTICLES, user_id, user_id, *ids, limit - len(chosen)),
             )
             chosen += cursor.fetchall()
 
