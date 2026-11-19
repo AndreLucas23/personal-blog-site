@@ -94,3 +94,13 @@ def test_suggestions_carry_the_profile_of_each_member(reader_client):
     assert reader_client.get(SUGGESTIONS_URL).get_json()['members'] == [
         {'username': 'ana', 'display_name': 'Ana', 'headline': None, 'avatar_url': None, 'followed': False}
     ]
+
+
+def test_members_get_the_suggestions_card(reader_client):
+    page = reader_client.get('/').get_data(as_text=True)
+
+    assert 'id="suggestions"' in page and 'data-viewer="reader"' in page
+
+
+def test_visitors_do_not(client):
+    assert 'id="suggestions"' not in client.get('/').get_data(as_text=True)
