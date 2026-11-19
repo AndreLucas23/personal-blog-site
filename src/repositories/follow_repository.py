@@ -6,6 +6,8 @@ from db import db_cursor
 from pagination import PAGE_SIZE
 
 MISSING_REFERENCE_ERROR = 1452
+SUGGESTIONS = 3
+MAX_SUGGESTIONS = 10
 
 # The first placeholder is the viewer id, to tell whether they follow each member listed.
 MEMBER_COLUMNS = (
@@ -82,6 +84,43 @@ def get_members(
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(query, tuple(params))
         return [_with_follow_flag(member) for member in cursor.fetchall()]
+
+
+def suggestions(user_id: int, limit: int = SUGGESTIONS) -> list[dict]:
+    """Members to follow: those the people you follow follow, then recent authors.
+
+    Never yourself, someone you already follow or the same member twice.
+    """
+    # Placeholders: the member's id, twice.
+    new_to_you = (
+        'u.user_id <> %s AND NOT EXISTS (SELECT 1 FROM FOLLOWS f '
+        'WHERE f.follower_id = %s AND f.followed_id = u.user_id)'
+    )
+    with db_cursor(dictionary=True) as cursor:
+        # The more of the people you follow follow someone, the earlier they come.
+        cursor.execute(
+            f'SELECT {MEMBER_COLUMNS} FROM FOLLOWS yours '
+            'JOIN FOLLOWS theirs ON theirs.follower_id = yours.followed_id '
+            'JOIN USERS u ON u.user_id = theirs.followed_id '
+            f'WHERE yours.follower_id = %s AND {new_to_you} '
+            'GROUP BY u.user_id ORDER BY COUNT(*) DESC, u.user_id DESC LIMIT %s',
+            (user_id, user_id, user_id, user_id, limit),
+        )
+        chosen = cursor.fetchall()
+
+        if len(chosen) < limit:
+            ids = [member['user_id'] for member in chosen]
+            not_chosen = f' AND u.user_id NOT IN ({", ".join(["%s"] * len(ids))})' if ids else ''
+            cursor.execute(
+                f'SELECT {MEMBER_COLUMNS} FROM USERS u '
+                "JOIN ARTICLES a ON a.author_id = u.user_id AND a.status = 'published' "
+                f'WHERE {new_to_you}{not_chosen} '
+                'GROUP BY u.user_id ORDER BY MAX(a.publish_date) DESC, u.user_id DESC LIMIT %s',
+                (user_id, user_id, user_id, *ids, limit - len(chosen)),
+            )
+            chosen += cursor.fetchall()
+
+    return [_with_follow_flag(member) for member in chosen]
 
 
 def _with_follow_flag(member: dict) -> dict:
