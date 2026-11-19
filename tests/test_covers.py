@@ -154,3 +154,33 @@ def test_a_cover_for_an_article_removed_meanwhile_leaves_no_file(reader_client, 
 
     assert response.status_code == 404
     assert list(upload_dir.iterdir()) == []
+
+
+def test_the_editor_shows_the_cover_to_change(reader_client, reader_id):
+    article_id = create_article(reader_id)
+    cover_url = upload(reader_client, article_id, image_bytes()).get_json()['cover_url']
+
+    page = reader_client.get(f'/write/{article_id}').get_data(as_text=True)
+
+    assert f'src="{cover_url}"' in page
+    assert 'Trocar capa' in page and 'id="cover-remove" type="button" hidden' not in page
+
+
+def test_a_new_article_starts_without_a_cover(reader_client):
+    page = reader_client.get('/write').get_data(as_text=True)
+
+    assert 'Adicionar capa' in page and 'id="cover-remove" type="button" hidden' in page
+    assert f'data-max-bytes="{uploads.MAX_IMAGE_BYTES}"' in page
+
+
+def test_the_article_page_shows_the_cover(client, reader_client, reader_id):
+    with_cover = create_article(reader_id)
+    without = create_article(reader_id)
+    cover_url = upload(reader_client, with_cover, image_bytes()).get_json()['cover_url']
+
+    page = client.get(f'/articles/{with_cover}', follow_redirects=True).get_data(as_text=True)
+    plain = client.get(f'/articles/{without}', follow_redirects=True).get_data(as_text=True)
+
+    assert 'class="article__cover"' in page and f'src="{cover_url}"' in page
+    assert 'article__cover' not in plain
+

@@ -65,6 +65,15 @@ export function createArticleCard(article) {
         el(
             'a',
             { class: 'post__link', href: url },
+            article.cover_url ? el('img', {
+                class: 'post__cover',
+                src: article.cover_url,
+                alt: '',
+                width: 1200,
+                height: 630,
+                loading: 'lazy',
+                decoding: 'async',
+            }) : null,
             el('h2', { class: 'post__title', id: titleId, text: article.article_title }),
             article.excerpt ? el('p', { class: 'post__excerpt', text: article.excerpt }) : null,
         ),

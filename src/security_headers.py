@@ -2,11 +2,13 @@
 from flask import Flask, Response, current_app
 
 # Only this application's own files may run, style the pages, load or receive data.
+# Images may also come from blob: addresses, which the editor makes to show a chosen
+# cover before it is sent.
 CONTENT_SECURITY_POLICY = '; '.join((
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self'",
-    "img-src 'self'",
+    "img-src 'self' blob:",
     "font-src 'self'",
     "connect-src 'self'",
     "object-src 'none'",

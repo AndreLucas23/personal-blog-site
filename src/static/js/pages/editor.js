@@ -2,6 +2,7 @@ import { API, ApiError } from '../api.js';
 import { confirmDialog } from '../ui/dialog.js';
 import { el, icon } from '../ui/dom.js';
 import { bindCounter, setFieldError } from '../ui/forms.js';
+import { imageErrors } from '../ui/images.js';
 import { showToast, showToastAfterLeaving } from '../ui/toast.js';
 
 const form = document.getElementById('editor');
@@ -22,6 +23,13 @@ const tagInput = document.getElementById('tag-input');
 const maxTags = Number(tagInput.dataset.max);
 const minTagLength = Number(tagInput.dataset.minLength);
 const maxTagLength = Number(tagInput.dataset.maxLength);
+const coverInput = document.getElementById('cover-input');
+const coverPreview = document.getElementById('cover-preview');
+const coverPick = document.getElementById('cover-pick');
+const coverRemove = document.getElementById('cover-remove');
+const coverError = document.getElementById('cover-error');
+const maxImageBytes = Number(coverInput.dataset.maxBytes);
+const IMAGE_ERRORS = imageErrors(maxImageBytes);
 let articleId = form.dataset.articleId || null;
 const inputs = { title: titleInput, summary: summaryInput, content: contentInput, tags: tagInput };
 
@@ -39,6 +47,10 @@ const ARTICLE_ERRORS = {
 
 let dirty = false;
 let saving = false;
+// The cover waits for the save, like the words: a file to send, null to remove the
+// cover, or undefined while it stays as it is.
+let coverChange;
+let coverPreviewUrl = null;
 let previewedContent = null;
 // Every preview request takes a number, so a slow older answer cannot replace a newer one.
 let previewRun = 0;
@@ -207,6 +219,54 @@ function addTypedTags(finished) {
     return !error;
 }
 
+function showCover(src) {
+    // The browser keeps a chosen file in memory until its address is let go.
+    if (coverPreviewUrl && coverPreviewUrl !== src) {
+        URL.revokeObjectURL(coverPreviewUrl);
+        coverPreviewUrl = null;
+    }
+    coverPreview.hidden = !src;
+    if (src) coverPreview.src = src;
+    else coverPreview.removeAttribute('src');
+    coverRemove.hidden = !src;
+    coverPick.querySelector('span').textContent = src ? 'Trocar capa' : 'Adicionar capa';
+}
+
+function chooseCover(file) {
+    coverError.textContent = '';
+    // The server checks again; checking here tells at once, before anything is saved.
+    if (!coverInput.accept.split(',').includes(file.type)) {
+        coverError.textContent = IMAGE_ERRORS.image_format;
+        return;
+    }
+    if (file.size > maxImageBytes) {
+        coverError.textContent = IMAGE_ERRORS.image_too_large;
+        return;
+    }
+    const url = URL.createObjectURL(file);
+    showCover(url);
+    coverPreviewUrl = url;
+    coverChange = file;
+    dirty = true;
+}
+
+/** Tell why the cover was not saved, when the article itself was. */
+function coverNotSaved(error, article) {
+    const code = error instanceof ApiError ? error.errors?.cover : null;
+    if (!code) console.error(error);
+    const reason = IMAGE_ERRORS[code] || 'Não foi possível enviar a capa.';
+
+    // This editor still has the actions of a draft, so it opens again as a published one.
+    if (article.status === 'published' && !unpublishButton) {
+        dirty = false;
+        showToastAfterLeaving(`O artigo foi publicado, mas a capa não. ${reason}`, { type: 'error' });
+        window.location.assign(`/write/${article.article_id}`);
+        return;
+    }
+    coverError.textContent = reason;
+    showToast('O artigo foi salvo, mas a capa não. Confira a capa e salve de novo.', { type: 'error' });
+}
+
 function readFields() {
     return {
         title: titleInput.value.trim(),
@@ -271,9 +331,29 @@ async function save(status, button) {
 
     try {
         const payload = { ...fields, status };
-        const article = articleId
+        let article = articleId
             ? await API.updateArticle(articleId, payload)
             : await API.createArticle(payload);
+        // A new article gets its own address, so a reload or another try saves the same one.
+        if (!articleId) {
+            articleId = String(article.article_id);
+            form.dataset.articleId = articleId;
+            window.history.replaceState(null, '', `/write/${articleId}`);
+        }
+
+        if (coverChange !== undefined) {
+            try {
+                article = coverChange
+                    ? await API.uploadCover(articleId, coverChange)
+                    : await API.removeCover(articleId);
+                coverChange = undefined;
+            } catch (error) {
+                saving = false;
+                setBusy(button, false);
+                coverNotSaved(error, article);
+                return null;
+            }
+        }
         dirty = false;
 
         if (article.status === 'published') {
@@ -281,12 +361,8 @@ async function save(status, button) {
             return article;
         }
 
-        // A new draft gets its own address, so a reload keeps editing the same article.
-        if (!articleId) {
-            articleId = String(article.article_id);
-            form.dataset.articleId = articleId;
-            window.history.replaceState(null, '', `/write/${articleId}`);
-        }
+        // The saved cover takes the place of the preview of the chosen file.
+        showCover(article.cover_url);
         statusEl.textContent = `Rascunho salvo às ${savedAt()}`;
         saving = false;
         setBusy(button, false);
@@ -407,6 +483,24 @@ unpublishButton?.addEventListener('click', async () => {
         // The editor reopens with the actions of a draft.
         window.location.assign(`/write/${articleId}`);
     }
+});
+
+coverPick.addEventListener('click', () => coverInput.click());
+
+coverInput.addEventListener('change', () => {
+    const [file] = coverInput.files;
+    // Cleared, so choosing the same file again still counts as a choice.
+    coverInput.value = '';
+    if (file) chooseCover(file);
+});
+
+coverRemove.addEventListener('click', () => {
+    coverError.textContent = '';
+    coverChange = null;
+    showCover(null);
+    dirty = true;
+    // The remove button hides with the cover.
+    coverPick.focus();
 });
 
 window.addEventListener('beforeunload', (event) => {
