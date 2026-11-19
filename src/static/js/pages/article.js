@@ -1,4 +1,5 @@
 import { API } from '../api.js';
+import { bindFollowButton } from '../components/follow-button.js';
 import { bindLikeButton } from '../components/like-button.js';
 import { confirmDialog } from '../ui/dialog.js';
 import { isLaterDay } from '../ui/format.js';
@@ -15,6 +16,9 @@ if (updatedNote) {
 
 const likeButton = article.querySelector('.like-btn');
 if (likeButton) bindLikeButton(likeButton);
+
+const followButton = article.querySelector('button[data-follow]');
+if (followButton) bindFollowButton(followButton);
 
 // The author deletes; an admin removes for moderation. Both go through the same request.
 const deleteButton = article.querySelector('[data-delete-article]');

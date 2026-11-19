@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'partials/follow_button.html' import follow_button with context %}
 
 {% set is_author = current_user.is_authenticated and current_user.user_id == article['author_id'] %}
 {% set author = article['author'] %}
@@ -90,8 +91,10 @@
                         {{ icon('trash') }}
                     </button>
                 </div>
-                {% elif current_user.is_authenticated and current_user.is_admin %}
+                {% else %}
                 <div class="byline__actions">
+                    {{ follow_button(article['author_username'], author, author_followed, 'btn--sm') }}
+                    {% if current_user.is_authenticated and current_user.is_admin %}
                     <button class="btn btn--ghost btn--sm"
                     type="button"
                     data-delete-article
@@ -103,6 +106,7 @@
                         {{ icon('shield', 'icon--sm') }}
                         Remover
                     </button>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>

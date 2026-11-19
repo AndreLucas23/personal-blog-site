@@ -79,8 +79,13 @@
 
 .profile__stats {
     color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
     font-size: var(--text-sm);
+    gap: var(--space-1) var(--space-4);
+    list-style: none;
     margin-top: var(--space-3);
+    padding: 0;
 }
 
 .profile__stats strong {
