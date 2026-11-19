@@ -6,6 +6,7 @@ from flask import Flask, url_for
 from markupsafe import Markup, escape
 
 import user_validation
+from links import login_url
 
 AVATAR_COLORS = 8
 MONTHS = (
@@ -96,6 +97,7 @@ def init_app(app: Flask) -> None:
     app.jinja_env.globals.update(
         icon=icon,
         avatar=avatar,
+        login_url=login_url,
         # Scripts that check a username read the rules from the page, not a copy.
         username_pattern=user_validation.USERNAME_PATTERN.pattern,
         reserved_usernames=' '.join(sorted(user_validation.RESERVED_USERNAMES)),
