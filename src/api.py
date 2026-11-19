@@ -455,6 +455,39 @@ def remove_avatar():
     return jsonify({'avatar_url': None})
 
 
+def _member_json(member: dict) -> dict:
+    """A member in a list, with whether the viewer follows them."""
+    return {
+        'username': member['username'],
+        'display_name': member['display_name'],
+        'headline': member['headline'],
+        'avatar_url': media_url(member['avatar_path']),
+        'followed': member['followed'],
+    }
+
+def _member_list(username: str, kind: str):
+    """A page of a member's followers or following, the most recent follows first."""
+    member = user_repository.get_by_username(validation.normalize_username(username))
+    if member is None:
+        return jsonify({'message': 'User not found'}), 404
+    after, limit, refused = _read_page()
+    if refused:
+        return refused
+
+    members = follow_repository.get_members(kind, member['user_id'], current_user_id(), after, limit + 1)
+    return jsonify({
+        'members': [_member_json(listed) for listed in members[:limit]],
+        'next_cursor': _next_cursor(members, limit, 'followed_at', 'user_id'),
+    })
+
+@api_bp.route('/users/<string:username>/followers', methods=['GET'])
+def list_followers(username):
+    return _member_list(username, 'followers')
+
+@api_bp.route('/users/<string:username>/following', methods=['GET'])
+def list_following(username):
+    return _member_list(username, 'following')
+
 @api_bp.route('/users/<string:username>/follow', methods=['PUT', 'DELETE'])
 @login_required
 def follow_member(username):

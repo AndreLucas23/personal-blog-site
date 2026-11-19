@@ -1,8 +1,24 @@
+from datetime import datetime
+
 import mysql.connector
 
 from db import db_cursor
+from pagination import PAGE_SIZE
 
 MISSING_REFERENCE_ERROR = 1452
+
+# The first placeholder is the viewer id, to tell whether they follow each member listed.
+MEMBER_COLUMNS = (
+    'u.user_id, u.username, u.display_name, u.headline, u.avatar_path, '
+    'EXISTS(SELECT 1 FROM FOLLOWS mine WHERE mine.follower_id = %s '
+    'AND mine.followed_id = u.user_id) AS followed'
+)
+
+# For each list: the column of the member whose list it is, and of the members listed.
+LISTS = {
+    'followers': ('f.followed_id', 'f.follower_id'),
+    'following': ('f.follower_id', 'f.followed_id'),
+}
 
 
 def follow(follower_id: int, followed_id: int) -> bool:
@@ -39,6 +55,38 @@ def is_following(follower_id: int, followed_id: int) -> bool:
             (follower_id, followed_id)
         )
         return cursor.fetchone() is not None
+
+
+def get_members(
+    kind: str,
+    user_id: int,
+    viewer_id: int | None = None,
+    after: tuple[datetime, int] | None = None,
+    limit: int = PAGE_SIZE,
+) -> list[dict]:
+    """A member's followers or following, the most recent follows first, after the cursor."""
+    owner, listed = LISTS[kind]
+    query = (
+        f'SELECT {MEMBER_COLUMNS}, f.created_at AS followed_at FROM FOLLOWS f '
+        f'JOIN USERS u ON u.user_id = {listed} WHERE {owner} = %s'
+    )
+    params = [viewer_id, user_id]
+    if after is not None:
+        followed_at, member_id = after
+        # The id orders follows made in the same second.
+        query += f' AND (f.created_at < %s OR (f.created_at = %s AND {listed} < %s))'
+        params += [followed_at, followed_at, member_id]
+    query += f' ORDER BY f.created_at DESC, {listed} DESC LIMIT %s'
+    params.append(limit)
+
+    with db_cursor(dictionary=True) as cursor:
+        cursor.execute(query, tuple(params))
+        return [_with_follow_flag(member) for member in cursor.fetchall()]
+
+
+def _with_follow_flag(member: dict) -> dict:
+    member['followed'] = bool(member['followed'])
+    return member
 
 
 def count_followers(user_id: int) -> int:
