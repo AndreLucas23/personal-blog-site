@@ -7,5 +7,6 @@
         }
     } catch (error) {
         // Storage can be blocked; the system theme still applies.
+        console.warn('Could not read the stored theme', error);
     }
 })();
