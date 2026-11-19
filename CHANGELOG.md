@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Lists of each member's followers and following at `/@<username>/followers` and `/following`, opened from the profile counts, in pages, with `GET /api/users/<username>/followers` and `/following` (#88).
+- A Quem seguir card on the home page with members followed by the people you follow and recent authors, and `GET /api/users/me/suggestions` (#88).
 - Follow and unfollow members, without approval, from their profiles and from the byline of their articles, with the follower and following counts on profiles and `PUT` and `DELETE /api/users/<username>/follow` (#87).
 - Signing in or creating an account leads back to the page that asked for it, through `next`, which only accepts paths on this site (#87).
 - Article covers: JPEG, PNG or WebP, cropped to 1200 by 630 and stored as WebP, chosen in the editor and sent with the article, shown on cards and on the article page, with `PUT` and `DELETE /api/articles/<id>/cover` (#82).

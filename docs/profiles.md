@@ -37,6 +37,7 @@ Without an avatar, pages show the initials of the display name on a color picked
 | Page | Who sees it | What it offers |
 | --- | --- | --- |
 | `/@<username>` | Everyone | The photo, name, username, headline, location, website, join date, counts of articles, followers and following, bio and articles of the member. Your own profile has an Editar perfil button, and other profiles a Seguir button. Other letter cases redirect to the lowercase address, and unknown usernames answer `404` |
+| `/@<username>/followers` and `/@<username>/following` | Everyone | The people who follow the member and the people they follow, the most recent follows first, opened from the counts on the profile, with tabs between the two lists. Each person has a follow button, except yourself |
 | `/settings/profile` | Signed in | The form for every field, with the rules and counters next to them, and the photo upload. Errors from the API appear under their fields in Portuguese |
 
 The top bar, the account menu, the profile card on the home page, the article cards and the byline of an article show the member's photo, and their names and photos lead to the profile. The account menu links to your profile and to the profile settings. A change saved in the settings, including a new photo or username, shows up on the page without a reload.
@@ -49,6 +50,8 @@ Members follow each other without approval, as on Medium or X. Any member can fo
 
 The Seguir button on a profile and in the byline of an article turns into Seguindo, and clicking it again unfollows. It shows the result at once and undoes it if the server refuses. Its name is the word it shows, Seguir or Seguindo, followed by the member's name, so screen readers and voice control get the same words as the screen. Visitors get a link to sign in, which leads back to the page.
 
+Members also get a Quem seguir card on the home page with up to three suggestions: first the members most followed by the people they follow, then the authors who published most recently, never themselves or someone they already follow. The card shows only when there is someone to suggest.
+
 ## API
 
 | Method | Path | Access | Description |
@@ -60,6 +63,9 @@ The Seguir button on a profile and in the byline of an article turns into Seguin
 | `DELETE` | `/api/users/me/avatar` | Signed in | Remove your avatar |
 | `PUT` | `/api/users/<username>/follow` | Signed in | Follow the member |
 | `DELETE` | `/api/users/<username>/follow` | Signed in | Unfollow the member |
+| `GET` | `/api/users/<username>/followers` | Everyone | A page of the member's followers |
+| `GET` | `/api/users/<username>/following` | Everyone | A page of the members they follow |
+| `GET` | `/api/users/me/suggestions` | Signed in | Members to follow, 3 by default, or `limit` up to 10 |
 
 A profile looks like this:
 
@@ -81,6 +87,8 @@ A profile looks like this:
 ```
 
 `followed` tells whether the signed-in viewer follows the member, and is `false` for visitors and on your own profile.
+
+The lists answer one page at a time, the most recent follows first, as `{"members": [...], "next_cursor": "..."}`, with the same `limit` and `cursor` as the article lists. Each member has `username`, `display_name`, `headline`, `avatar_url` and `followed`, whether the viewer follows them. The suggestions answer `{"members": [...]}` in the same shape.
 
 Following and unfollowing answer `200` with `{"followed": true, "followers": 13}`, the same when repeated, `400` with `{"message": "You cannot follow yourself"}` for your own username, and `404` for a username that does not exist.
 
