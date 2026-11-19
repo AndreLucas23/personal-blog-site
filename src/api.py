@@ -179,11 +179,17 @@ def update_article(article_id):
     if errors:
         return _invalid_article(errors)
 
-    changes = _stored(fields)
-    if status is not None:
+    # The editor sends every field on each save; only what differs is an edit.
+    changes = {
+        field: value for field, value in _stored(fields).items()
+        if value != article[article_repository.COLUMNS[field]]
+    }
+    if status is not None and status != article['status']:
         changes['status'] = status
+    if tags == article['tags']:
+        tags = None
     # An admin may remove the article between the checks above and this save.
-    if not article_repository.update(article_id, changes, tags):
+    if (changes or tags is not None) and not article_repository.update(article_id, changes, tags):
         return _article_not_found()
     article = article_repository.get_by_id(article_id, current_user.user_id)
     if article is None:
