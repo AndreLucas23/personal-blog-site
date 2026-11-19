@@ -51,6 +51,8 @@ def _editor(article: dict | None):
         max_title=article_validation.MAX_TITLE_LENGTH,
         max_summary=article_validation.MAX_SUMMARY_LENGTH,
         max_content=article_validation.MAX_CONTENT_LENGTH,
+        max_tags=article_validation.MAX_TAGS,
+        max_tag_length=article_validation.MAX_TAG_LENGTH,
     )
 
 @views_bp.route('/write')
