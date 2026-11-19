@@ -141,7 +141,7 @@ async function removeArticle(article) {
     if (!confirmed) return;
 
     try {
-        await API.remove(article.article_id);
+        await API.deleteArticle(article.article_id);
     } catch (error) {
         console.error(error);
         showToast('Não foi possível remover o artigo. Tente de novo.', { type: 'error' });
@@ -178,7 +178,7 @@ function setUpNewArticle() {
         submitButton.disabled = true;
 
         try {
-            await API.add({ 'new-title': fields.title, 'new-content': fields.content });
+            await API.createArticle({ title: fields.title, content: fields.content });
         } catch (error) {
             console.error(error);
             showToast('Não foi possível publicar o artigo. Tente de novo.', { type: 'error' });

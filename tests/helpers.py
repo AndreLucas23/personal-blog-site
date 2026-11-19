@@ -28,9 +28,12 @@ def create_user(
 
 
 def create_article(
-    author_id: int, title: str = 'Título', content: str = 'Conteúdo'
+    author_id: int,
+    title: str = 'Título',
+    content: str = 'Conteúdo',
+    summary: str | None = None,
 ) -> int:
-    return article_repository.create(title, content, author_id)
+    return article_repository.create(title, summary, content, author_id)
 
 
 def login(client, login_name: str, password: str):

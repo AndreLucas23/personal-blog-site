@@ -1,6 +1,6 @@
 import { avatar } from '../ui/avatar.js';
 import { el, icon } from '../ui/dom.js';
-import { excerpt, formatDateTime, isoString, timeAgo } from '../ui/format.js';
+import { formatDateTime, isoString, timeAgo } from '../ui/format.js';
 import { createLikeButton } from './like-button.js';
 
 export function articleUrl(article) {
@@ -49,7 +49,7 @@ export function createArticleCard(article) {
             'a',
             { class: 'post__link', href: url },
             el('h2', { class: 'post__title', id: titleId, text: article.article_title }),
-            el('p', { class: 'post__excerpt', text: excerpt(article.article_content) }),
+            el('p', { class: 'post__excerpt', text: article.excerpt }),
         ),
         el(
             'footer',

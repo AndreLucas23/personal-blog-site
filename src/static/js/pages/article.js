@@ -48,7 +48,7 @@ function setUpEditor() {
         submitButton.disabled = true;
 
         try {
-            await API.update(articleId, { title, content });
+            await API.updateArticle(articleId, { title, content });
             titleView.textContent = title;
             contentView.textContent = content;
             document.title = `${title} | Social Blog`;
