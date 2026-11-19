@@ -2,22 +2,11 @@
 import { avatar } from '../ui/avatar.js';
 import { el } from '../ui/dom.js';
 import { profileUrl } from './article-card.js';
-import { createFollowButton } from './follow-button.js';
+import { createFollowAction } from './follow-button.js';
 
 /** viewer is the username of the member reading, empty for visitors, who sign in to follow. */
-export function createMemberRow(member, { viewer, loginUrl }) {
+export function createMemberRow(member, { viewer, loginUrl, onFollowChange }) {
     const url = profileUrl(member.username);
-    let action = null;
-    if (!viewer) {
-        action = el(
-            'a',
-            { class: 'btn btn--primary btn--sm follow-btn', href: loginUrl },
-            'Seguir',
-            el('span', { class: 'u-visually-hidden', text: ` ${member.display_name}` }),
-        );
-    } else if (viewer !== member.username) {
-        action = createFollowButton(member);
-    }
 
     return el(
         'li',
@@ -30,6 +19,6 @@ export function createMemberRow(member, { viewer, loginUrl }) {
             el('a', { class: 'member-row__name', href: url, text: member.display_name }),
             el('span', { class: 'member-row__detail', text: member.headline || `@${member.username}` }),
         ),
-        action,
+        createFollowAction(member, { viewer, loginUrl, onChange: onFollowChange }),
     );
 }
