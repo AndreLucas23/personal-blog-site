@@ -41,7 +41,7 @@ if (followButton) {
 
 const more = createLoadMore(document.getElementById('profile-more'), {
     fetchPage: (cursor) => API.fetchArticlesBy(username, cursor),
-    add: (articles) => appendArticles(feed, articles),
+    add: ({ articles }) => appendArticles(feed, articles),
 });
 
 async function loadArticles() {

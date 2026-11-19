@@ -18,7 +18,7 @@ let articles = [];
 let searchTimer = null;
 const more = createLoadMore(document.getElementById('admin-more'), {
     fetchPage: (cursor) => API.fetchAll(cursor),
-    add(page) {
+    add({ articles: page }) {
         articles = articles.concat(page);
         const rows = page.map(createRow);
         list.append(...rows);
