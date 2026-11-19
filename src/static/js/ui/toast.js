@@ -20,3 +20,25 @@ export function showToast(message, { type = 'info' } = {}) {
         setTimeout(() => toast.remove(), 250);
     }, VISIBLE_MS);
 }
+
+const PENDING_KEY = 'pendingToast';
+
+/** Show a message on the next page, for actions that end by leaving this one. */
+export function showToastAfterLeaving(message, options = {}) {
+    try {
+        sessionStorage.setItem(PENDING_KEY, JSON.stringify({ message, options }));
+    } catch (error) {
+        console.warn('Could not keep the message for the next page', error);
+    }
+}
+
+export function showPendingToast() {
+    let pending = null;
+    try {
+        pending = JSON.parse(sessionStorage.getItem(PENDING_KEY));
+        sessionStorage.removeItem(PENDING_KEY);
+    } catch (error) {
+        console.warn('Could not read the message left by the previous page', error);
+    }
+    if (pending?.message) showToast(pending.message, pending.options);
+}
