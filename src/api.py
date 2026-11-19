@@ -2,6 +2,7 @@ from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
 from werkzeug.exceptions import RequestEntityTooLarge
 
+import markdown_render
 import uploads
 import user_validation as validation
 from auth import admin_required, current_user_id
@@ -100,6 +101,15 @@ def _patch_article(article_id):
         return jsonify({'message': 'Article not found'}), 404
 
     return jsonify({'message': 'Article updated'}), 200
+
+@api_bp.route('/previews', methods=['POST'])
+@login_required
+def preview_markdown():
+    """The HTML a Markdown text becomes, so the editor shows what readers will see."""
+    data = _json_object()
+    if data is None or not isinstance(data.get('content'), str):
+        return jsonify({'message': 'Invalid request body'}), 400
+    return jsonify({'html': str(markdown_render.render(data['content']))})
 
 @api_bp.route('/articles/<int:article_id>/likes', methods=['POST', 'DELETE'])
 @login_required
