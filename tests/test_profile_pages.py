@@ -125,3 +125,9 @@ def test_article_byline_links_to_the_author(client, admin_id):
 
     assert '<a class="byline__name" href="/@owner">Owner</a>' in page
     assert f'src="/media/{AVATAR}"' in page
+
+
+
+def test_only_the_owner_gets_the_drafts_tab(client, reader_client, reader_id):
+    assert 'id="tab-drafts"' in reader_client.get('/@reader').get_data(as_text=True)
+    assert 'id="tab-drafts"' not in client.get('/@reader').get_data(as_text=True)

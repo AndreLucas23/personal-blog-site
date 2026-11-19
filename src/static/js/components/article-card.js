@@ -8,6 +8,29 @@ export function profileUrl(username) {
     return `/@${encodeURIComponent(username)}`;
 }
 
+function createTime(article) {
+    // A draft has no publication date yet; what matters is when it was last touched.
+    if (article.status === 'draft') {
+        const edited = article.updated_at || article.created_at;
+        return el('span', { class: 'post__time', text: `Rascunho · editado ${timeAgo(edited)}` });
+    }
+    return el('time', {
+        class: 'post__time',
+        datetime: isoString(article.publish_date),
+        title: formatDateTime(article.publish_date),
+        text: timeAgo(article.publish_date),
+    });
+}
+
+function createTags(tags) {
+    if (!tags?.length) return null;
+    return el(
+        'ul',
+        { class: 'post__tags', 'aria-label': 'Tags' },
+        ...tags.map((tag) => el('li', { class: 'chip', text: tag })),
+    );
+}
+
 function createAuthor(article) {
     const url = profileUrl(article.author_username);
 
@@ -24,18 +47,15 @@ function createAuthor(article) {
             'div',
             { class: 'post__meta' },
             el('a', { class: 'post__author', href: url, text: article.author }),
-            el('time', {
-                class: 'post__time',
-                datetime: isoString(article.publish_date),
-                title: formatDateTime(article.publish_date),
-                text: timeAgo(article.publish_date),
-            }),
+            createTime(article),
         ),
     );
 }
 
 export function createArticleCard(article) {
-    const { url } = article;
+    const isDraft = article.status === 'draft';
+    // A draft card leads back to the editor; nobody else can like or read it yet.
+    const url = isDraft ? `/write/${article.article_id}` : article.url;
     const titleId = `article-title-${article.article_id}`;
 
     return el(
@@ -46,17 +66,18 @@ export function createArticleCard(article) {
             'a',
             { class: 'post__link', href: url },
             el('h2', { class: 'post__title', id: titleId, text: article.article_title }),
-            el('p', { class: 'post__excerpt', text: article.excerpt }),
+            article.excerpt ? el('p', { class: 'post__excerpt', text: article.excerpt }) : null,
         ),
+        createTags(article.tags),
         el(
             'footer',
             { class: 'post__footer' },
-            el('div', { class: 'post__actions' }, createLikeButton(article)),
+            el('div', { class: 'post__actions' }, isDraft ? null : createLikeButton(article)),
             el(
                 'a',
                 { class: 'btn btn--ghost btn--sm', href: url },
-                el('span', { text: 'Ler artigo' }),
-                icon('arrow-right', 'icon--sm'),
+                el('span', { text: isDraft ? 'Continuar editando' : 'Ler artigo' }),
+                icon(isDraft ? 'pen' : 'arrow-right', 'icon--sm'),
             ),
         ),
     );
