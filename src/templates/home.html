@@ -73,7 +73,7 @@
     <button class="btn btn--secondary load-more" id="feed-more" type="button" hidden>Mais artigos</button>
 </main>
 
-<aside class="page__right" aria-label="Mais">
+<aside class="page__right" aria-label="{{ 'Sugestões e sobre o Social Blog' if current_user.is_authenticated else 'Sobre o Social Blog' }}">
     {% if current_user.is_authenticated %}
     {# Filled by the page's script, and shown only when there is someone to suggest. #}
     <section class="card suggestions" id="suggestions" aria-labelledby="suggestions-title" hidden>
