@@ -9,7 +9,7 @@ import user_validation as validation
 from auth import current_user_id
 from media import media_url
 from links import article_url
-from repositories import article_repository, like_repository, tag_repository, user_repository
+from repositories import article_repository, like_repository, user_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -133,9 +133,8 @@ def create_article():
         stored.get('content') or '',
         current_user.user_id,
         status,
+        tags,
     )
-    if tags:
-        tag_repository.set_article_tags(article_id, tags)
     article = article_repository.get_by_id(article_id, current_user.user_id)
     # The author may delete it from another tab before this read.
     if article is None:
@@ -184,10 +183,8 @@ def update_article(article_id):
     if status is not None:
         changes['status'] = status
     # An admin may remove the article between the checks above and this save.
-    if not article_repository.update(article_id, changes, edited=tags is not None):
+    if not article_repository.update(article_id, changes, tags):
         return _article_not_found()
-    if tags is not None:
-        tag_repository.set_article_tags(article_id, tags)
     article = article_repository.get_by_id(article_id, current_user.user_id)
     if article is None:
         return _article_not_found()
