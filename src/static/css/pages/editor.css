@@ -36,6 +36,27 @@
     padding: var(--space-6) var(--space-6) var(--space-5);
 }
 
+.cover-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.cover-field__image {
+    aspect-ratio: 1200 / 630;
+    background: var(--surface-sunken);
+    border-radius: var(--radius-md);
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+}
+
+.cover-field__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
 .editor__title,
 .editor__summary,
 .editor__content {

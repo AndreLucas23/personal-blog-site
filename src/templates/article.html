@@ -35,6 +35,14 @@
     <article class="card article"
     data-article-id="{{ article['article_id'] }}"
     aria-labelledby="article-title">
+        {% if article['cover_path'] %}
+        <img class="article__cover"
+        src="{{ media_url(article['cover_path']) }}"
+        alt=""
+        width="1200"
+        height="630"
+        fetchpriority="high">
+        {% endif %}
         <header class="article__header">
             <h1 class="article__title" id="article-title">{{ article['article_title'] }}</h1>
             {% if article['summary'] %}
