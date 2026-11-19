@@ -15,6 +15,9 @@ def get_db_connection():
         password=os.getenv('DB_PASSWORD'),
         database=os.getenv('DB_NAME'),
         charset='utf8mb4',
+        # TIMESTAMP values come back in the session zone. UTC keeps the dates the
+        # application sends to browsers right whatever the server zone is.
+        time_zone='+00:00',
         # Count matched rows on UPDATE, so unchanged values are not a missing row.
         client_flags=[ClientFlag.FOUND_ROWS],
     )

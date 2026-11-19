@@ -40,3 +40,9 @@ def test_db_cursor_returns_dictionaries_on_request():
     with db_cursor(dictionary=True) as cursor:
         cursor.execute('SELECT 1 AS one')
         assert cursor.fetchone() == {'one': 1}
+
+
+def test_connections_read_timestamps_in_utc():
+    with db_cursor() as cursor:
+        cursor.execute('SELECT @@session.time_zone')
+        assert cursor.fetchone()[0] == '+00:00'
