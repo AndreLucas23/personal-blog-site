@@ -146,3 +146,15 @@ def test_articles_offer_to_follow_their_author(client, reader_client, admin_clie
     assert 'data-followed="true"' in page(admin_client, path)
     assert 'data-follow' not in page(reader_client, path)
     assert f'href="/auth/login?next={path}/titulo">Seguir<span class="u-visually-hidden"> Reader</span></a>' in page(client, path)
+
+
+def test_following_a_member_removed_meanwhile_answers_404(reader_client, monkeypatch):
+    from repositories import user_repository
+
+    # The lookup finds the member, who is gone by the time the follow is written.
+    monkeypatch.setattr(user_repository, 'get_by_username', lambda username: {'user_id': 999_999})
+
+    response = reader_client.put(FOLLOW_URL.format('ghost'))
+
+    assert response.status_code == 404
+    assert response.get_json() == {'message': 'User not found'}
