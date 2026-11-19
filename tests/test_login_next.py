@@ -101,3 +101,9 @@ def test_addresses_with_accents_keep_their_way_back(client):
 
     assert sign_in_link(page) == '/auth/login?next=/caf%25C3%25A9'
 
+
+@pytest.mark.parametrize('target', ['/auth/logout', '/auth/login', '/api/users/me', '/api/articles'])
+def test_signing_in_does_not_lead_to_the_api_or_the_sign_in_pages(client, reader_id, target):
+    response = client.post('/auth/login', data={**READER_LOGIN, 'next': target})
+
+    assert response.headers['Location'] == '/'
