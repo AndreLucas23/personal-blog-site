@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Private drafts: save without publishing, publish later and move a published article back to drafts, with a Rascunhos tab on your profile and `GET /api/users/me/drafts` (#81).
+- Up to 5 tags per article, normalized to lowercase words joined by hyphens, shown on cards and articles and given in the editor as chips (#81).
+- Articles record when they were updated, and their page mentions edits made on a later day (#81).
 - Every member writes articles in Markdown, with an optional summary, in an editor at `/write` with a toolbar, shortcuts and a preview, and edits them at `/write/<id>` (#80).
 - Articles live at `/articles/<id>/<slug>`, show the formatted text and the reading time, and give the author Editar and Excluir (#80).
 - `GET /api/articles/<id>` and `POST /api/previews` (#80).
