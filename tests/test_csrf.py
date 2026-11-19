@@ -69,7 +69,12 @@ def test_token_stays_the_same_within_a_session(client):
 
 
 def test_registration_requires_the_token(client):
-    form = {'username': 'Leitora', 'email': 'leitora@example.com', 'password': 'senha-1234'}
+    form = {
+        'display_name': 'Leitora',
+        'username': 'leitora',
+        'email': 'leitora@example.com',
+        'password': 'senha-1234',
+    }
     token = page_token(client, '/auth/register')
 
     assert client.post('/auth/register', data=form).status_code == 400

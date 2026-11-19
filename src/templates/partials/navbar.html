@@ -30,7 +30,7 @@
                 aria-expanded="false"
                 aria-controls="account-menu"
                 data-menu-button>
-                    {{ avatar(current_user.username, 'xs') }}
+                    {{ avatar(current_user.display_name, 'xs') }}
                     <span class="topnav__caret">
                         <span class="topnav__label">Eu</span>
                         {{ icon('chevron-down') }}
@@ -40,10 +40,10 @@
 
                 <div class="menu" id="account-menu" role="menu" aria-label="Conta" hidden>
                     <div class="menu__header">
-                        {{ avatar(current_user.username, 'md') }}
+                        {{ avatar(current_user.display_name, 'md') }}
                         <div class="menu__header-text">
-                            <strong>{{ current_user.username }}</strong>
-                            <span>{{ current_user.email }}</span>
+                            <strong>{{ current_user.display_name }}</strong>
+                            <span>@{{ current_user.username }}</span>
                         </div>
                     </div>
 

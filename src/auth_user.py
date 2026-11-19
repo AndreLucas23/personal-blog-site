@@ -21,5 +21,9 @@ class AuthUser(UserMixin):
         return self._user['username']
 
     @property
+    def display_name(self) -> str:
+        return self._user['display_name']
+
+    @property
     def email(self) -> str:
         return self._user['email']

@@ -3,22 +3,28 @@ from werkzeug.security import generate_password_hash
 from repositories import article_repository, user_repository
 
 ADMIN = {
-    'username': 'Owner',
+    'display_name': 'Owner',
+    'username': 'owner',
     'email': 'owner@example.com',
     'password': 'admin-password-1',
 }
 READER = {
-    'username': 'Reader',
+    'display_name': 'Reader',
+    'username': 'reader',
     'email': 'reader@example.com',
     'password': 'reader-password-1',
 }
 
 
 def create_user(
-    username: str, email: str, password: str, is_admin: bool = False
+    display_name: str,
+    username: str,
+    email: str,
+    password: str,
+    is_admin: bool = False,
 ) -> int:
     password_hash = generate_password_hash(password)
-    return user_repository.create(username, email, password_hash, is_admin)
+    return user_repository.create(display_name, username, email, password_hash, is_admin)
 
 
 def create_article(

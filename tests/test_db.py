@@ -15,8 +15,9 @@ def count_users() -> int:
 
 def insert_user(cursor, email: str) -> None:
     cursor.execute(
-        'INSERT INTO USERS (username, email, password_hash) VALUES (%s, %s, %s)',
-        ('Ana', email, 'hash'),
+        'INSERT INTO USERS (display_name, username, email, password_hash) '
+        'VALUES (%s, %s, %s, %s)',
+        ('Ana', 'ana', email, 'hash'),
     )
 
 
