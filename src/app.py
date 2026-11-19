@@ -12,9 +12,9 @@ import security_headers
 import template_helpers
 import uploads
 from api import api_bp
-from links import login_url
 from auth import auth_bp
 from auth_user import AuthUser
+from links import login_url
 from settings import env_flag, env_list
 from views import views_bp
 
