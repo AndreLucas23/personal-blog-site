@@ -24,6 +24,7 @@ const ARTICLE_ERRORS = {
 };
 
 let dirty = false;
+let saving = false;
 let previewedContent = null;
 
 // Title and summary are single lines that grow as they wrap.
@@ -149,6 +150,9 @@ function showErrors(errors) {
 }
 
 async function save() {
+    // Ctrl+Enter does not go through the disabled button, so a second save waits here.
+    if (saving) return;
+
     Object.values(inputs).forEach((input) => setFieldError(input, ''));
     const fields = readFields();
     const localErrors = checkFields(fields);
@@ -157,6 +161,7 @@ async function save() {
         return;
     }
 
+    saving = true;
     submitButton.classList.add('is-loading');
     submitButton.disabled = true;
 
@@ -167,6 +172,7 @@ async function save() {
         dirty = false;
         window.location.assign(article.url);
     } catch (error) {
+        saving = false;
         submitButton.classList.remove('is-loading');
         submitButton.disabled = false;
         if (error instanceof ApiError && error.errors && Object.keys(error.errors).length) {
