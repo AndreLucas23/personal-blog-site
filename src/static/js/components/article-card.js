@@ -12,23 +12,21 @@ export function profileUrl(username) {
 }
 
 function createAuthor(article) {
-    const author = article.author || 'Membro removido';
-    const name = article.author_username
-        ? el('a', { class: 'post__author', href: profileUrl(article.author_username), text: author })
-        : el('span', { class: 'post__author', text: author });
-    const photo = avatar(author, 'md', article.author_avatar_url);
+    const url = profileUrl(article.author_username);
 
     return el(
         'header',
         { class: 'post__header' },
         // The name is the link people use; the photo repeats it for the pointer only.
-        article.author_username
-            ? el('a', { href: profileUrl(article.author_username), tabindex: '-1', 'aria-hidden': 'true' }, photo)
-            : photo,
+        el(
+            'a',
+            { href: url, tabindex: '-1', 'aria-hidden': 'true' },
+            avatar(article.author, 'md', article.author_avatar_url),
+        ),
         el(
             'div',
             { class: 'post__meta' },
-            name,
+            el('a', { class: 'post__author', href: url, text: article.author }),
             el('time', {
                 class: 'post__time',
                 datetime: isoString(article.publish_date),
