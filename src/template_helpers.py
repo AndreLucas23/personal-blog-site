@@ -27,9 +27,12 @@ def month_year(value: datetime) -> str:
 
 
 def website_label(url: str) -> str:
-    """A website as people say it: without the scheme, the www and the last slash."""
+    """A website as people say it: without the scheme, the www and the last slash.
+
+    Built from the host, so the text always names the site the link opens.
+    """
     parts = urlsplit(url)
-    label = (parts.netloc + parts.path).removeprefix('www.').rstrip('/')
+    label = ((parts.hostname or '') + parts.path).removeprefix('www.').rstrip('/')
     return label or url
 
 

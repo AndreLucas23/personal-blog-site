@@ -127,6 +127,11 @@ def validate_website(website: str) -> str | None:
     if parts.scheme not in ('http', 'https') or not parts.hostname or '.' not in parts.hostname:
         return WEBSITE_INVALID
 
+    # https://bank.com@evil.example opens evil.example, so a user name before the host
+    # would only serve to disguise where the link goes.
+    if parts.username is not None or parts.password is not None:
+        return WEBSITE_INVALID
+
     if any(character.isspace() for character in website):
         return WEBSITE_INVALID
 

@@ -70,6 +70,8 @@ def test_month_year_uses_full_portuguese_month_names():
     ('https://ana.dev', 'ana.dev'),
     ('https://www.ana.dev/', 'ana.dev'),
     ('http://ana.dev/blog/', 'ana.dev/blog'),
+    ('https://paypal.com@evil.example/', 'evil.example'),
+    ('https://ana.dev:8443/', 'ana.dev'),
 ])
 def test_website_label_drops_the_scheme_and_the_www(url, label):
     assert template_helpers.website_label(url) == label

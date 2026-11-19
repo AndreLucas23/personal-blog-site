@@ -127,6 +127,8 @@ def test_normalize_website(raw, normalized):
         ('ftp://example.com', validation.WEBSITE_INVALID),
         ('https://javascript:alert(1)', validation.WEBSITE_INVALID),
         ('https://[::1', validation.WEBSITE_INVALID),
+        ('https://paypal.com@evil.example/', validation.WEBSITE_INVALID),
+        ('https://user:pass@ana.dev', validation.WEBSITE_INVALID),
     ],
 )
 def test_validate_website(website, expected):
