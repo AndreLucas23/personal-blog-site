@@ -256,10 +256,13 @@ function coverNotSaved(error, article, publishing) {
     if (!code) console.error(error);
     const reason = IMAGE_ERRORS[code] || 'Não foi possível enviar a capa.';
 
-    // This editor still has the actions of a draft, so it opens again as a published one.
-    if (article.status === 'published' && !unpublishButton) {
+    // A save that moved the article between draft and published leaves this editor with
+    // the actions of the other state, so it opens again with the right ones.
+    const published = article.status === 'published';
+    if (published !== Boolean(unpublishButton)) {
         dirty = false;
-        showToastAfterLeaving(`O artigo foi publicado, mas a capa não. ${reason}`, { type: 'error' });
+        const saved = published ? 'O artigo foi publicado' : 'O artigo voltou para os rascunhos';
+        showToastAfterLeaving(`${saved}, mas a capa não. ${reason}`, { type: 'error' });
         window.location.assign(`/write/${article.article_id}`);
         return;
     }
