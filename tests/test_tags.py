@@ -19,6 +19,9 @@ def tag_count() -> int:
     ('#carreira', 'carreira'),
     ('front_end', 'front-end'),
     ('Educação', 'educação'),
+    ('Cafe\u0301', 'café'),
+    ('हिंदी', 'हिंदी'),
+    ('\u0301\u0301python', 'python'),
     ('c++', 'c'),
     ('--a--b--', 'a-b'),
 ])
