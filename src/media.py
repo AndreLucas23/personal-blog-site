@@ -31,3 +31,4 @@ def media_url(file_name: str | None) -> str | None:
 
 def init_app(app: Flask) -> None:
     app.register_blueprint(media_bp)
+    app.jinja_env.globals['media_url'] = media_url

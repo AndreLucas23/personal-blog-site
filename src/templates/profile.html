@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ member['display_name'] }} (@{{ member['username'] }}) | Social Blog{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/profile.css') }}">
+{% endblock %}
+
+{% block page_class %}page--profile{% endblock %}
+
+{% block page %}
+<main id="main" class="page__main">
+    <section class="card profile" aria-labelledby="profile-name">
+        <div class="profile__cover"></div>
+
+        <div class="profile__body">
+            <div class="profile__top">
+                {{ avatar(member['display_name'], 'xl', media_url(member['avatar_path'])) }}
+
+                {% if is_own %}
+                <a class="btn btn--secondary" href="{{ url_for('views.profile_settings') }}">
+                    {{ icon('pen', 'icon--sm') }}
+                    Editar perfil
+                </a>
+                {% endif %}
+            </div>
+
+            <h1 class="profile__name" id="profile-name">{{ member['display_name'] }}</h1>
+            <p class="profile__username">@{{ member['username'] }}</p>
+
+            {% if member['headline'] %}
+            <p class="profile__headline">{{ member['headline'] }}</p>
+            {% endif %}
+
+            <ul class="profile__facts">
+                {% if member['location'] %}
+                <li>{{ icon('map-pin', 'icon--sm') }} {{ member['location'] }}</li>
+                {% endif %}
+                {% if member['website'] %}
+                <li>
+                    {{ icon('link', 'icon--sm') }}
+                    <a href="{{ member['website'] }}" rel="nofollow ugc noopener noreferrer" target="_blank">{{ member['website'] | website_label }}</a>
+                </li>
+                {% endif %}
+                <li>{{ icon('calendar', 'icon--sm') }} Membro desde {{ member['created_at'] | month_year }}</li>
+            </ul>
+
+            <p class="profile__stats">
+                <strong>{{ member['article_count'] }}</strong>
+                artigo{{ '' if member['article_count'] == 1 else 's' }} publicado{{ '' if member['article_count'] == 1 else 's' }}
+            </p>
+        </div>
+    </section>
+
+    {% if member['bio'] %}
+    <section class="card profile-about" aria-labelledby="profile-about-title">
+        <h2 class="card__title" id="profile-about-title">Sobre</h2>
+        <p class="profile-about__text">{{ member['bio'] }}</p>
+    </section>
+    {% endif %}
+
+    <section class="profile-articles" aria-labelledby="profile-articles-title">
+        <h2 class="profile-articles__title" id="profile-articles-title">Artigos</h2>
+        <div class="feed"
+        id="profile-feed"
+        data-username="{{ member['username'] }}"
+        data-own="{{ 'true' if is_own else 'false' }}"
+        aria-busy="true"></div>
+    </section>
+</main>
+
+<aside class="page__right" aria-label="Mais">
+    {% include 'partials/footer.html' %}
+</aside>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/profile.js') }}"></script>
+{% endblock %}
