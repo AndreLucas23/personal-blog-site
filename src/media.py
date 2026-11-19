@@ -5,8 +5,9 @@ import uploads
 
 media_bp = Blueprint('media', __name__, url_prefix='/media')
 
-# Every upload gets a new name, so a file never changes once it is served.
-CACHE_SECONDS = 365 * 24 * 60 * 60
+# A removed photo must stop showing up: only browsers keep a file, for a day, and
+# shared caches such as proxies never store it.
+CACHE_SECONDS = 24 * 60 * 60
 
 
 @media_bp.route('/<filename>')
@@ -19,7 +20,8 @@ def uploaded_file(filename: str):
     response = send_from_directory(
         current_app.config['UPLOAD_DIR'], filename, mimetype='image/webp', max_age=CACHE_SECONDS
     )
-    response.cache_control.immutable = True
+    response.cache_control.public = False
+    response.cache_control.private = True
     return response
 
 

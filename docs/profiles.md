@@ -28,7 +28,7 @@ An empty optional field clears it. The email is never shown on a public profile.
 
 A member can upload a JPEG, PNG or WebP of up to 5 MB and 40 million pixels. The site turns the photo upright from its EXIF orientation, crops the center to a square, resizes it to 400 by 400 pixels and stores it as WebP, which also drops the metadata of the original file. Transparency is kept. Other files are refused before anything is stored.
 
-Each upload gets a new random name in the directory set by `UPLOAD_DIR`, `/data/uploads` by default, which Docker Compose keeps in the `uploads_data` volume. Uploading a new avatar or removing it deletes the previous file. `/media/<name>` serves the files as `image/webp` with a cache of one year, because a name never points to another image.
+Each upload gets a new random name in the directory set by `UPLOAD_DIR`, `/data/uploads` by default, which Docker Compose keeps in the `uploads_data` volume. Uploading a new avatar or removing it deletes the previous file. `/media/<name>` serves the files as `image/webp`. Browsers keep them for a day and shared caches such as proxies never store them, so a removed photo stops showing up.
 
 Without an avatar, pages show the initials of the display name on a color picked from the name.
 
