@@ -1,5 +1,6 @@
 import io
 
+import mysql.connector
 import pytest
 from PIL import Image
 
@@ -190,3 +191,15 @@ def test_upload_names_must_match_entirely():
     assert uploads.is_upload_name(name)
     assert not uploads.is_upload_name(name + '\n')
     assert not uploads.is_upload_name('x' + name)
+
+
+def test_a_failed_save_leaves_no_file_behind(reader_client, upload_dir, monkeypatch):
+    def database_down(*args, **kwargs):
+        raise mysql.connector.errors.InterfaceError(msg='down', errno=2005)
+
+    monkeypatch.setattr(user_repository, 'set_avatar', database_down)
+
+    response = upload(reader_client, image_bytes())
+
+    assert response.status_code == 500
+    assert list(upload_dir.iterdir()) == []
