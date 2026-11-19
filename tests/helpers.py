@@ -33,5 +33,5 @@ def create_article(
     return article_repository.create(title, content, author_id)
 
 
-def login(client, email: str, password: str):
-    return client.post('/auth/login', data={'email': email, 'password': password})
+def login(client, login_name: str, password: str):
+    return client.post('/auth/login', data={'login': login_name, 'password': password})

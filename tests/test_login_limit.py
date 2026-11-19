@@ -86,7 +86,7 @@ def test_block_does_not_reach_other_addresses(app, client, reader_id):
 
     response = other_client.post(
         '/auth/login',
-        data={'email': READER['email'], 'password': READER['password']},
+        data={'login': READER['email'], 'password': READER['password']},
         environ_base=OTHER_ADDRESS,
     )
 
@@ -104,3 +104,24 @@ def test_email_longer_than_the_column_is_still_limited(client):
     fail_logins(client, long_email)
 
     assert login(client, long_email, WRONG_PASSWORD).status_code == 429
+
+
+def test_failures_by_username_are_limited_too(client, reader_id):
+    fail_logins(client, READER['username'])
+
+    assert login(client, READER['username'], READER['password']).status_code == 429
+
+
+def test_username_failures_count_together_whatever_the_case_or_the_at(client, reader_id):
+    for login_name in ('reader', 'Reader', '@reader', ' READER ', 'reader'):
+        assert login(client, login_name, WRONG_PASSWORD).status_code == 401
+
+    assert login(client, 'reader', READER['password']).status_code == 429
+
+
+def test_email_and_username_of_one_account_count_together(client, reader_id):
+    for login_name in ('reader@example.com', 'reader', 'READER@example.com', '@reader', 'reader'):
+        assert login(client, login_name, WRONG_PASSWORD).status_code == 401
+
+    assert login(client, READER['email'], READER['password']).status_code == 429
+    assert login(client, READER['username'], READER['password']).status_code == 429
