@@ -41,8 +41,13 @@ def normalize_tag(value: str) -> str:
     """Lowercase words joined by hyphens, such as banco-de-dados. Accents stay."""
     tag = unicodedata.normalize('NFC', value).lower().strip().lstrip('#')
     tag = re.sub(r'[\s_]+', '-', tag)
-    tag = re.sub(r'[^\w-]', '', tag)
-    return re.sub(r'-{2,}', '-', tag).strip('-')
+    kept = []
+    for char in tag:
+        kind = unicodedata.category(char)[0]
+        # Scripts such as Hindi spell words with marks, which belong to the letter before them.
+        if char == '-' or kind in 'LN' or (kind == 'M' and kept and kept[-1] != '-'):
+            kept.append(char)
+    return re.sub(r'-{2,}', '-', ''.join(kept)).strip('-')
 
 
 def normalize_tags(values: list[str]) -> list[str]:
