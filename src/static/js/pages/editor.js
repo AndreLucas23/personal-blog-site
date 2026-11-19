@@ -26,6 +26,8 @@ const ARTICLE_ERRORS = {
 let dirty = false;
 let saving = false;
 let previewedContent = null;
+// Every preview request takes a number, so a slow older answer cannot replace a newer one.
+let previewRun = 0;
 
 // Title and summary are single lines that grow as they wrap.
 function autosize(textarea) {
@@ -100,6 +102,7 @@ function showTab(tab) {
 async function showPreview() {
     const content = contentInput.value;
     if (content === previewedContent) return;
+    const run = ++previewRun;
 
     if (!content.trim()) {
         previewPanel.replaceChildren(Object.assign(document.createElement('p'), {
@@ -113,14 +116,16 @@ async function showPreview() {
     previewPanel.setAttribute('aria-busy', 'true');
     try {
         const { html } = await API.preview(content);
+        if (run !== previewRun) return;
         // The server renders without raw HTML and refuses unsafe links, so this markup is safe.
         previewPanel.innerHTML = html;
         previewedContent = content;
     } catch (error) {
+        if (run !== previewRun) return;
         console.error(error);
         previewPanel.textContent = 'Não foi possível pré-visualizar agora. Tente de novo.';
     } finally {
-        previewPanel.removeAttribute('aria-busy');
+        if (run === previewRun) previewPanel.removeAttribute('aria-busy');
     }
 }
 
