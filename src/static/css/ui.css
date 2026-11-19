@@ -968,6 +968,10 @@ a.post__author:hover {
     margin-top: 1.1em;
 }
 
+.prose > :first-child {
+    margin-top: 0;
+}
+
 .prose h2,
 .prose h3,
 .prose h4,

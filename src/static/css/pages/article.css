@@ -61,17 +61,18 @@ a.byline__name:hover {
     font-size: var(--text-sm);
 }
 
-.byline__action {
+.byline__actions {
+    align-items: center;
+    display: flex;
+    gap: var(--space-1);
     margin-left: auto;
 }
 
-.article__body {
-    color: var(--text);
-    font-family: var(--font-serif);
-    font-size: 1.1875rem;
-    line-height: 1.75;
-    overflow-wrap: anywhere;
-    white-space: pre-wrap;
+.article__summary {
+    color: var(--text-secondary);
+    font-size: var(--text-xl);
+    line-height: 1.5;
+    margin-top: calc(var(--space-3) * -1);
 }
 
 .article__footer {
