@@ -5,7 +5,8 @@ const THEMES = ['light', 'dark'];
 function storedTheme() {
     try {
         return localStorage.getItem(STORAGE_KEY) || 'system';
-    } catch {
+    } catch (error) {
+        console.warn('Could not read the stored theme', error);
         return 'system';
     }
 }
@@ -14,8 +15,9 @@ function storeTheme(theme) {
     try {
         if (THEMES.includes(theme)) localStorage.setItem(STORAGE_KEY, theme);
         else localStorage.removeItem(STORAGE_KEY);
-    } catch {
+    } catch (error) {
         // Without storage the choice lasts until the page closes.
+        console.warn('Could not store the theme', error);
     }
 }
 
