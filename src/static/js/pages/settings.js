@@ -40,7 +40,10 @@ let currentAvatarUrl = document.querySelector('#avatar-current img')?.getAttribu
 
 // Pieces of the page that show the signed-in member, kept in step after a change.
 function showIdentity({ display_name: name, username, avatar_url: avatarUrl }) {
-    if (name !== undefined) {
+    const nameChanged = name !== undefined && name !== currentName;
+    const photoChanged = avatarUrl !== undefined && avatarUrl !== currentAvatarUrl;
+
+    if (nameChanged) {
         currentName = name;
         document.querySelectorAll('[data-me-name]').forEach((node) => { node.textContent = name; });
     }
@@ -48,10 +51,14 @@ function showIdentity({ display_name: name, username, avatar_url: avatarUrl }) {
         document.querySelectorAll('[data-me-username]').forEach((node) => { node.textContent = `@${username}`; });
         document.querySelectorAll('[data-me-profile-link]').forEach((link) => { link.href = `/@${username}`; });
     }
-    if (avatarUrl !== undefined) currentAvatarUrl = avatarUrl;
-    document.querySelectorAll('[data-me-avatar]').forEach((slot) => {
-        slot.replaceChildren(avatar(currentName, slot.dataset.meAvatar, currentAvatarUrl, { eager: true }));
-    });
+    if (photoChanged) currentAvatarUrl = avatarUrl;
+
+    // Initials come from the name, so a new name only matters while there is no photo.
+    if (photoChanged || (nameChanged && !currentAvatarUrl)) {
+        document.querySelectorAll('[data-me-avatar]').forEach((slot) => {
+            slot.replaceChildren(avatar(currentName, slot.dataset.meAvatar, currentAvatarUrl, { eager: true }));
+        });
+    }
 }
 
 function fillForm(profile) {
