@@ -20,10 +20,20 @@ const usernameHint = document.getElementById('username-hint');
 
 if (usernameInput && usernameHint) {
     const rule = usernameHint.textContent;
-    const valid = /^[a-z0-9_]{3,30}$/;
+    const pattern = new RegExp(usernameInput.dataset.pattern);
+    const reserved = new Set(usernameInput.dataset.reserved.split(' '));
 
-    usernameInput.addEventListener('input', () => {
+    const isValid = (username) => username.length >= usernameInput.minLength
+        && username.length <= usernameInput.maxLength
+        && pattern.test(username)
+        && !reserved.has(username);
+
+    const showAddress = () => {
         const username = usernameInput.value.trim().replace(/^@/, '').toLowerCase();
-        usernameHint.textContent = valid.test(username) ? `Seu perfil vai ficar em /@${username}` : rule;
-    });
+        usernameHint.textContent = isValid(username) ? `Seu perfil vai ficar em /@${username}` : rule;
+    };
+
+    usernameInput.addEventListener('input', showAddress);
+    // The server fills the field back in after an error.
+    showAddress();
 }

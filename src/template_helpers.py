@@ -5,6 +5,8 @@ from urllib.parse import urlsplit
 from flask import Flask, url_for
 from markupsafe import Markup, escape
 
+import user_validation
+
 AVATAR_COLORS = 8
 MONTHS = (
     'jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.',
@@ -84,7 +86,13 @@ def avatar(name: str, size: str = 'md', image_url: str | None = None) -> Markup:
 
 
 def init_app(app: Flask) -> None:
-    app.jinja_env.globals.update(icon=icon, avatar=avatar)
+    app.jinja_env.globals.update(
+        icon=icon,
+        avatar=avatar,
+        # Scripts that check a username read the rules from the page, not a copy.
+        username_pattern=user_validation.USERNAME_PATTERN.pattern,
+        reserved_usernames=' '.join(sorted(user_validation.RESERVED_USERNAMES)),
+    )
     app.jinja_env.filters.update(
         long_date=long_date,
         month_year=month_year,
