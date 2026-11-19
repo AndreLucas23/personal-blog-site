@@ -75,7 +75,7 @@ Every `401` from the API has the body `{"message": "Authentication required", "l
 
 New articles are stored with the member who created them as author, as [articles.md](articles.md#permissions) describes. The admin flag is read from the database on every request, so removing it takes effect immediately, even for sessions that are already open.
 
-Pages that need a session redirect anonymous visitors to `/auth/login?next=<page>`, and the Entrar links of the pages lead back to them too. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired or when a visitor clicks a like button, it opens the `login_url` with the current page as `next`.
+Pages that need a session redirect anonymous visitors to `/auth/login?next=<page>`, and the Entrar and Criar conta links of the pages lead back to them too. API routes answer with `401` instead, because the client is JavaScript and not a browser navigation. When the browser receives a `401` from the API, for example after the session expired or when a visitor clicks a like button, it opens the `login_url` with the current page as `next`.
 
 ## Pages
 

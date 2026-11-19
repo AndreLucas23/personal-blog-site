@@ -34,7 +34,7 @@
     <section class="card welcome-card" aria-labelledby="welcome-title">
         <h2 class="welcome-card__title" id="welcome-title">Boas-vindas ao Social Blog</h2>
         <p class="welcome-card__text">Leia artigos de quem entende do assunto e curta os que você mais gostar.</p>
-        <a class="btn btn--primary btn--block" href="{{ url_for('auth.register') }}">Criar conta</a>
+        <a class="btn btn--primary btn--block" href="{{ register_url() }}">Criar conta</a>
         <a class="btn btn--ghost btn--block" href="{{ login_url() }}">Entrar</a>
     </section>
     {% endif %}
