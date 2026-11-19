@@ -1,15 +1,15 @@
 {# Follow a member. Visitors get a link to sign in, which leads back to this page.
-   The name stays the same and aria-pressed tells whether the viewer follows. #}
+   The name is what the button shows, Seguir or Seguindo, then the member's name, so
+   voice control finds it by its words. #}
 {% macro follow_button(username, name, followed, size='') %}
 {% if current_user.is_authenticated %}
 <button class="btn {{ 'btn--secondary' if followed else 'btn--primary' }} {{ size }} follow-btn"
 type="button"
 data-follow="{{ username }}"
-aria-pressed="{{ 'true' if followed else 'false' }}"
-aria-label="Seguir {{ name }}">
-    <span class="follow-btn__text">{{ 'Seguindo' if followed else 'Seguir' }}</span>
+data-followed="{{ 'true' if followed else 'false' }}">
+    <span class="follow-btn__text">{{ 'Seguindo' if followed else 'Seguir' }}</span><span class="u-visually-hidden"> {{ name }}</span>
 </button>
 {% else %}
-<a class="btn btn--primary {{ size }} follow-btn" href="{{ login_url() }}" aria-label="Seguir {{ name }}">Seguir</a>
+<a class="btn btn--primary {{ size }} follow-btn" href="{{ login_url() }}">Seguir<span class="u-visually-hidden"> {{ name }}</span></a>
 {% endif %}
 {% endmacro %}
