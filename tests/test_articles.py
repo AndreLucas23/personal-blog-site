@@ -5,7 +5,7 @@ from helpers import create_article
 from repositories import article_repository
 
 ARTICLE_FIELDS = {
-    'article_id', 'url', 'article_title', 'summary', 'tags', 'excerpt', 'reading_time', 'status',
+    'article_id', 'url', 'article_title', 'summary', 'cover_url', 'tags', 'excerpt', 'reading_time', 'status',
     'publish_date', 'created_at', 'updated_at', 'author', 'author_username', 'author_avatar_url',
     'likes', 'liked',
 }
