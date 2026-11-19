@@ -284,3 +284,19 @@ def test_articles_carry_their_readable_address(client, admin_id):
     article = client.get(f'/api/articles/{article_id}').get_json()
 
     assert article['url'] == f'/articles/{article_id}/ola-mundo'
+
+
+def test_saving_an_article_removed_meanwhile_answers_404(reader_client, reader_id, monkeypatch):
+    article_id = create_article(reader_id)
+    remove_before_saving = article_repository.update
+
+    def removed_by_a_moderator(*args, **kwargs):
+        article_repository.delete(article_id)
+        return remove_before_saving(*args, **kwargs)
+
+    monkeypatch.setattr(article_repository, 'update', removed_by_a_moderator)
+
+    response = reader_client.patch(f'/api/articles/{article_id}', json={'title': 'Novo'})
+
+    assert response.status_code == 404
+    assert response.get_json() == {'message': 'Article not found'}

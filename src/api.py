@@ -103,6 +103,9 @@ def create_article():
         stored['title'], stored.get('summary'), stored['content'], current_user.user_id
     )
     article = article_repository.get_by_id(article_id, current_user.user_id)
+    # The author may delete it from another tab before this read.
+    if article is None:
+        return _article_not_found()
     return jsonify(_article_json(article, with_content=True)), 201
 
 @api_bp.route('/articles/<int:article_id>', methods=['GET'])
@@ -133,8 +136,12 @@ def update_article(article_id):
     if errors:
         return _invalid_article(errors)
 
-    article_repository.update(article_id, _stored(fields))
+    # An admin may remove the article between the checks above and this save.
+    if not article_repository.update(article_id, _stored(fields)):
+        return _article_not_found()
     article = article_repository.get_by_id(article_id, current_user.user_id)
+    if article is None:
+        return _article_not_found()
     return jsonify(_article_json(article, with_content=True))
 
 @api_bp.route('/articles/<int:article_id>', methods=['DELETE'])
