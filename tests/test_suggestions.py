@@ -104,3 +104,16 @@ def test_members_get_the_suggestions_card(reader_client):
 
 def test_visitors_do_not(client):
     assert 'id="suggestions"' not in client.get('/').get_data(as_text=True)
+
+
+def test_authors_come_only_from_the_latest_articles(reader_client, monkeypatch):
+    from repositories import follow_repository
+
+    monkeypatch.setattr(follow_repository, 'RECENT_ARTICLES', 2)
+    ana, bia = member('ana'), member('bia')
+    published(ana, day=1)
+    published(bia, day=8)
+    published(bia, day=9)
+
+    # Ana's article is older than the two latest, which are both by Bia.
+    assert suggested(reader_client) == ['bia']
