@@ -60,6 +60,14 @@ def test_avatar_shows_the_photo_when_there_is_one(app):
     assert markup.startswith('<img class="avatar avatar--lg"')
     assert 'src="/media/x.webp"' in markup
     assert 'alt=""' in markup
+    assert 'loading="lazy"' in markup
+
+
+def test_eager_avatar_loads_at_once(app):
+    with app.test_request_context():
+        markup = str(template_helpers.avatar('Ana', 'xl', '/media/x.webp', eager=True))
+
+    assert 'loading=' not in markup
 
 
 def test_month_year_uses_full_portuguese_month_names():

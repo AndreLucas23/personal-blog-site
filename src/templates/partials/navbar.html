@@ -30,7 +30,7 @@
                 aria-expanded="false"
                 aria-controls="account-menu"
                 data-menu-button>
-                    <span class="avatar-slot" data-me-avatar="xs">{{ avatar(current_user.display_name, 'xs', media_url(current_user.avatar_path)) }}</span>
+                    <span class="avatar-slot" data-me-avatar="xs">{{ avatar(current_user.display_name, 'xs', media_url(current_user.avatar_path), eager=true) }}</span>
                     <span class="topnav__caret">
                         <span class="topnav__label">Eu</span>
                         {{ icon('chevron-down') }}
