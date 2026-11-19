@@ -97,6 +97,7 @@ Start and target dates feed the roadmap view. The target date of a sub-issue nev
 - Python uses `snake_case`, four spaces, type hints on new code and `str | None` instead of `Optional`.
 - JavaScript uses `camelCase` and four spaces.
 - CSS follows BEM (`block__element--modifier`) and the `u-` prefix for utility classes.
+- Templates have no inline scripts, inline styles or event handler attributes: the Content Security Policy blocks them. Put scripts in `static/js` and styles in `static/css`.
 - Database tables are uppercase and plural (`USERS`, `ARTICLES`, `LIKES`), and columns use `snake_case`.
 - A schema change is a new numbered file in `migrations/`, as the README describes. Never edit a migration that was already merged.
 - REST endpoints use plural nouns and no verbs.
