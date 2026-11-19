@@ -20,15 +20,18 @@ export function avatarColor(name) {
     return value % AVATAR_COLORS;
 }
 
-/** The member's photo when there is one, their initials otherwise. */
-export function avatar(name, size = 'md', imageUrl = null) {
+/**
+ * The member's photo when there is one, their initials otherwise. Photos load when
+ * they get near the screen, unless eager asks for them at once.
+ */
+export function avatar(name, size = 'md', imageUrl = null, { eager = false } = {}) {
     if (imageUrl) {
         // The name is always shown next to it, so the photo needs no text of its own.
         return el('img', {
             class: `avatar avatar--${size}`,
             src: imageUrl,
             alt: '',
-            loading: 'lazy',
+            loading: eager ? null : 'lazy',
             decoding: 'async',
         });
     }

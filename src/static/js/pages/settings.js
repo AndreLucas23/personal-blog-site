@@ -50,7 +50,7 @@ function showIdentity({ display_name: name, username, avatar_url: avatarUrl }) {
     }
     if (avatarUrl !== undefined) currentAvatarUrl = avatarUrl;
     document.querySelectorAll('[data-me-avatar]').forEach((slot) => {
-        slot.replaceChildren(avatar(currentName, slot.dataset.meAvatar, currentAvatarUrl));
+        slot.replaceChildren(avatar(currentName, slot.dataset.meAvatar, currentAvatarUrl, { eager: true }));
     });
 }
 

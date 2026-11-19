@@ -71,13 +71,20 @@ def icon(name: str, class_name: str = '') -> Markup:
     )
 
 
-def avatar(name: str, size: str = 'md', image_url: str | None = None) -> Markup:
-    """The member's photo when there is one, their initials otherwise."""
+def avatar(
+    name: str, size: str = 'md', image_url: str | None = None, eager: bool = False
+) -> Markup:
+    """The member's photo when there is one, their initials otherwise.
+
+    Photos load when they get near the screen, unless eager asks for them at once,
+    as for the ones visible when the page opens.
+    """
     if image_url:
+        loading = '' if eager else ' loading="lazy"'
         # The name is always shown next to it, so the photo needs no text of its own.
         return Markup(
             f'<img class="avatar avatar--{escape(size)}" src="{escape(image_url)}" '
-            'alt="" loading="lazy" decoding="async">'
+            f'alt=""{loading} decoding="async">'
         )
     return Markup(
         f'<span class="avatar avatar--{escape(size)} avatar--c{avatar_color(name)}" '
