@@ -51,3 +51,25 @@ def test_icon_points_at_the_sprite(app):
     assert 'class="icon icon--sm"' in markup
     assert 'href="/static/imgs/icons.svg#heart"' in markup
     assert 'aria-hidden="true"' in markup
+
+
+def test_avatar_shows_the_photo_when_there_is_one(app):
+    with app.test_request_context():
+        markup = str(template_helpers.avatar('Ana', 'lg', '/media/x.webp'))
+
+    assert markup.startswith('<img class="avatar avatar--lg"')
+    assert 'src="/media/x.webp"' in markup
+    assert 'alt=""' in markup
+
+
+def test_month_year_uses_full_portuguese_month_names():
+    assert template_helpers.month_year(datetime(2026, 3, 5)) == 'março de 2026'
+
+
+@pytest.mark.parametrize(('url', 'label'), [
+    ('https://ana.dev', 'ana.dev'),
+    ('https://www.ana.dev/', 'ana.dev'),
+    ('http://ana.dev/blog/', 'ana.dev/blog'),
+])
+def test_website_label_drops_the_scheme_and_the_www(url, label):
+    assert template_helpers.website_label(url) == label

@@ -1,10 +1,12 @@
 const SAFE_METHODS = ['GET', 'HEAD'];
 
 export class ApiError extends Error {
-    constructor(status, message) {
+    constructor(status, message, errors = {}) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
+        // Error codes by field, when the API reports which fields are invalid.
+        this.errors = errors;
     }
 }
 
@@ -12,15 +14,16 @@ function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]').content;
 }
 
-async function request(endpoint, { method = 'GET', json } = {}) {
+async function request(endpoint, { method = 'GET', json, formData } = {}) {
     const headers = {};
     if (!SAFE_METHODS.includes(method)) headers['X-CSRF-Token'] = csrfToken();
     if (json !== undefined) headers['Content-Type'] = 'application/json';
 
+    // A FormData body sets its own multipart content type with the boundary.
     const res = await fetch(endpoint, {
         method,
         headers,
-        body: json === undefined ? undefined : JSON.stringify(json),
+        body: formData ?? (json === undefined ? undefined : JSON.stringify(json)),
     });
     const body = await res.json().catch(() => ({}));
 
@@ -30,7 +33,7 @@ async function request(endpoint, { method = 'GET', json } = {}) {
         return new Promise(() => {});
     }
     if (!res.ok) {
-        throw new ApiError(res.status, body.message || `Erro ${res.status}`);
+        throw new ApiError(res.status, body.message || `Erro ${res.status}`, body.errors);
     }
     return body;
 }
@@ -38,6 +41,10 @@ async function request(endpoint, { method = 'GET', json } = {}) {
 export const API = {
     fetchAll() {
         return request('/api/articles');
+    },
+
+    fetchArticlesBy(username) {
+        return request(`/api/articles?author=${encodeURIComponent(username)}`);
     },
 
     add(data) {
@@ -66,5 +73,19 @@ export const API = {
 
     searchById(query) {
         return request(`/api/articles/id/${encodeURIComponent(query)}`);
+    },
+
+    updateProfile(fields) {
+        return request('/api/users/me', { method: 'PATCH', json: fields });
+    },
+
+    uploadAvatar(file) {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        return request('/api/users/me/avatar', { method: 'PUT', formData });
+    },
+
+    removeAvatar() {
+        return request('/api/users/me/avatar', { method: 'DELETE' });
     },
 };

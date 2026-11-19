@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, abort, redirect, render_template, url_for
+from flask_login import current_user, login_required
 
+import user_validation as validation
 from auth import admin_required, current_user_id
-from repositories import article_repository
+from repositories import article_repository, user_repository
 
 views_bp = Blueprint('views', __name__)
 
@@ -22,3 +24,24 @@ def open_article(article_id):
         abort(404)
 
     return render_template('article.html', article=article), 200
+
+@views_bp.route('/@<username>')
+def profile(username):
+    canonical = validation.normalize_username(username)
+    member = user_repository.get_profile(canonical)
+    if member is None:
+        abort(404)
+
+    # One address per profile, whatever the letter case someone typed.
+    if username != canonical:
+        return redirect(url_for('views.profile', username=canonical), 301)
+
+    is_own = current_user.is_authenticated and current_user.user_id == member['user_id']
+    return render_template('profile.html', member=member, is_own=is_own)
+
+
+@views_bp.route('/settings/profile')
+@login_required
+def profile_settings():
+    member = user_repository.get_profile_by_id(current_user.user_id)
+    return render_template('settings_profile.html', member=member)

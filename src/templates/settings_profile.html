@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar perfil | Social Blog{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/settings.css') }}">
+{% endblock %}
+
+{% block page_class %}page--settings{% endblock %}
+
+{% block page %}
+<main id="main" class="page__main">
+    <header class="settings-header">
+        <div>
+            <h1 class="section-title">Editar perfil</h1>
+            <p class="section-subtitle">Como as pessoas veem você no Social Blog.</p>
+        </div>
+        <a class="btn btn--ghost"
+        href="{{ url_for('views.profile', username=member['username']) }}"
+        data-me-profile-link>
+            {{ icon('user', 'icon--sm') }}
+            Ver meu perfil
+        </a>
+    </header>
+
+    <section class="card settings-photo" aria-labelledby="photo-title">
+        <span class="settings-photo__current" id="avatar-current" data-me-avatar="xl">
+            {{ avatar(member['display_name'], 'xl', media_url(member['avatar_path'])) }}
+        </span>
+
+        <div class="settings-photo__body">
+            <h2 class="card__title" id="photo-title">Foto</h2>
+            <p class="field__hint">JPEG, PNG ou WebP de até 5 MB. O centro da imagem vira um quadrado.</p>
+
+            <div class="settings-photo__actions">
+                <button class="btn btn--secondary btn--sm" id="avatar-pick" type="button">
+                    {{ icon('upload', 'icon--sm') }}
+                    {{ 'Trocar foto' if member['avatar_path'] else 'Enviar foto' }}
+                </button>
+                <button class="btn btn--ghost btn--sm"
+                id="avatar-remove"
+                type="button"
+                {% if not member['avatar_path'] %}hidden{% endif %}>
+                    {{ icon('trash', 'icon--sm') }}
+                    Remover
+                </button>
+                <input class="u-visually-hidden"
+                id="avatar-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                tabindex="-1"
+                aria-hidden="true">
+            </div>
+
+            <p class="field__error" id="avatar-error" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <form class="card form settings-form" id="profile-form" novalidate>
+        <div class="field">
+            <div class="field__row">
+                <label class="field__label" for="display_name">Nome</label>
+                <span class="field__counter" id="display_name-counter"></span>
+            </div>
+            <input class="input"
+            id="display_name"
+            name="display_name"
+            type="text"
+            value="{{ member['display_name'] }}"
+            maxlength="50"
+            autocomplete="name"
+            aria-describedby="display_name-error"
+            required>
+            <span class="field__error" id="display_name-error" aria-live="polite"></span>
+        </div>
+
+        <div class="field">
+            <label class="field__label" for="username">Nome de usuário</label>
+            <div class="input-group">
+                {{ icon('at-sign') }}
+                <input class="input"
+                id="username"
+                name="username"
+                type="text"
+                value="{{ member['username'] }}"
+                minlength="3"
+                maxlength="30"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                aria-describedby="username-hint username-error"
+                required>
+            </div>
+            <span class="field__hint" id="username-hint">O endereço do seu perfil. De 3 a 30 letras minúsculas, números ou _.</span>
+            <span class="field__error" id="username-error" aria-live="polite"></span>
+        </div>
+
+        <div class="field">
+            <div class="field__row">
+                <label class="field__label" for="headline">Título</label>
+                <span class="field__counter" id="headline-counter"></span>
+            </div>
+            <input class="input"
+            id="headline"
+            name="headline"
+            type="text"
+            value="{{ member['headline'] or '' }}"
+            maxlength="120"
+            placeholder="Ex.: Engenheira de dados na Empresa"
+            aria-describedby="headline-error">
+            <span class="field__error" id="headline-error" aria-live="polite"></span>
+        </div>
+
+        <div class="settings-form__row">
+            <div class="field">
+                <label class="field__label" for="location">Localização</label>
+                <input class="input"
+                id="location"
+                name="location"
+                type="text"
+                value="{{ member['location'] or '' }}"
+                maxlength="80"
+                placeholder="Ex.: Recife, PE"
+                autocomplete="address-level2"
+                aria-describedby="location-error">
+                <span class="field__error" id="location-error" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+                <label class="field__label" for="website">Site</label>
+                <input class="input"
+                id="website"
+                name="website"
+                type="text"
+                inputmode="url"
+                value="{{ member['website'] or '' }}"
+                maxlength="200"
+                placeholder="seusite.com.br"
+                autocomplete="url"
+                aria-describedby="website-error">
+                <span class="field__error" id="website-error" aria-live="polite"></span>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="field__row">
+                <label class="field__label" for="bio">Sobre</label>
+                <span class="field__counter" id="bio-counter"></span>
+            </div>
+            <textarea class="textarea"
+            id="bio"
+            name="bio"
+            rows="5"
+            maxlength="500"
+            placeholder="Conte um pouco sobre você e sobre o que escreve."
+            aria-describedby="bio-error">{{ member['bio'] or '' }}</textarea>
+            <span class="field__error" id="bio-error" aria-live="polite"></span>
+        </div>
+
+        <div class="settings-form__actions">
+            <button class="btn btn--primary" id="profile-submit" type="submit">Salvar</button>
+        </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/settings.js') }}"></script>
+{% endblock %}

@@ -1,5 +1,6 @@
 """Helpers that templates call to draw icons, avatars and dates the same way everywhere."""
 from datetime import datetime, timezone
+from urllib.parse import urlsplit
 
 from flask import Flask, url_for
 from markupsafe import Markup, escape
@@ -9,11 +10,27 @@ MONTHS = (
     'jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.',
     'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.',
 )
+MONTH_NAMES = (
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+)
 
 
 def long_date(value: datetime) -> str:
     """A date as people read it in Brazil, such as 18 de nov. de 2026."""
     return f'{value.day} de {MONTHS[value.month - 1]} de {value.year}'
+
+
+def month_year(value: datetime) -> str:
+    """Such as novembro de 2026, for how long someone has been a member."""
+    return f'{MONTH_NAMES[value.month - 1]} de {value.year}'
+
+
+def website_label(url: str) -> str:
+    """A website as people say it: without the scheme, the www and the last slash."""
+    parts = urlsplit(url)
+    label = (parts.netloc + parts.path).removeprefix('www.').rstrip('/')
+    return label or url
 
 
 def iso_datetime(value: datetime) -> str:
@@ -49,7 +66,14 @@ def icon(name: str, class_name: str = '') -> Markup:
     )
 
 
-def avatar(name: str, size: str = 'md') -> Markup:
+def avatar(name: str, size: str = 'md', image_url: str | None = None) -> Markup:
+    """The member's photo when there is one, their initials otherwise."""
+    if image_url:
+        # The name is always shown next to it, so the photo needs no text of its own.
+        return Markup(
+            f'<img class="avatar avatar--{escape(size)}" src="{escape(image_url)}" '
+            'alt="" loading="lazy" decoding="async">'
+        )
     return Markup(
         f'<span class="avatar avatar--{escape(size)} avatar--c{avatar_color(name)}" '
         f'aria-hidden="true">{escape(initials(name))}</span>'
@@ -58,4 +82,9 @@ def avatar(name: str, size: str = 'md') -> Markup:
 
 def init_app(app: Flask) -> None:
     app.jinja_env.globals.update(icon=icon, avatar=avatar)
-    app.jinja_env.filters.update(long_date=long_date, iso_datetime=iso_datetime)
+    app.jinja_env.filters.update(
+        long_date=long_date,
+        month_year=month_year,
+        website_label=website_label,
+        iso_datetime=iso_datetime,
+    )
