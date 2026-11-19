@@ -11,7 +11,9 @@ ACCOUNT_COLUMNS = (
 PROFILE_QUERY = (
     'SELECT u.user_id, u.username, u.display_name, u.email, u.headline, u.bio, '
     'u.location, u.website, u.avatar_path, u.created_at, '
-    '(SELECT COUNT(*) FROM ARTICLES a WHERE a.author_id = u.user_id) AS article_count '
+    # Drafts are private, so profiles count only what was published.
+    "(SELECT COUNT(*) FROM ARTICLES a WHERE a.author_id = u.user_id AND a.status = 'published') "
+    'AS article_count '
     'FROM USERS u'
 )
 
