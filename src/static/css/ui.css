@@ -134,6 +134,16 @@
     border-color: var(--brand) var(--brand) transparent transparent;
 }
 
+/* Follow: the width of Seguindo, so the button keeps its size when it changes */
+.follow-btn {
+    justify-content: center;
+    min-width: 6.5rem;
+}
+
+.follow-btn.btn--sm {
+    min-width: 5.5rem;
+}
+
 /* The button after a list that comes in pages, centered in flex and block parents */
 .load-more {
     display: flex;

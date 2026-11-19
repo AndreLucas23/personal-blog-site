@@ -88,3 +88,59 @@ def test_follows_go_away_with_the_account(client, reader_client, reader_id, admi
         cursor.execute('DELETE FROM USERS WHERE user_id = %s', (reader_id,))
 
     assert profile(client, 'owner')['followers'] == 0
+
+
+def page(client, path: str) -> str:
+    return client.get(path, follow_redirects=True).get_data(as_text=True)
+
+
+def test_a_profile_offers_to_follow_its_member(reader_client, admin_id):
+    shown = page(reader_client, '/@owner')
+
+    assert 'data-follow="owner"' in shown and 'aria-pressed="false"' in shown
+    assert 'aria-label="Seguir Owner"' in shown
+
+
+def test_a_followed_member_shows_seguindo(reader_client, admin_id):
+    reader_client.put(FOLLOW_URL.format('owner'))
+
+    shown = page(reader_client, '/@owner')
+
+    assert 'aria-pressed="true"' in shown and 'Seguindo' in shown
+    assert '<strong id="profile-followers">1</strong>' in shown and '>seguidor<' in shown
+
+
+def test_your_own_profile_has_no_follow_button(reader_client):
+    shown = page(reader_client, '/@reader')
+
+    assert 'data-follow' not in shown and 'Editar perfil' in shown
+
+
+def test_visitors_follow_by_signing_in_first(client, reader_id):
+    shown = page(client, '/@reader')
+
+    assert 'href="/auth/login?next=/@reader" aria-label="Seguir Reader">Seguir</a>' in shown
+
+
+def test_profiles_count_followers_and_following(client, reader_client, admin_id):
+    reader_client.put(FOLLOW_URL.format('owner'))
+
+    owner = page(client, '/@owner')
+    reader = page(client, '/@reader')
+
+    assert '<strong id="profile-followers">1</strong>' in owner
+    assert '<strong id="profile-followers">0</strong>' in reader and '>seguidores<' in reader
+    assert '<li><strong>1</strong> seguindo</li>' in reader
+
+
+def test_articles_offer_to_follow_their_author(client, reader_client, admin_client, reader_id):
+    from helpers import create_article
+    article_id = create_article(reader_id)
+    path = f'/articles/{article_id}'
+
+    admin_client.put(FOLLOW_URL.format('reader'))
+
+    assert 'data-follow="reader"' in page(admin_client, path)
+    assert 'aria-pressed="true"' in page(admin_client, path)
+    assert 'data-follow' not in page(reader_client, path)
+    assert f'href="/auth/login?next={path}/titulo" aria-label="Seguir Reader">Seguir</a>' in page(client, path)
