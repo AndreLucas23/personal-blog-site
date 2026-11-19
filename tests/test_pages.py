@@ -100,3 +100,10 @@ def test_pages_have_no_inline_code(admin_client, admin_id, path):
     assert not INLINE_SCRIPT.search(page)
     assert not INLINE_STYLE.search(page)
     assert not INLINE_HANDLER.search(page)
+
+
+def test_registration_page_carries_the_username_rules(client):
+    page = client.get('/auth/register').get_data(as_text=True)
+
+    assert 'data-pattern="^[a-z0-9_]+$"' in page
+    assert 'data-reserved="admin me moderacao socialblog suporte"' in page
