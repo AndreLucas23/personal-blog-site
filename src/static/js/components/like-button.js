@@ -43,7 +43,7 @@ export function createLikeButton(article) {
         { class: 'like-btn', type: 'button', dataset: { articleId: article.article_id } },
         icon('heart'),
         el('span', { class: 'like-btn__count', 'aria-hidden': 'true' }),
-        el('span', { class: 'like-btn__label visually-hidden' }),
+        el('span', { class: 'like-btn__label u-visually-hidden' }),
     );
 
     renderLikeState(button, { liked: article.liked, likes: article.likes });
