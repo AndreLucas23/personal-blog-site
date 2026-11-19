@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from db import db_cursor
+from pagination import PAGE_SIZE
 from repositories import tag_repository
 
 # The first placeholder is the viewer id, used to tell whether they liked each article.
@@ -35,7 +36,7 @@ def get_page(
     viewer_id: int | None = None,
     author_username: str | None = None,
     after: tuple[datetime, int] | None = None,
-    limit: int = 20,
+    limit: int = PAGE_SIZE,
 ) -> list[dict]:
     """Published articles newest first, after the given date and id, up to limit."""
     query, params = ARTICLE_DETAILS_QUERY + ONLY_PUBLISHED, [viewer_id]
