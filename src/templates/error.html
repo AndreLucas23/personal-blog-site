@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | Social Blog{% endblock %}
+
+{% block page_class %}page--narrow{% endblock %}
+
+{% block page %}
+<main id="main" class="page__main">
+    <section class="card empty-state error-page" aria-labelledby="error-title">
+        {{ icon('alert' if status >= 500 else 'info', 'icon--lg') }}
+        <p class="error-page__code">Erro {{ status }}</p>
+        <h1 class="empty-state__title" id="error-title">{{ title }}</h1>
+        <p class="empty-state__text">{{ message }}</p>
+        <a class="btn btn--primary" href="{{ url_for('views.home') }}">Voltar para o início</a>
+    </section>
+</main>
+{% endblock %}

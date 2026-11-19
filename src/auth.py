@@ -13,6 +13,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 MAX_FAILED_LOGINS = 5
 FAILED_LOGIN_WINDOW_MINUTES = 15
 
+ADMIN_REQUIRED_MESSAGE = 'Admin privileges required'
 DUPLICATE_EMAIL_MESSAGE = 'Este e-mail já está cadastrado.'
 TOO_MANY_LOGINS_MESSAGE = (
     'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.'
@@ -40,7 +41,8 @@ def admin_required(view):
     @login_required
     def wrapped(*args, **kwargs):
         if not current_user.is_admin:
-            abort(403)
+            # Pages show their own message in Portuguese; the API explains in its language.
+            abort(403, description=ADMIN_REQUIRED_MESSAGE if request.blueprint == 'api' else None)
         return view(*args, **kwargs)
 
     return wrapped
