@@ -7,7 +7,7 @@ import uploads
 import user_validation as validation
 from auth import admin_required, current_user_id
 from links import article_url
-from repositories import article_repository, user_repository
+from repositories import article_repository, follow_repository, user_repository
 
 views_bp = Blueprint('views', __name__)
 
@@ -34,11 +34,17 @@ def article(article_id, slug=None):
         return redirect(canonical, 301)
 
     content_html, plain = markdown_render.render_with_plain_text(found['article_content'])
+    viewer_id = current_user_id()
+    author_followed = bool(
+        viewer_id and viewer_id != found['author_id']
+        and follow_repository.is_following(viewer_id, found['author_id'])
+    )
     published, updated = found['publish_date'], found['updated_at']
     updated_after = bool(published and updated and updated > published)
     return render_template(
         'article.html',
         article=found,
+        author_followed=author_followed,
         updated_after=updated_after,
         # Edits on the day of publication are part of publishing; later ones are news.
         # The day here is UTC's, and the browser decides again in the reader's zone.

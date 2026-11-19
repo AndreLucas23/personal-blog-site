@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'partials/follow_button.html' import follow_button with context %}
 
 {% block title %}{{ member['display_name'] }} (@{{ member['username'] }}) | Social Blog{% endblock %}
 
@@ -22,6 +23,8 @@
                     {{ icon('pen', 'icon--sm') }}
                     Editar perfil
                 </a>
+                {% else %}
+                {{ follow_button(member['username'], member['display_name'], member['followed']) }}
                 {% endif %}
             </div>
 
@@ -45,10 +48,17 @@
                 <li>{{ icon('calendar', 'icon--sm') }} Membro desde {{ member['created_at'] | month_year }}</li>
             </ul>
 
-            <p class="profile__stats">
-                <strong>{{ member['article_count'] }}</strong>
-                artigo{{ '' if member['article_count'] == 1 else 's' }} publicado{{ '' if member['article_count'] == 1 else 's' }}
-            </p>
+            <ul class="profile__stats">
+                <li>
+                    <strong>{{ member['article_count'] }}</strong>
+                    artigo{{ '' if member['article_count'] == 1 else 's' }} publicado{{ '' if member['article_count'] == 1 else 's' }}
+                </li>
+                <li>
+                    <strong id="profile-followers">{{ member['follower_count'] }}</strong>
+                    <span id="profile-followers-label">seguidor{{ '' if member['follower_count'] == 1 else 'es' }}</span>
+                </li>
+                <li><strong>{{ member['following_count'] }}</strong> seguindo</li>
+            </ul>
         </div>
     </section>
 

@@ -92,6 +92,14 @@ export const API = {
         return request(`/api/articles/id/${encodeURIComponent(query)}`);
     },
 
+    follow(username) {
+        return request(`/api/users/${encodeURIComponent(username)}/follow`, { method: 'PUT' });
+    },
+
+    unfollow(username) {
+        return request(`/api/users/${encodeURIComponent(username)}/follow`, { method: 'DELETE' });
+    },
+
     updateProfile(fields) {
         return request('/api/users/me', { method: 'PATCH', json: fields });
     },

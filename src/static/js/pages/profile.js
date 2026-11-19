@@ -1,5 +1,6 @@
 import { API } from '../api.js';
 import { appendArticles, showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
+import { bindFollowButton } from '../components/follow-button.js';
 import { createLoadMore } from '../components/load-more.js';
 
 const feed = document.getElementById('profile-feed');
@@ -10,6 +11,18 @@ const draftsTab = document.getElementById('tab-drafts');
 const { username, own } = feed.dataset;
 
 let draftsLoaded = false;
+
+const followButton = document.querySelector('.profile button[data-follow]');
+if (followButton) {
+    const followers = document.getElementById('profile-followers');
+    const followersLabel = document.getElementById('profile-followers-label');
+    bindFollowButton(followButton, {
+        onChange({ followers: count }) {
+            followers.textContent = count;
+            followersLabel.textContent = count === 1 ? 'seguidor' : 'seguidores';
+        },
+    });
+}
 
 const more = createLoadMore(document.getElementById('profile-more'), {
     fetchPage: (cursor) => API.fetchArticlesBy(username, cursor),
