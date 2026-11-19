@@ -12,13 +12,13 @@ ARTICLE_FIELDS = {
 NEW_ARTICLE = {'title': 'Olá', 'summary': 'Um resumo', 'content': '# Oi\n\nPrimeiro post'}
 
 
-def test_listing_returns_every_article_with_its_details(client, admin_id):
+def test_listing_returns_the_articles_newest_first_with_their_details(client, admin_id):
     create_article(admin_id, title='Primeiro')
     create_article(admin_id, title='Segundo')
 
-    articles = client.get('/api/articles').get_json()
+    articles = client.get('/api/articles').get_json()['articles']
 
-    assert [article['article_title'] for article in articles] == ['Primeiro', 'Segundo']
+    assert [article['article_title'] for article in articles] == ['Segundo', 'Primeiro']
     assert set(articles[0]) == ARTICLE_FIELDS
     assert articles[0]['author'] == 'Owner'
     assert articles[0]['author_username'] == 'owner'
@@ -31,7 +31,7 @@ def test_listing_shows_the_summary_or_an_excerpt(client, admin_id):
     create_article(admin_id, title='Com resumo', summary='Resumo escrito')
     create_article(admin_id, title='Sem resumo', content='**Texto** com _formato_.')
 
-    articles = {a['article_title']: a for a in client.get('/api/articles').get_json()}
+    articles = {a['article_title']: a for a in client.get('/api/articles').get_json()['articles']}
 
     assert articles['Com resumo']['excerpt'] == 'Resumo escrito'
     assert articles['Sem resumo']['excerpt'] == 'Texto com formato.'
@@ -82,7 +82,7 @@ def test_creation_rejects_invalid_data(reader_client, payload, errors):
 
     assert response.status_code == 400
     assert response.get_json() == {'message': 'Invalid article', 'errors': errors}
-    assert reader_client.get('/api/articles').get_json() == []
+    assert reader_client.get('/api/articles').get_json()['articles'] == []
 
 
 def test_limits_match_the_rules():
@@ -255,8 +255,8 @@ def test_listing_filters_by_author(client, admin_id, reader_id):
     response = client.get('/api/articles?author=@Reader')
 
     assert response.status_code == 200
-    assert [article['article_title'] for article in response.get_json()] == ['Da leitora']
-    assert client.get('/api/articles?author=owner').get_json()[0]['article_title'] == 'Do admin'
+    assert [article['article_title'] for article in response.get_json()['articles']] == ['Da leitora']
+    assert client.get('/api/articles?author=owner').get_json()['articles'][0]['article_title'] == 'Do admin'
 
 
 def test_listing_by_an_unknown_author_answers_404(client):
@@ -267,7 +267,7 @@ def test_listing_by_an_unknown_author_answers_404(client):
 
 
 def test_member_without_articles_gets_an_empty_list(client, reader_id):
-    assert client.get('/api/articles?author=reader').get_json() == []
+    assert client.get('/api/articles?author=reader').get_json()['articles'] == []
 
 
 def test_search_results_carry_the_author_fields(client, admin_id):

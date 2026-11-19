@@ -4,6 +4,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 
 import article_validation
 import markdown_render
+import pagination
 import uploads
 import user_validation as validation
 from auth import current_user_id
@@ -49,16 +50,29 @@ def _articles_json(articles: list[dict]):
 
 @api_bp.route('/articles', methods=['GET'])
 def get_articles():
-    author = request.args.get('author')
-    if author is None:
-        return _articles_json(article_repository.get_all(current_user_id()))
+    """A page of published articles, newest first, and the cursor of the next one."""
+    after = None
+    if 'cursor' in request.args:
+        after = pagination.decode_cursor(request.args['cursor'])
+        if after is None:
+            return jsonify({'message': 'Invalid cursor'}), 400
+    limit = pagination.read_limit(request.args.get('limit'))
+    if limit is None:
+        return jsonify({'message': f'The limit must be from 1 to {pagination.MAX_PAGE_SIZE}'}), 400
 
-    username = validation.normalize_username(author)
-    articles = article_repository.get_all(current_user_id(), author_username=username)
-    # Only an empty list needs a second query to tell a quiet member from a missing one.
-    if not articles and user_repository.get_by_username(username) is None:
+    author = request.args.get('author')
+    username = None if author is None else validation.normalize_username(author)
+    # One more than the page tells whether another page follows.
+    articles = article_repository.get_page(current_user_id(), username, after, limit + 1)
+    # Only an empty page needs a second query to tell a quiet member from a missing one.
+    if username is not None and not articles and user_repository.get_by_username(username) is None:
         return jsonify({'message': 'User not found'}), 404
-    return _articles_json(articles)
+
+    page = articles[:limit]
+    next_cursor = None
+    if len(articles) > limit:
+        next_cursor = pagination.encode_cursor(page[-1]['publish_date'], page[-1]['article_id'])
+    return jsonify({'articles': [_article_json(article) for article in page], 'next_cursor': next_cursor})
 
 def _read_article_fields(data: dict) -> tuple[dict[str, str], dict[str, str]]:
     """The article fields of a request body, normalized, and the ones that are not text."""

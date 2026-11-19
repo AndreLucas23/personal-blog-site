@@ -43,9 +43,9 @@ def test_drafts_stay_out_of_every_list(client, reader_client, reader_id):
     create_article(reader_id, title='Publicado')
 
     for viewer in (client, reader_client):
-        titles = [a['article_title'] for a in viewer.get('/api/articles').get_json()]
+        titles = [a['article_title'] for a in viewer.get('/api/articles').get_json()['articles']]
         assert titles == ['Publicado']
-        by_author = viewer.get('/api/articles?author=reader').get_json()
+        by_author = viewer.get('/api/articles?author=reader').get_json()['articles']
         assert [a['article_title'] for a in by_author] == ['Publicado']
         assert viewer.get('/api/articles/title/secreto').get_json() == []
 
@@ -83,7 +83,7 @@ def test_publishing_a_draft_dates_it_and_lists_it(client, reader_client, reader_
 
     assert response.status_code == 200
     assert response.get_json()['publish_date'] is not None
-    assert [a['article_id'] for a in client.get('/api/articles').get_json()] == [article_id]
+    assert [a['article_id'] for a in client.get('/api/articles').get_json()['articles']] == [article_id]
 
 
 def test_publishing_needs_content(reader_client, reader_id):
@@ -101,7 +101,7 @@ def test_a_published_article_goes_back_to_drafts_and_keeps_its_date(client, read
     first_date = article_repository.get_by_id(article_id)['publish_date']
 
     reader_client.patch(f'/api/articles/{article_id}', json={'status': 'draft'})
-    hidden = client.get('/api/articles').get_json()
+    hidden = client.get('/api/articles').get_json()['articles']
     reader_client.patch(f'/api/articles/{article_id}', json={'status': 'published'})
 
     assert hidden == []

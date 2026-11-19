@@ -120,7 +120,7 @@ def test_unexpected_page_error_hides_the_details(
 
 def test_unexpected_api_error_answers_json(client, monkeypatch, unhandled_errors_answer_500):
     from repositories import article_repository
-    monkeypatch.setattr(article_repository, 'get_all', explode)
+    monkeypatch.setattr(article_repository, 'get_page', explode)
 
     response = client.get('/api/articles')
 
@@ -160,7 +160,7 @@ def test_library_error_details_never_reach_the_api(client, monkeypatch):
     def missing_field(*args, **kwargs):
         raise BadRequestKeyError('secret_field')
 
-    monkeypatch.setattr(article_repository, 'get_all', missing_field)
+    monkeypatch.setattr(article_repository, 'get_page', missing_field)
 
     response = client.get('/api/articles')
 
@@ -217,7 +217,7 @@ def test_other_client_errors_read_as_an_invalid_request(client, monkeypatch):
         raise UnsupportedMediaType()
 
     monkeypatch.setattr(article_repository, 'get_by_id', unsupported)
-    monkeypatch.setattr(article_repository, 'get_all', unsupported)
+    monkeypatch.setattr(article_repository, 'get_page', unsupported)
 
     page = client.get('/open/1')
     api = client.get('/api/articles')

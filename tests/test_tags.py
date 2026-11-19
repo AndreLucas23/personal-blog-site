@@ -44,13 +44,13 @@ def test_articles_are_created_with_their_tags(reader_client):
 def test_tags_show_in_lists_in_the_authors_order(client, reader_client):
     reader_client.post('/api/articles', json={'title': 'T', 'content': 'C', 'tags': ['zeta', 'alfa']})
 
-    assert client.get('/api/articles').get_json()[0]['tags'] == ['zeta', 'alfa']
+    assert client.get('/api/articles').get_json()['articles'][0]['tags'] == ['zeta', 'alfa']
 
 
 def test_articles_without_tags_have_an_empty_list(client, admin_id):
     create_article(admin_id)
 
-    assert client.get('/api/articles').get_json()[0]['tags'] == []
+    assert client.get('/api/articles').get_json()['articles'][0]['tags'] == []
 
 
 def test_patch_replaces_and_clears_the_tags(reader_client, reader_id):
@@ -114,7 +114,7 @@ def test_an_article_is_not_created_when_its_tags_fail(reader_id):
     with pytest.raises(mysql.connector.Error):
         article_repository.create('Com tags', None, 'Conteúdo', reader_id, tags=TOO_LONG_FOR_THE_COLUMN)
 
-    assert article_repository.get_all() == []
+    assert article_repository.get_page() == []
 
 
 def test_an_article_keeps_its_fields_when_its_tags_fail(reader_id):
