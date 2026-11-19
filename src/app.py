@@ -12,6 +12,7 @@ import security_headers
 import template_helpers
 import uploads
 from api import api_bp
+from links import login_url
 from auth import auth_bp
 from auth_user import AuthUser
 from settings import env_flag, env_list
@@ -68,13 +69,13 @@ def load_user(user_id: str) -> AuthUser | None:
 
 @login_manager.unauthorized_handler
 def handle_unauthorized():
-    login_url = url_for('auth.login')
     if errors.is_api_request():
+        # The page that called the API knows where to come back, so it adds the way back.
         return jsonify({
             'message': 'Authentication required',
-            'login_url': login_url,
+            'login_url': url_for('auth.login'),
         }), 401
-    return redirect(login_url)
+    return redirect(login_url())
 
 
 if __name__ == '__main__':

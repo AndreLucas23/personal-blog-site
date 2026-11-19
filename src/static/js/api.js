@@ -28,7 +28,10 @@ async function request(endpoint, { method = 'GET', json, formData } = {}) {
     const body = await res.json().catch(() => ({}));
 
     if (res.status === 401) {
-        window.location.assign(body.login_url || '/auth/login');
+        // After signing in, the member comes back to this page.
+        const login = new URL(body.login_url || '/auth/login', window.location.origin);
+        login.searchParams.set('next', `${window.location.pathname}${window.location.search}`);
+        window.location.assign(login.href);
         // The page is leaving, so callers must not react as if the request failed.
         return new Promise(() => {});
     }
