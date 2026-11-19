@@ -2,7 +2,7 @@ import logging
 
 import mysql.connector
 import pytest
-from werkzeug.exceptions import BadRequest, BadRequestKeyError
+from werkzeug.exceptions import BadRequest, BadRequestKeyError, UnsupportedMediaType
 
 import db
 
@@ -208,3 +208,21 @@ def test_unexpected_error_keeps_the_account_menu_when_the_database_works(
 
     assert response.status_code == 500
     assert 'id="account-menu"' in response.get_data(as_text=True)
+
+
+def test_other_client_errors_read_as_an_invalid_request(client, monkeypatch):
+    from repositories import article_repository
+
+    def unsupported(*args, **kwargs):
+        raise UnsupportedMediaType()
+
+    monkeypatch.setattr(article_repository, 'get_by_id', unsupported)
+    monkeypatch.setattr(article_repository, 'get_all', unsupported)
+
+    page = client.get('/open/1')
+    api = client.get('/api/articles')
+
+    assert page.status_code == 415
+    assert 'Requisição inválida' in page.get_data(as_text=True)
+    assert api.status_code == 415
+    assert api.get_json() == {'message': 'Unsupported Media Type'}
