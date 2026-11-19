@@ -2,6 +2,7 @@ import logging
 
 import mysql.connector
 import pytest
+from werkzeug.exceptions import BadRequest, BadRequestKeyError
 
 import db
 
@@ -149,3 +150,34 @@ def test_database_error_page_skips_the_account_of_a_signed_in_member(reader_clie
     assert 'Algo deu errado' in page
     assert 'id="account-menu"' not in page
     assert 'topnav__guest' not in page
+
+
+def test_library_error_details_never_reach_the_api(client, monkeypatch):
+    from repositories import article_repository
+
+    def missing_field(*args, **kwargs):
+        raise BadRequestKeyError('secret_field')
+
+    monkeypatch.setattr(article_repository, 'get_all', missing_field)
+
+    response = client.get('/api/articles')
+
+    assert response.status_code == 400
+    assert response.get_json() == {'message': 'Bad request'}
+    assert 'secret_field' not in response.get_data(as_text=True)
+
+
+def test_library_error_details_never_reach_the_pages(client, monkeypatch):
+    from repositories import article_repository
+
+    def bad_body(*args, **kwargs):
+        raise BadRequest('Failed to decode JSON object: internal detail')
+
+    monkeypatch.setattr(article_repository, 'get_by_id', bad_body)
+
+    response = client.get('/open/1')
+
+    assert response.status_code == 400
+    page = response.get_data(as_text=True)
+    assert 'Requisição inválida' in page
+    assert 'internal detail' not in page

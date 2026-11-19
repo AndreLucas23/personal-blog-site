@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import user_validation as validation
 from auth_user import AuthUser
+from errors import abort_with_message, is_api_request
 from repositories import failed_login_repository, user_repository
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -42,7 +43,9 @@ def admin_required(view):
     def wrapped(*args, **kwargs):
         if not current_user.is_admin:
             # Pages show their own message in Portuguese; the API explains in its language.
-            abort(403, description=ADMIN_REQUIRED_MESSAGE if request.blueprint == 'api' else None)
+            if is_api_request():
+                abort_with_message(403, ADMIN_REQUIRED_MESSAGE)
+            abort(403)
         return view(*args, **kwargs)
 
     return wrapped

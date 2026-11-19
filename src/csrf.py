@@ -2,9 +2,9 @@
 import hmac
 import secrets
 
-from flask import Flask, abort, current_app, jsonify, request, session
+from flask import Flask, current_app, jsonify, request, session
 
-from errors import is_api_request
+from errors import abort_with_message, is_api_request
 
 SESSION_KEY = '_csrf_token'
 FORM_FIELD = 'csrf_token'
@@ -42,7 +42,7 @@ def _protect():
 
     if is_api_request():
         return jsonify({'message': API_MESSAGE}), 400
-    abort(400, description=PAGE_MESSAGE)
+    abort_with_message(400, PAGE_MESSAGE)
 
 
 def init_app(app: Flask) -> None:
