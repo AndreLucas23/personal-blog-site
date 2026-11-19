@@ -40,9 +40,11 @@ def get_articles():
         return _articles_json(article_repository.get_all(current_user_id()))
 
     username = validation.normalize_username(author)
-    if user_repository.get_by_username(username) is None:
+    articles = article_repository.get_all(current_user_id(), author_username=username)
+    # Only an empty list needs a second query to tell a quiet member from a missing one.
+    if not articles and user_repository.get_by_username(username) is None:
         return jsonify({'message': 'User not found'}), 404
-    return _articles_json(article_repository.get_all(current_user_id(), author_username=username))
+    return _articles_json(articles)
 
 @api_bp.route('/articles', methods=['POST'])
 @admin_required
