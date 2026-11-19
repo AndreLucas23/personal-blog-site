@@ -32,8 +32,9 @@ def create_article(
     title: str = 'Título',
     content: str = 'Conteúdo',
     summary: str | None = None,
+    status: str = 'published',
 ) -> int:
-    return article_repository.create(title, summary, content, author_id)
+    return article_repository.create(title, summary, content, author_id, status)
 
 
 def login(client, login_name: str, password: str):
