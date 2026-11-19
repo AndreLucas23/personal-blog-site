@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from db import db_cursor
 from repositories import tag_repository
 
@@ -29,11 +31,24 @@ ONLY_PUBLISHED = " WHERE a.status = 'published'"
 # Placeholder: the viewer id. Without a viewer the comparison is NULL, so only published.
 VISIBLE_TO_VIEWER = " AND (a.status = 'published' OR a.author_id = %s)"
 
-def get_all(viewer_id: int | None = None, author_username: str | None = None) -> list[dict]:
+def get_page(
+    viewer_id: int | None = None,
+    author_username: str | None = None,
+    after: tuple[datetime, int] | None = None,
+    limit: int = 20,
+) -> list[dict]:
+    """Published articles newest first, after the given date and id, up to limit."""
     query, params = ARTICLE_DETAILS_QUERY + ONLY_PUBLISHED, [viewer_id]
     if author_username is not None:
         query += ' AND u.username = %s'
         params.append(author_username)
+    if after is not None:
+        published, article_id = after
+        # The id orders articles published in the same second.
+        query += ' AND (a.publish_date < %s OR (a.publish_date = %s AND a.article_id < %s))'
+        params += [published, published, article_id]
+    query += ' ORDER BY a.publish_date DESC, a.article_id DESC LIMIT %s'
+    params.append(limit)
 
     with db_cursor(dictionary=True) as cursor:
         cursor.execute(query, tuple(params))

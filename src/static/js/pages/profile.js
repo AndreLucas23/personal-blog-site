@@ -13,7 +13,7 @@ async function loadArticles() {
     showSkeletons(feed, 2);
 
     try {
-        const articles = await API.fetchArticlesBy(username);
+        const { articles } = await API.fetchArticlesBy(username);
         showArticles(feed, articles, own === 'true'
             ? { title: 'Você ainda não publicou', text: 'Seus artigos aparecem aqui.' }
             : { title: 'Nenhum artigo publicado ainda' });

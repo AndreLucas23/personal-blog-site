@@ -18,7 +18,7 @@ async function loadArticles() {
     showSkeletons(feed);
 
     try {
-        const articles = await API.fetchAll();
+        const { articles } = await API.fetchAll();
         if (run !== currentRun) return;
         showArticles(feed, articles, {
             title: 'Nenhum artigo por aqui ainda',
