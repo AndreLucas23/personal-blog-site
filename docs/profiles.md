@@ -32,6 +32,17 @@ Each upload gets a new random name in the directory set by `UPLOAD_DIR`, `/data/
 
 Without an avatar, pages show the initials of the display name on a color picked from the name.
 
+## Pages
+
+| Page | Who sees it | What it offers |
+| --- | --- | --- |
+| `/@<username>` | Everyone | The photo, name, username, headline, location, website, join date, bio and articles of the member. Your own profile has an Editar perfil button. Other letter cases redirect to the lowercase address, and unknown usernames answer `404` |
+| `/settings/profile` | Signed in | The form for every field, with the rules and counters next to them, and the photo upload. Errors from the API appear under their fields in Portuguese |
+
+The top bar, the account menu, the profile card on the home page, the article cards and the byline of an article show the member's photo, and their names and photos lead to the profile. The account menu links to your profile and to the profile settings. A change saved in the settings, including a new photo or username, shows up on the page without a reload.
+
+The website opens in a new tab with `rel="nofollow ugc noopener noreferrer"`, so the page cannot reach back to the site and search engines do not count the link as an endorsement.
+
 ## API
 
 | Method | Path | Access | Description |
