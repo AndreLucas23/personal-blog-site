@@ -9,7 +9,7 @@ Social Blog is a social network for publishing and reading articles, built with 
 - Anyone can read and search articles, each with its author, date and like count.
 - Visitors can create an account with a name and a unique username, and sign in with the email or the username.
 - Every member has a public profile at `/@username` with a headline, a bio, a location, a website, a photo and their articles, edited at `/settings/profile`. Photos appear next to the member's name across the site.
-- Every member writes articles in Markdown at `/write`, with a preview, and edits or deletes their own. Articles live at readable addresses such as `/articles/12/arquitetura-limpa`.
+- Every member writes articles in Markdown at `/write`, with a preview, tags and private drafts, and edits or deletes their own. Articles live at readable addresses such as `/articles/12/arquitetura-limpa`.
 - Signed-in users can like and unlike articles.
 - Admins search and remove articles that break the rules in the moderation panel at `/admin`.
 - Every page shares a top bar and a layout with three columns on wide screens and one on phones, in light and dark themes that follow the system or the choice in the account menu.
@@ -179,9 +179,10 @@ src/
 | `GET` | `/api/articles/<id>` | Everyone | One article with its content |
 | `GET` | `/api/articles/id/<id>` | Everyone | Search articles by id, partial match |
 | `GET` | `/api/articles/title/<title>` | Everyone | Search articles by title, partial match |
-| `POST` | `/api/articles` | Signed in | Create an article with `title`, `summary` and `content` |
-| `PATCH` | `/api/articles/<id>` | The author | Change `title`, `summary` or `content` |
+| `POST` | `/api/articles` | Signed in | Create an article with `title`, `summary`, `content`, `tags` and `status` |
+| `PATCH` | `/api/articles/<id>` | The author | Change `title`, `summary`, `content`, `tags` or `status` |
 | `DELETE` | `/api/articles/<id>` | The author or an admin | Delete an article |
+| `GET` | `/api/users/me/drafts` | Signed in | Your drafts |
 | `POST` | `/api/previews` | Signed in | The HTML of a Markdown text |
 | `POST` | `/api/articles/<id>/likes` | Signed in | Like an article |
 | `DELETE` | `/api/articles/<id>/likes` | Signed in | Remove your like |
@@ -191,7 +192,7 @@ src/
 | `PUT` | `/api/users/me/avatar` | Signed in | Upload your avatar as a `multipart/form-data` field named `avatar` |
 | `DELETE` | `/api/users/me/avatar` | Signed in | Remove your avatar |
 
-Each article has `article_id`, `url`, `article_title`, `summary`, `excerpt`, `reading_time`, `publish_date`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it; a single article also has `article_content`. [docs/articles.md](docs/articles.md#api) describes the article endpoints and their errors, and [docs/profiles.md](docs/profiles.md#api) the profile ones.
+Each article has `article_id`, `url`, `article_title`, `summary`, `tags`, `excerpt`, `reading_time`, `status`, `publish_date`, `created_at`, `updated_at`, `author` with the display name of the author, `author_username`, `author_avatar_url`, `likes` and `liked`, which tells whether the signed-in viewer liked it; a single article also has `article_content`. [docs/articles.md](docs/articles.md#api) describes the article endpoints and their errors, and [docs/profiles.md](docs/profiles.md#api) the profile ones.
 
 Without a session the protected endpoints answer `401` with the login page URL, and members get `403` for actions on articles that are not theirs.
 
