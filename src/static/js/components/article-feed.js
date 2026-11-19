@@ -9,9 +9,10 @@ export function showSkeletons(feed, count = SKELETONS) {
     feed.replaceChildren(...Array.from({ length: count }, createArticleSkeleton));
 }
 
-export function showArticles(feed, articles, emptyState) {
-    feed.replaceChildren(...(articles.length
-        ? newestFirst(articles).map(createArticleCard)
+export function showArticles(feed, articles, emptyState, { keepOrder = false } = {}) {
+    const ordered = keepOrder ? articles : newestFirst(articles);
+    feed.replaceChildren(...(ordered.length
+        ? ordered.map(createArticleCard)
         : [createEmptyState(emptyState)]));
     feed.removeAttribute('aria-busy');
 }

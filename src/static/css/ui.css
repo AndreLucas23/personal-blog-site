@@ -815,6 +815,14 @@ a.post__author:hover {
     overflow: hidden;
 }
 
+.post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    list-style: none;
+    padding: 0;
+}
+
 .post__footer {
     align-items: center;
     border-top: 1px solid var(--border);

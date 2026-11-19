@@ -47,6 +47,10 @@ export const API = {
         return request(`/api/articles?author=${encodeURIComponent(username)}`);
     },
 
+    fetchDrafts() {
+        return request('/api/users/me/drafts');
+    },
+
     createArticle(fields) {
         return request('/api/articles', { method: 'POST', json: fields });
     },
