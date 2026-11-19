@@ -214,7 +214,12 @@ def upload_avatar():
     except uploads.ImageError as error:
         return jsonify({'message': 'Invalid image', 'errors': {'avatar': error.code}}), 400
 
-    previous = user_repository.set_avatar(current_user.user_id, file_name)
+    try:
+        previous = user_repository.set_avatar(current_user.user_id, file_name)
+    except Exception:
+        # Without the row nothing points at the new file, so it must not stay behind.
+        uploads.delete_upload(file_name, upload_dir)
+        raise
     uploads.delete_upload(previous, upload_dir)
     return jsonify({'avatar_url': media_url(file_name)})
 
