@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% set can_edit = current_user.is_authenticated and current_user.user_id == article['author_id'] %}
+{% set is_author = current_user.is_authenticated and current_user.user_id == article['author_id'] %}
 {% set author = article['author'] %}
 {% set author_url = url_for('views.profile', username=article['author_username']) %}
 
@@ -26,9 +26,12 @@
 
     <article class="card article"
     data-article-id="{{ article['article_id'] }}"
-    aria-labelledby="view-title">
+    aria-labelledby="article-title">
         <header class="article__header">
-            <h1 class="article__title" id="view-title">{{ article['article_title'] }}</h1>
+            <h1 class="article__title" id="article-title">{{ article['article_title'] }}</h1>
+            {% if article['summary'] %}
+            <p class="article__summary">{{ article['summary'] }}</p>
+            {% endif %}
 
             <div class="byline">
                 {# The name is the link people use; the photo repeats it for the pointer only. #}
@@ -38,20 +41,49 @@
                 <div class="byline__text">
                     <a class="byline__name" href="{{ author_url }}">{{ author }}</a>
                     <span class="byline__meta">
-                        <time datetime="{{ article['publish_date'] | iso_datetime }}">{{ article['publish_date'] | long_date }}</time>
+                        <time datetime="{{ article['publish_date'] | iso_datetime }}" data-local-date>{{ article['publish_date'] | long_date }}</time>
+                        · {{ reading_minutes }} min de leitura
                     </span>
                 </div>
 
-                {% if can_edit %}
-                <button class="btn btn--secondary btn--sm byline__action" id="edit-btn" type="button">
-                    {{ icon('pen', 'icon--sm') }}
-                    Editar
-                </button>
+                {% if is_author %}
+                <div class="byline__actions">
+                    <a class="btn btn--secondary btn--sm" id="edit-btn" href="{{ url_for('views.edit_article', article_id=article['article_id']) }}">
+                        {{ icon('pen', 'icon--sm') }}
+                        Editar
+                    </a>
+                    <button class="icon-btn icon-btn--danger"
+                    type="button"
+                    aria-label="Excluir artigo"
+                    title="Excluir artigo"
+                    data-delete-article
+                    data-confirm-title="Excluir artigo?"
+                    data-confirm-message="O artigo e as curtidas dele serão apagados. Essa ação não pode ser desfeita."
+                    data-confirm-label="Excluir"
+                    data-done-message="Artigo excluído."
+                    data-next="{{ url_for('views.profile', username=article['author_username']) }}">
+                        {{ icon('trash') }}
+                    </button>
+                </div>
+                {% elif current_user.is_authenticated and current_user.is_admin %}
+                <div class="byline__actions">
+                    <button class="btn btn--ghost btn--sm"
+                    type="button"
+                    data-delete-article
+                    data-confirm-title="Remover artigo?"
+                    data-confirm-message="Use para conteúdo que viola as regras. O artigo e as curtidas dele serão apagados."
+                    data-confirm-label="Remover"
+                    data-done-message="Artigo removido."
+                    data-next="{{ url_for('views.admin') }}">
+                        {{ icon('shield', 'icon--sm') }}
+                        Remover
+                    </button>
+                </div>
                 {% endif %}
             </div>
         </header>
 
-        <div class="article__body" id="view-content">{{ article['article_content'] }}</div>
+        <div class="article__body prose">{{ content_html }}</div>
 
         <footer class="article__footer">
             <button class="like-btn{% if article['liked'] %} is-liked{% endif %}"
@@ -68,57 +100,6 @@
         </footer>
     </article>
 </main>
-
-{% if can_edit %}
-<dialog class="dialog" id="edit-dialog" aria-labelledby="edit-dialog-title">
-    <form class="dialog__panel" id="edit-form" novalidate>
-        <div class="dialog__header">
-            <h2 class="dialog__title" id="edit-dialog-title">Editar artigo</h2>
-            <button class="icon-btn" type="button" aria-label="Fechar" data-dialog-close>
-                {{ icon('close') }}
-            </button>
-        </div>
-
-        <div class="dialog__body form">
-            <div class="field">
-                <div class="field__row">
-                    <label class="field__label" for="edit-title">Título</label>
-                    <span class="field__counter" id="edit-title-counter">0 / 150</span>
-                </div>
-                <input class="input"
-                id="edit-title"
-                name="title"
-                type="text"
-                maxlength="150"
-                autocomplete="off"
-                aria-describedby="edit-title-error"
-                required>
-                <span class="field__error" id="edit-title-error" aria-live="polite"></span>
-            </div>
-
-            <div class="field">
-                <div class="field__row">
-                    <label class="field__label" for="edit-content">Conteúdo</label>
-                    <span class="field__counter" id="edit-content-counter">0 / 50000</span>
-                </div>
-                <textarea class="textarea"
-                id="edit-content"
-                name="content"
-                rows="10"
-                maxlength="50000"
-                aria-describedby="edit-content-error"
-                required></textarea>
-                <span class="field__error" id="edit-content-error" aria-live="polite"></span>
-            </div>
-        </div>
-
-        <div class="dialog__footer">
-            <button class="btn btn--ghost" type="button" data-dialog-close>Cancelar</button>
-            <button class="btn btn--primary" type="submit" id="edit-submit">Salvar</button>
-        </div>
-    </form>
-</dialog>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
