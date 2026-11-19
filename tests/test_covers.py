@@ -184,3 +184,19 @@ def test_the_article_page_shows_the_cover(client, reader_client, reader_id):
     assert 'class="article__cover"' in page and f'src="{cover_url}"' in page
     assert 'article__cover' not in plain
 
+
+
+def test_a_new_cover_counts_as_an_edit(reader_client, reader_id):
+    article_id = create_article(reader_id)
+
+    article = upload(reader_client, article_id, image_bytes()).get_json()
+
+    assert article['updated_at'] is not None
+
+
+def test_removing_a_cover_that_is_not_there_changes_nothing(reader_client, reader_id):
+    article_id = create_article(reader_id)
+
+    article = reader_client.delete(f'/api/articles/{article_id}/cover').get_json()
+
+    assert article['updated_at'] is None
