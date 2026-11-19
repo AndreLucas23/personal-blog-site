@@ -23,10 +23,25 @@ def _is_valid_title(title) -> bool:
 def _is_valid_content(content) -> bool:
     return isinstance(content, str) and bool(content.strip())
 
+def _article_json(article: dict) -> dict:
+    """An article as the API shows it, with a URL for the author's avatar."""
+    shown = dict(article)
+    shown['author_avatar_url'] = media_url(shown.pop('author_avatar_path'))
+    return shown
+
+def _articles_json(articles: list[dict]):
+    return jsonify([_article_json(article) for article in articles])
+
 @api_bp.route('/articles', methods=['GET'])
 def get_articles():
-    all_articles = article_repository.get_all(current_user_id())
-    return jsonify(all_articles)
+    author = request.args.get('author')
+    if author is None:
+        return _articles_json(article_repository.get_all(current_user_id()))
+
+    username = validation.normalize_username(author)
+    if user_repository.get_by_username(username) is None:
+        return jsonify({'message': 'User not found'}), 404
+    return _articles_json(article_repository.get_all(current_user_id(), author_username=username))
 
 @api_bp.route('/articles', methods=['POST'])
 @admin_required
@@ -100,14 +115,14 @@ def article_likes(article_id):
 @api_bp.route('/articles/id/<int:search_id>', methods=['GET'])
 def search_by_id(search_id):
     search_articles = article_repository.search_by_id(search_id, current_user_id())
-    return jsonify(search_articles), 200
+    return _articles_json(search_articles), 200
 
 @api_bp.route('/articles/title/<string:search_title>', methods=['GET'])
 def search_by_title(search_title):
     search_articles = article_repository.search_by_title(
         search_title, current_user_id()
     )
-    return jsonify(search_articles), 200
+    return _articles_json(search_articles), 200
 
 
 # Optional profile fields are stored as NULL when a member leaves them empty.
