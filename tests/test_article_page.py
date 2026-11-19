@@ -1,3 +1,6 @@
+import re
+from datetime import datetime
+
 from db import db_cursor
 from helpers import create_article
 
@@ -73,19 +76,32 @@ def test_a_draft_page_tells_its_author_and_has_no_likes(reader_client, reader_id
     assert 'like-btn' not in page
 
 
-def test_edits_on_a_later_day_are_shown(client, admin_id):
-    article_id = create_article(admin_id)
+PUBLISHED = datetime(2026, 3, 5, 10, 0)
+
+
+def update_note(client, article_id: int, updated_at: datetime) -> str | None:
+    """The opening tag of the update note of an article published at PUBLISHED (UTC)."""
     with db_cursor() as cursor:
         cursor.execute(
-            'UPDATE ARTICLES SET updated_at = publish_date + INTERVAL 2 DAY WHERE article_id = %s',
-            (article_id,),
+            'UPDATE ARTICLES SET publish_date = %s, updated_at = %s WHERE article_id = %s',
+            (PUBLISHED, updated_at, article_id),
         )
+    found = re.search(r'<span data-updated-after="[^"]+"[^>]*>', page_of(client, article_id))
+    return found and found.group()
 
-    assert 'atualizado em' in page_of(client, article_id)
+
+def test_edits_on_a_later_day_are_shown(client, admin_id):
+    note = update_note(client, create_article(admin_id), datetime(2026, 3, 7, 10, 0))
+
+    assert note is not None and 'hidden' not in note
 
 
-def test_edits_on_the_day_of_publication_are_not_announced(client, reader_client, reader_id):
-    article_id = create_article(reader_id)
-    reader_client.patch(f'/api/articles/{article_id}', json={'title': 'Corrigido'})
+def test_edits_on_the_day_of_publication_start_hidden(client, admin_id):
+    # The browser shows them when the reader's zone puts the two on different days.
+    note = update_note(client, create_article(admin_id), datetime(2026, 3, 5, 22, 30))
 
-    assert 'atualizado em' not in page_of(client, article_id)
+    assert note is not None and 'hidden' in note
+
+
+def test_edits_before_publication_are_not_updates(client, admin_id):
+    assert update_note(client, create_article(admin_id), datetime(2026, 3, 4, 10, 0)) is None

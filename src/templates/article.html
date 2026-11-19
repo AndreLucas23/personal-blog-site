@@ -54,8 +54,10 @@
                         {% else %}
                         Rascunho
                         {% endif %}
-                        {% if updated_later %}
-                        · atualizado em <time datetime="{{ article['updated_at'] | iso_datetime }}" data-local-date>{{ article['updated_at'] | long_date }}</time>
+                        {% if updated_after %}
+                        <span data-updated-after="{{ article['publish_date'] | iso_datetime }}"{% if not updated_later %} hidden{% endif %}>
+                            · atualizado em <time datetime="{{ article['updated_at'] | iso_datetime }}" data-local-date>{{ article['updated_at'] | long_date }}</time>
+                        </span>
                         {% endif %}
                         · {{ reading_minutes }} min de leitura
                     </span>

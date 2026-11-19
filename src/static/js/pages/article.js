@@ -1,9 +1,17 @@
 import { API } from '../api.js';
 import { bindLikeButton } from '../components/like-button.js';
 import { confirmDialog } from '../ui/dialog.js';
+import { isLaterDay } from '../ui/format.js';
 import { showToast, showToastAfterLeaving } from '../ui/toast.js';
 
 const article = document.querySelector('.article');
+
+// The server tells a later day in UTC; the dates on the page are in the reader's zone.
+const updatedNote = article.querySelector('[data-updated-after]');
+if (updatedNote) {
+    const updated = updatedNote.querySelector('time').dateTime;
+    updatedNote.hidden = !isLaterDay(updated, updatedNote.dataset.updatedAfter);
+}
 
 const likeButton = article.querySelector('.like-btn');
 if (likeButton) bindLikeButton(likeButton);
