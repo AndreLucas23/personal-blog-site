@@ -6,7 +6,7 @@ import csrf
 from helpers import READER, create_article
 
 TOKEN_META = re.compile(r'<meta name="csrf-token" content="([^"]+)">')
-LOGIN_FORM = {'email': READER['email'], 'password': READER['password']}
+LOGIN_FORM = {'login': READER['email'], 'password': READER['password']}
 
 
 @pytest.fixture(autouse=True)

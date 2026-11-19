@@ -17,6 +17,7 @@ FAILED_LOGIN_WINDOW_MINUTES = 15
 ADMIN_REQUIRED_MESSAGE = 'Admin privileges required'
 DUPLICATE_EMAIL_MESSAGE = 'Este e-mail já está cadastrado.'
 DUPLICATE_USERNAME_MESSAGE = 'Este nome de usuário já está em uso.'
+INVALID_LOGIN_MESSAGE = 'E-mail, nome de usuário ou senha inválidos.'
 TOO_MANY_LOGINS_MESSAGE = (
     'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.'
 )
@@ -63,6 +64,14 @@ def admin_required(view):
     return wrapped
 
 
+def normalize_login(value: str) -> str:
+    """An email stays as typed; anything else is read as a username, with or without the @."""
+    value = value.strip()
+    if '@' in value.removeprefix('@'):
+        return value
+    return validation.normalize_username(value)
+
+
 def current_user_id() -> int | None:
     return current_user.user_id if current_user.is_authenticated else None
 
@@ -75,27 +84,28 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    email = request.form.get('email', '').strip()
+    login_name = normalize_login(request.form.get('login', ''))
     password = request.form.get('password', '')
     ip_address = request.remote_addr or ''
 
+    user = user_repository.get_by_login(login_name)
+    # Attempts on an account count together, whether its email or its username was typed.
+    attempt_key = user['email'] if user else login_name
+
     # Checked before the password, so a blocked client learns nothing from guessing.
     failures = failed_login_repository.count_recent(
-        email, ip_address, FAILED_LOGIN_WINDOW_MINUTES
+        attempt_key, ip_address, FAILED_LOGIN_WINDOW_MINUTES
     )
     if failures >= MAX_FAILED_LOGINS:
         flash(TOO_MANY_LOGINS_MESSAGE)
-        return render_template('login.html', email=email), 429
+        return render_template('login.html', login=login_name), 429
 
-    user = user_repository.get_by_email(email)
-    is_valid = user and check_password_hash(user['password_hash'], password)
+    if not (user and check_password_hash(user['password_hash'], password)):
+        failed_login_repository.add(attempt_key, ip_address, FAILED_LOGIN_WINDOW_MINUTES)
+        flash(INVALID_LOGIN_MESSAGE)
+        return render_template('login.html', login=login_name), 401
 
-    if not is_valid:
-        failed_login_repository.add(email, ip_address, FAILED_LOGIN_WINDOW_MINUTES)
-        flash('E-mail ou senha inválidos.')
-        return render_template('login.html', email=email), 401
-
-    failed_login_repository.clear(email, ip_address)
+    failed_login_repository.clear(attempt_key, ip_address)
     login_user(AuthUser(user))
     return redirect(url_for('views.home'))
 
