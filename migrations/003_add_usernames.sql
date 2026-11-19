@@ -23,21 +23,44 @@ UPDATE USERS SET username = CONCAT('user_', user_id)
 WHERE CHAR_LENGTH(username) < 3
     OR username IN ('me', 'admin', 'moderacao', 'socialblog', 'suporte');
 
+-- In each group of equal usernames the account whose username is its own
+-- user_<id> keeps it, since that one cannot change, and so does the oldest
+-- account otherwise. The others become user_<id>, which can only clash with a
+-- name that was already user_<another id>, so each pass settles one more link
+-- of such a chain.
 UPDATE USERS u
 JOIN (
     SELECT user_id FROM (
-        SELECT user_id, ROW_NUMBER() OVER (PARTITION BY username ORDER BY user_id) AS position
+        SELECT user_id, ROW_NUMBER() OVER (
+            PARTITION BY username
+            ORDER BY username = CONCAT('user_', user_id) DESC, user_id
+        ) AS position
         FROM USERS
     ) ranked
     WHERE position > 1
 ) taken ON taken.user_id = u.user_id
 SET u.username = CONCAT('user_', u.user_id);
 
--- Again, for the rare member whose name was already user_<id> of another account.
 UPDATE USERS u
 JOIN (
     SELECT user_id FROM (
-        SELECT user_id, ROW_NUMBER() OVER (PARTITION BY username ORDER BY user_id) AS position
+        SELECT user_id, ROW_NUMBER() OVER (
+            PARTITION BY username
+            ORDER BY username = CONCAT('user_', user_id) DESC, user_id
+        ) AS position
+        FROM USERS
+    ) ranked
+    WHERE position > 1
+) taken ON taken.user_id = u.user_id
+SET u.username = CONCAT('user_', u.user_id);
+
+UPDATE USERS u
+JOIN (
+    SELECT user_id FROM (
+        SELECT user_id, ROW_NUMBER() OVER (
+            PARTITION BY username
+            ORDER BY username = CONCAT('user_', user_id) DESC, user_id
+        ) AS position
         FROM USERS
     ) ranked
     WHERE position > 1

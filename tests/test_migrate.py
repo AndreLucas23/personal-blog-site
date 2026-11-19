@@ -188,3 +188,24 @@ def test_usernames_are_unique_in_the_database():
                 "INSERT INTO USERS (display_name, username, email, password_hash) "
                 "VALUES ('Outra Ana', 'ana', 'b@example.com', 'hash')"
             )
+
+
+def test_generated_usernames_never_clash_with_names_like_them(empty_database, tmp_path):
+    for path in sorted(migrate.MIGRATIONS_DIR.glob('*.sql'))[:2]:
+        write_migration(tmp_path, path.name, path.read_text(encoding='utf-8'))
+    migrate.apply_pending(tmp_path)
+    # Account 2 is too short and becomes user_2, which account 1 already has; then
+    # account 1 becomes user_1, which account 3 already has.
+    with db_cursor() as cursor:
+        for index, name in enumerate(['user_2', 'ab', 'User 1']):
+            cursor.execute(
+                'INSERT INTO USERS (user_id, username, email, password_hash) '
+                'VALUES (%s, %s, %s, %s)',
+                (index + 1, name, f'user{index}@example.com', 'hash'),
+            )
+
+    migrate.apply_pending()
+
+    with db_cursor() as cursor:
+        cursor.execute('SELECT user_id, username FROM USERS ORDER BY user_id')
+        assert cursor.fetchall() == [(1, 'user_1'), (2, 'user_2'), (3, 'user_3')]
