@@ -13,7 +13,7 @@ export function renderLikeState(button, { liked, likes }) {
         : `Curtir. ${likes} curtida${likes === 1 ? '' : 's'}`;
 }
 
-export function bindLikeButton(button) {
+export function bindLikeButton(button, { onChange } = {}) {
     button.addEventListener('click', async () => {
         const wasLiked = button.getAttribute('aria-pressed') === 'true';
         const likes = Number(button.dataset.likes);
@@ -26,6 +26,7 @@ export function bindLikeButton(button) {
         try {
             const result = wasLiked ? await API.unlike(articleId) : await API.like(articleId);
             renderLikeState(button, result);
+            onChange?.(result);
         } catch (error) {
             console.error(error);
             renderLikeState(button, { liked: wasLiked, likes });
@@ -46,6 +47,7 @@ export function createLikeButton(article) {
     );
 
     renderLikeState(button, { liked: article.liked, likes: article.likes });
-    bindLikeButton(button);
+    // Lists that draw the cards again from their data must see the new state.
+    bindLikeButton(button, { onChange: ({ liked, likes }) => Object.assign(article, { liked, likes }) });
     return button;
 }

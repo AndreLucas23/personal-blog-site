@@ -1,9 +1,10 @@
 import { API } from '../api.js';
+import { foundLabel, newestFirst, readArticleFields } from '../articles.js';
 import { createEmptyState } from '../components/article-card.js';
 import { bindDialog, confirmDialog } from '../ui/dialog.js';
 import { el, icon } from '../ui/dom.js';
 import { formatDate } from '../ui/format.js';
-import { bindCounter, setFieldError } from '../ui/forms.js';
+import { bindCounter } from '../ui/forms.js';
 import { showToast } from '../ui/toast.js';
 
 const SEARCH_DELAY_MS = 250;
@@ -15,25 +16,11 @@ const searchType = document.getElementById('admin-search-type');
 
 let articles = [];
 let searchTimer = null;
-let searchRun = 0;
-
-function newestFirst(items) {
-    return [...items].sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date)
-        || b.article_id - a.article_id);
-}
+// Every load and search takes a number. Only the latest one may draw the list.
+let currentRun = 0;
 
 function createRow(article) {
     const url = `/open/${article.article_id}`;
-    const removeButton = el(
-        'button',
-        {
-            class: 'icon-btn icon-btn--danger',
-            type: 'button',
-            'aria-label': `Remover o artigo “${article.article_title}”`,
-        },
-        icon('trash'),
-    );
-    removeButton.addEventListener('click', () => removeArticle(article));
 
     return el(
         'li',
@@ -55,7 +42,16 @@ function createRow(article) {
             'div',
             { class: 'admin-row__actions' },
             el('a', { class: 'icon-btn', href: url, 'aria-label': `Abrir o artigo “${article.article_title}”` }, icon('eye')),
-            removeButton,
+            el(
+                'button',
+                {
+                    class: 'icon-btn icon-btn--danger',
+                    type: 'button',
+                    'aria-label': `Remover o artigo “${article.article_title}”`,
+                    onClick: () => removeArticle(article),
+                },
+                icon('trash'),
+            ),
         ),
     );
 }
@@ -66,7 +62,8 @@ function render(items, emptyState) {
         : [el('li', {}, createEmptyState(emptyState))]));
 }
 
-function showError() {
+function showLoadError() {
+    statusEl.textContent = '';
     list.replaceChildren(el('li', {}, createEmptyState({
         iconName: 'alert',
         title: 'Não foi possível carregar os artigos',
@@ -74,23 +71,7 @@ function showError() {
     })));
 }
 
-async function loadArticles() {
-    try {
-        articles = await API.fetchAll();
-        renderCurrent();
-    } catch (error) {
-        console.error(error);
-        showError();
-    } finally {
-        list.removeAttribute('aria-busy');
-    }
-}
-
-function renderCurrent() {
-    if (searchInput.value.trim()) {
-        runSearch();
-        return;
-    }
+function renderAll() {
     statusEl.textContent = '';
     render(articles, {
         title: 'Nenhum artigo publicado',
@@ -98,31 +79,55 @@ function renderCurrent() {
     });
 }
 
+async function loadArticles() {
+    const run = ++currentRun;
+
+    try {
+        const loaded = await API.fetchAll();
+        if (run !== currentRun) return;
+        articles = loaded;
+        // A search typed while loading stays on screen.
+        if (searchInput.value.trim()) runSearch();
+        else renderAll();
+    } catch (error) {
+        console.error(error);
+        if (run === currentRun) showLoadError();
+    } finally {
+        list.removeAttribute('aria-busy');
+    }
+}
+
 async function runSearch() {
     const query = searchInput.value.trim();
     const type = searchType.value;
-    const run = ++searchRun;
+    const run = ++currentRun;
+    const noResults = { iconName: 'search', title: 'Nenhum artigo encontrado' };
 
     if (!query) {
-        renderCurrent();
+        renderAll();
         return;
     }
 
     if (type === 'id' && !/^\d+$/.test(query)) {
         statusEl.textContent = 'O ID tem apenas números.';
-        render([], { iconName: 'search', title: 'Nenhum artigo encontrado' });
+        render([], noResults);
         return;
     }
 
     try {
         const results = type === 'title' ? await API.searchByTitle(query) : await API.searchById(query);
-        if (run !== searchRun) return;
-
-        statusEl.textContent = `${results.length} artigo${results.length === 1 ? '' : 's'} encontrado${results.length === 1 ? '' : 's'}.`;
-        render(results, { iconName: 'search', title: 'Nenhum artigo encontrado' });
+        if (run !== currentRun) return;
+        statusEl.textContent = foundLabel(results.length);
+        render(results, noResults);
     } catch (error) {
+        if (run !== currentRun) return;
         console.error(error);
-        if (run === searchRun) showError();
+        if (error.status === 404) {
+            statusEl.textContent = foundLabel(0);
+            render([], noResults);
+        } else {
+            statusEl.textContent = 'Não foi possível buscar agora. Tente de novo em instantes.';
+        }
     }
 }
 
@@ -137,13 +142,14 @@ async function removeArticle(article) {
 
     try {
         await API.remove(article.article_id);
-        articles = articles.filter((item) => item.article_id !== article.article_id);
-        renderCurrent();
-        showToast('Artigo removido.', { type: 'success' });
     } catch (error) {
         console.error(error);
         showToast('Não foi possível remover o artigo. Tente de novo.', { type: 'error' });
+        return;
     }
+
+    showToast('Artigo removido.', { type: 'success' });
+    loadArticles();
 }
 
 function setUpNewArticle() {
@@ -165,42 +171,30 @@ function setUpNewArticle() {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const title = titleInput.value.trim();
-        const content = contentInput.value;
-        let valid = true;
-
-        if (!title) {
-            setFieldError(titleInput, 'O título não pode ficar em branco.');
-            valid = false;
-        }
-        if (!content.trim()) {
-            setFieldError(contentInput, 'O conteúdo não pode ficar em branco.');
-            valid = false;
-        }
-        if (!valid) {
-            form.querySelector('[aria-invalid="true"]').focus();
-            return;
-        }
+        const fields = readArticleFields(titleInput, contentInput);
+        if (!fields) return;
 
         submitButton.classList.add('is-loading');
         submitButton.disabled = true;
 
         try {
-            await API.add({ 'new-title': title, 'new-content': content });
-            form.reset();
-            updateTitleCounter();
-            updateContentCounter();
-            dialog.close();
-            showToast('Artigo publicado.', { type: 'success' });
-            articles = await API.fetchAll();
-            renderCurrent();
+            await API.add({ 'new-title': fields.title, 'new-content': fields.content });
         } catch (error) {
             console.error(error);
             showToast('Não foi possível publicar o artigo. Tente de novo.', { type: 'error' });
+            return;
         } finally {
             submitButton.classList.remove('is-loading');
             submitButton.disabled = false;
         }
+
+        form.reset();
+        updateTitleCounter();
+        updateContentCounter();
+        dialog.close();
+        showToast('Artigo publicado.', { type: 'success' });
+        // A failure here only affects the list, which shows its own error.
+        loadArticles();
     });
 }
 

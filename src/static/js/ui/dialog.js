@@ -2,9 +2,15 @@ import { el, icon } from './dom.js';
 
 /** Close a dialog from its close buttons and from a click on the backdrop. */
 export function bindDialog(dialog) {
+    // The panel fills the dialog, so an event on the dialog itself happened on the backdrop.
+    // Both ends of the click must be there: selecting text and releasing outside keeps it open.
+    let pressedOnBackdrop = false;
+    dialog.addEventListener('pointerdown', (event) => {
+        pressedOnBackdrop = event.target === dialog;
+    });
     dialog.addEventListener('click', (event) => {
-        // The panel fills the dialog, so a click on the dialog itself landed on the backdrop.
-        if (event.target === dialog) dialog.close();
+        if (pressedOnBackdrop && event.target === dialog) dialog.close();
+        pressedOnBackdrop = false;
     });
 
     dialog.querySelectorAll('[data-dialog-close]').forEach((button) => {

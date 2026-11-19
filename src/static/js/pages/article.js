@@ -2,6 +2,7 @@ import { API } from '../api.js';
 import { bindLikeButton } from '../components/like-button.js';
 import { bindDialog } from '../ui/dialog.js';
 import { showToast } from '../ui/toast.js';
+import { readArticleFields } from '../articles.js';
 import { bindCounter, setFieldError } from '../ui/forms.js';
 
 const likeButton = document.querySelector('.article .like-btn');
@@ -39,22 +40,9 @@ function setUpEditor() {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const title = titleInput.value.trim();
-        const content = contentInput.value;
-        let valid = true;
-
-        if (!title) {
-            setFieldError(titleInput, 'O título não pode ficar em branco.');
-            valid = false;
-        }
-        if (!content.trim()) {
-            setFieldError(contentInput, 'O conteúdo não pode ficar em branco.');
-            valid = false;
-        }
-        if (!valid) {
-            form.querySelector('[aria-invalid="true"]').focus();
-            return;
-        }
+        const fields = readArticleFields(titleInput, contentInput);
+        if (!fields) return;
+        const { title, content } = fields;
 
         submitButton.classList.add('is-loading');
         submitButton.disabled = true;

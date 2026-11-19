@@ -1,6 +1,6 @@
 import { avatar } from '../ui/avatar.js';
 import { el, icon } from '../ui/dom.js';
-import { excerpt, formatDateTime, timeAgo } from '../ui/format.js';
+import { excerpt, formatDateTime, isoString, timeAgo } from '../ui/format.js';
 import { createLikeButton } from './like-button.js';
 
 export function articleUrl(article) {
@@ -25,7 +25,7 @@ export function createArticleCard(article) {
                 el('span', { class: 'post__author', text: author }),
                 el('time', {
                     class: 'post__time',
-                    datetime: new Date(article.publish_date).toISOString(),
+                    datetime: isoString(article.publish_date),
                     title: formatDateTime(article.publish_date),
                     text: timeAgo(article.publish_date),
                 }),
