@@ -20,7 +20,19 @@ export function avatarColor(name) {
     return value % AVATAR_COLORS;
 }
 
-export function avatar(name, size = 'md') {
+/** The member's photo when there is one, their initials otherwise. */
+export function avatar(name, size = 'md', imageUrl = null) {
+    if (imageUrl) {
+        // The name is always shown next to it, so the photo needs no text of its own.
+        return el('img', {
+            class: `avatar avatar--${size}`,
+            src: imageUrl,
+            alt: '',
+            loading: 'lazy',
+            decoding: 'async',
+        });
+    }
+
     return el('span', {
         class: `avatar avatar--${size} avatar--c${avatarColor(name)}`,
         'aria-hidden': 'true',
