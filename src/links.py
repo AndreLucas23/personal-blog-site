@@ -39,6 +39,11 @@ def login_url() -> str:
     return url_for('auth.login', next=current_page())
 
 
+def register_url() -> str:
+    """The page to create an account, which also leads back to the page being read."""
+    return url_for('auth.register', next=current_page())
+
+
 def article_url(article: dict) -> str:
     """The canonical address of an article, with the words of its current title."""
     return url_for(
