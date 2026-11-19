@@ -6,6 +6,7 @@ from flask_login import LoginManager
 
 import csrf
 import errors
+import security_headers
 import template_helpers
 from api import api_bp
 from auth import auth_bp
@@ -35,6 +36,7 @@ app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE')
 login_manager = LoginManager(app)
 csrf.init_app(app)
 errors.init_app(app)
+security_headers.init_app(app)
 template_helpers.init_app(app)
 
 app.register_blueprint(views_bp)
