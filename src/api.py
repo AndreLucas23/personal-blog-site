@@ -2,33 +2,38 @@ from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
 from werkzeug.exceptions import RequestEntityTooLarge
 
+import article_validation
 import markdown_render
 import uploads
 import user_validation as validation
-from auth import admin_required, current_user_id
+from auth import current_user_id
 from media import media_url
 from repositories import article_repository, like_repository, user_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
-MAX_TITLE_LENGTH = 30
-
 def _json_object() -> dict | None:
     data = request.get_json(silent=True)
     return data if isinstance(data, dict) else None
 
-def _is_valid_title(title) -> bool:
-    if not isinstance(title, str):
-        return False
-    return bool(title.strip()) and len(title) <= MAX_TITLE_LENGTH
-
-def _is_valid_content(content) -> bool:
-    return isinstance(content, str) and bool(content.strip())
-
-def _article_json(article: dict) -> dict:
-    """An article as the API shows it, with a URL for the author's avatar."""
-    shown = dict(article)
-    shown['author_avatar_url'] = media_url(shown.pop('author_avatar_path'))
+def _article_json(article: dict, *, with_content: bool = False) -> dict:
+    """An article as the API shows it. Lists leave the content out, which can be long."""
+    content = article['article_content']
+    shown = {
+        'article_id': article['article_id'],
+        'article_title': article['article_title'],
+        'summary': article['summary'],
+        'excerpt': article['summary'] or markdown_render.excerpt(content),
+        'reading_time': markdown_render.reading_minutes(content),
+        'publish_date': article['publish_date'],
+        'author': article['author'],
+        'author_username': article['author_username'],
+        'author_avatar_url': media_url(article['author_avatar_path']),
+        'likes': article['likes'],
+        'liked': article['liked'],
+    }
+    if with_content:
+        shown['article_content'] = content
     return shown
 
 def _articles_json(articles: list[dict]):
@@ -47,60 +52,96 @@ def get_articles():
         return jsonify({'message': 'User not found'}), 404
     return _articles_json(articles)
 
+def _read_article_fields(data: dict) -> tuple[dict[str, str], dict[str, str]]:
+    """The article fields of a request body, normalized, and the ones that are not text."""
+    fields, errors = {}, {}
+    for field in article_validation.ARTICLE_FIELDS:
+        if field not in data:
+            continue
+        value = data[field]
+        if value is None and field in article_validation.OPTIONAL_FIELDS:
+            value = ''
+        if not isinstance(value, str):
+            errors[field] = article_validation.INVALID
+            continue
+        fields[field] = article_validation.normalize(field, value)
+    return fields, errors
+
+def _stored(fields: dict[str, str]) -> dict[str, str | None]:
+    return {
+        field: (value or None) if field in article_validation.OPTIONAL_FIELDS else value
+        for field, value in fields.items()
+    }
+
+def _invalid_article(errors: dict[str, str]):
+    return jsonify({'message': 'Invalid article', 'errors': errors}), 400
+
+def _article_not_found():
+    return jsonify({'message': 'Article not found'}), 404
+
 @api_bp.route('/articles', methods=['POST'])
-@admin_required
-def add_article():
+@login_required
+def create_article():
     data = _json_object()
     if data is None:
         return jsonify({'message': 'Invalid request body'}), 400
 
-    article_title = data.get('new-title')
-    article_content = data.get('new-content')
+    fields, errors = _read_article_fields(data)
+    # A value that is not text says more than "required", so it wins.
+    errors = article_validation.validate(fields, require_all=True) | errors
+    if errors:
+        return _invalid_article(errors)
 
-    if not _is_valid_title(article_title):
-        return jsonify({'message': 'Invalid title'}), 400
+    stored = _stored(fields)
+    article_id = article_repository.create(
+        stored['title'], stored.get('summary'), stored['content'], current_user.user_id
+    )
+    article = article_repository.get_by_id(article_id, current_user.user_id)
+    return jsonify(_article_json(article, with_content=True)), 201
 
-    if not _is_valid_content(article_content):
-        return jsonify({'message': 'Invalid content'}), 400
+@api_bp.route('/articles/<int:article_id>', methods=['GET'])
+def get_article(article_id):
+    article = article_repository.get_by_id(article_id, current_user_id())
+    if article is None:
+        return _article_not_found()
+    return jsonify(_article_json(article, with_content=True))
 
-    article_repository.create(article_title, article_content, current_user.user_id)
-    return jsonify({'message': 'artigo criado com sucesso'}), 201
+@api_bp.route('/articles/<int:article_id>', methods=['PATCH'])
+@login_required
+def update_article(article_id):
+    article = article_repository.get_by_id(article_id)
+    if article is None:
+        return _article_not_found()
+    # Admins moderate by removing; changing someone's words is only for the author.
+    if article['author_id'] != current_user.user_id:
+        return jsonify({'message': 'Only the author can edit this article'}), 403
 
-@api_bp.route('/articles/<int:article_id>', methods=['DELETE', 'PATCH'])
-@admin_required
-def article_by_id(article_id):
-    if request.method == 'DELETE':
-        return _delete_article(article_id)
-    return _patch_article(article_id)
-
-def _delete_article(article_id):
-    if not article_repository.delete(article_id):
-        return jsonify({'message': 'Article not found'}), 404
-
-    return jsonify({'message': 'artigo removido com sucesso'}), 200
-
-def _patch_article(article_id):
     data = _json_object()
     if data is None:
         return jsonify({'message': 'Invalid request body'}), 400
 
-    new_title = data.get('title')
-    new_content = data.get('content')
-
-    if new_title is None and new_content is None:
+    fields, errors = _read_article_fields(data)
+    if not fields and not errors:
         return jsonify({'message': 'No fields to update'}), 400
+    errors = article_validation.validate(fields, require_all=False) | errors
+    if errors:
+        return _invalid_article(errors)
 
-    if new_title is not None and not _is_valid_title(new_title):
-        return jsonify({'message': 'Invalid title'}), 400
+    article_repository.update(article_id, _stored(fields))
+    article = article_repository.get_by_id(article_id, current_user.user_id)
+    return jsonify(_article_json(article, with_content=True))
 
-    if new_content is not None and not _is_valid_content(new_content):
-        return jsonify({'message': 'Invalid content'}), 400
+@api_bp.route('/articles/<int:article_id>', methods=['DELETE'])
+@login_required
+def delete_article(article_id):
+    article = article_repository.get_by_id(article_id)
+    if article is None:
+        return _article_not_found()
+    if article['author_id'] != current_user.user_id and not current_user.is_admin:
+        return jsonify({'message': 'Only the author or an admin can remove this article'}), 403
 
-    updated = article_repository.update(article_id, title=new_title, content=new_content)
-    if not updated:
-        return jsonify({'message': 'Article not found'}), 404
-
-    return jsonify({'message': 'Article updated'}), 200
+    article_repository.delete(article_id)
+    return jsonify({'message': 'Article removed'}), 200
 
 @api_bp.route('/previews', methods=['POST'])
 @login_required
@@ -109,6 +150,8 @@ def preview_markdown():
     data = _json_object()
     if data is None or not isinstance(data.get('content'), str):
         return jsonify({'message': 'Invalid request body'}), 400
+    if len(data['content']) > article_validation.MAX_CONTENT_LENGTH:
+        return _invalid_article({'content': article_validation.CONTENT_TOO_LONG})
     return jsonify({'html': str(markdown_render.render(data['content']))})
 
 @api_bp.route('/articles/<int:article_id>/likes', methods=['POST', 'DELETE'])

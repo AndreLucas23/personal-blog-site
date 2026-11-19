@@ -47,16 +47,20 @@ export const API = {
         return request(`/api/articles?author=${encodeURIComponent(username)}`);
     },
 
-    add(data) {
-        return request('/api/articles', { method: 'POST', json: data });
+    createArticle(fields) {
+        return request('/api/articles', { method: 'POST', json: fields });
     },
 
-    remove(articleId) {
+    updateArticle(articleId, fields) {
+        return request(`/api/articles/${articleId}`, { method: 'PATCH', json: fields });
+    },
+
+    deleteArticle(articleId) {
         return request(`/api/articles/${articleId}`, { method: 'DELETE' });
     },
 
-    update(articleId, data) {
-        return request(`/api/articles/${articleId}`, { method: 'PATCH', json: data });
+    preview(content) {
+        return request('/api/previews', { method: 'POST', json: { content } });
     },
 
     like(articleId) {

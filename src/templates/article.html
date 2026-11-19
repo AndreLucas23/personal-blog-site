@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% set can_edit = current_user.is_authenticated and current_user.is_admin %}
+{% set can_edit = current_user.is_authenticated and current_user.user_id == article['author_id'] %}
 {% set author = article['author'] %}
 {% set author_url = url_for('views.profile', username=article['author_username']) %}
 
@@ -78,13 +78,13 @@
             <div class="field">
                 <div class="field__row">
                     <label class="field__label" for="edit-title">Título</label>
-                    <span class="field__counter" id="edit-title-counter">0 / 30</span>
+                    <span class="field__counter" id="edit-title-counter">0 / 150</span>
                 </div>
                 <input class="input"
                 id="edit-title"
                 name="title"
                 type="text"
-                maxlength="30"
+                maxlength="150"
                 autocomplete="off"
                 aria-describedby="edit-title-error"
                 required>
@@ -94,13 +94,13 @@
             <div class="field">
                 <div class="field__row">
                     <label class="field__label" for="edit-content">Conteúdo</label>
-                    <span class="field__counter" id="edit-content-counter">0 / 2500</span>
+                    <span class="field__counter" id="edit-content-counter">0 / 50000</span>
                 </div>
                 <textarea class="textarea"
                 id="edit-content"
                 name="content"
                 rows="10"
-                maxlength="2500"
+                maxlength="50000"
                 aria-describedby="edit-content-error"
                 required></textarea>
                 <span class="field__error" id="edit-content-error" aria-live="polite"></span>

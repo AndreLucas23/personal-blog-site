@@ -2,7 +2,7 @@ from db import db_cursor
 
 # The first placeholder is the viewer id, used to tell whether they liked each article.
 ARTICLE_DETAILS_QUERY = (
-    'SELECT a.article_id, a.article_title, a.article_content, '
+    'SELECT a.article_id, a.author_id, a.article_title, a.summary, a.article_content, '
     'a.publish_date, u.display_name AS author, u.username AS author_username, '
     'u.avatar_path AS author_avatar_path, '
     '(SELECT COUNT(*) FROM LIKES l WHERE l.article_id = a.article_id) AS likes, '
@@ -34,12 +34,15 @@ def get_by_id(article_id: int, viewer_id: int | None = None) -> dict | None:
         )
         return _with_like_flag(cursor.fetchone())
 
-def create(title: str, content: str, author_id: int) -> int:
+# Columns of the fields an author writes, the only ones an update can change.
+COLUMNS = {'title': 'article_title', 'summary': 'summary', 'content': 'article_content'}
+
+def create(title: str, summary: str | None, content: str, author_id: int) -> int:
     with db_cursor() as cursor:
         cursor.execute(
-            'INSERT INTO ARTICLES(ARTICLE_TITLE, ARTICLE_CONTENT, AUTHOR_ID) '
-            'VALUES (%s, %s, %s)',
-            (title, content, author_id)
+            'INSERT INTO ARTICLES (article_title, summary, article_content, author_id) '
+            'VALUES (%s, %s, %s, %s)',
+            (title, summary, content, author_id)
         )
         return cursor.lastrowid
 
@@ -48,29 +51,17 @@ def delete(article_id: int) -> bool:
         cursor.execute('DELETE FROM ARTICLES WHERE ARTICLE_ID = %s', (article_id,))
         return cursor.rowcount > 0
 
-def update(
-    article_id: int, title: str | None = None, content: str | None = None
-) -> bool:
-    if title is None and content is None:
+def update(article_id: int, changes: dict[str, str | None]) -> bool:
+    """Change the given fields, named as in COLUMNS. Returns False for a missing article."""
+    fields = [field for field in COLUMNS if field in changes]
+    if not fields:
         return False
 
-    fields = []
-    values = []
-
-    if title is not None:
-        fields.append('ARTICLE_TITLE = %s')
-        values.append(title)
-
-    if content is not None:
-        fields.append('ARTICLE_CONTENT = %s')
-        values.append(content)
-
-    values.append(article_id)
-
+    assignments = ', '.join(f'{COLUMNS[field]} = %s' for field in fields)
     with db_cursor() as cursor:
         cursor.execute(
-            f'UPDATE ARTICLES SET {", ".join(fields)} WHERE ARTICLE_ID = %s',
-            tuple(values)
+            f'UPDATE ARTICLES SET {assignments} WHERE article_id = %s',
+            (*(changes[field] for field in fields), article_id)
         )
         return cursor.rowcount > 0
 
