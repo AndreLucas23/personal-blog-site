@@ -4,10 +4,10 @@ from db import db_cursor
 
 DUPLICATE_ENTRY_ERROR = 1062
 USERNAME_KEY = 'uq_users_username'
-ACCOUNT_COLUMNS = 'user_id, username, display_name, email, password_hash, is_admin'
+ACCOUNT_COLUMNS = 'user_id, username, display_name, email, password_hash, is_admin, avatar_path'
 PROFILE_QUERY = (
     'SELECT u.user_id, u.username, u.display_name, u.email, u.headline, u.bio, '
-    'u.location, u.website, u.created_at, '
+    'u.location, u.website, u.avatar_path, u.created_at, '
     '(SELECT COUNT(*) FROM ARTICLES a WHERE a.author_id = u.user_id) AS article_count '
     'FROM USERS u'
 )
@@ -64,6 +64,17 @@ def update_profile(user_id: int, changes: dict[str, str | None]) -> None:
         if error.errno != DUPLICATE_ENTRY_ERROR:
             raise
         raise DuplicateUsernameError(changes.get('username')) from error
+
+def set_avatar(user_id: int, avatar_path: str | None) -> str | None:
+    """Store the new avatar and return the previous one, so its file can be removed."""
+    with db_cursor() as cursor:
+        # The lock keeps two uploads at once from losing track of a file.
+        cursor.execute('SELECT avatar_path FROM USERS WHERE user_id = %s FOR UPDATE', (user_id,))
+        row = cursor.fetchone()
+        cursor.execute(
+            'UPDATE USERS SET avatar_path = %s WHERE user_id = %s', (avatar_path, user_id)
+        )
+        return row[0] if row else None
 
 def get_by_login(login: str) -> dict | None:
     """Find a member by email or by username, as the login form accepts either one."""
