@@ -28,7 +28,7 @@
             <a class="tab"
             href="{{ url_for('views.following', username=member['username']) }}"
             {% if kind == 'following' %}aria-current="page"{% endif %}>
-                Seguindo <span class="tab__count">{{ member['following_count'] }}</span>
+                Seguindo <span class="tab__count" id="following-count">{{ member['following_count'] }}</span>
             </a>
         </nav>
 
