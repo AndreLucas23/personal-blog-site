@@ -20,7 +20,7 @@ Accounts created before usernames existed got one from their name when migration
 | `headline` | Optional, up to 120 characters, such as a role or a company |
 | `bio` | Optional, up to 500 characters. Line breaks are kept |
 | `location` | Optional, up to 80 characters |
-| `website` | Optional, an `http` or `https` address of up to 200 characters. `https://` is added when the scheme is missing |
+| `website` | Optional, an `http` or `https` address of up to 200 characters, without a user name or password before the host. `https://` is added when the scheme is missing |
 
 An empty optional field clears it. The email is never shown on a public profile.
 
@@ -41,7 +41,7 @@ Without an avatar, pages show the initials of the display name on a color picked
 
 The top bar, the account menu, the profile card on the home page, the article cards and the byline of an article show the member's photo, and their names and photos lead to the profile. The account menu links to your profile and to the profile settings. A change saved in the settings, including a new photo or username, shows up on the page without a reload.
 
-The website opens in a new tab with `rel="nofollow ugc noopener noreferrer"`, so the page cannot reach back to the site and search engines do not count the link as an endorsement.
+The website opens in a new tab with `rel="nofollow ugc noopener noreferrer"`, so the page cannot reach back to the site and search engines do not count the link as an endorsement. Its text is the host and the path, without the scheme or `www.`, so it always names the site the link opens.
 
 ## API
 

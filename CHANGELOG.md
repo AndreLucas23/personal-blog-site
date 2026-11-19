@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Profile websites cannot carry a user name before the host, such as `https://bank.com@evil.example`, which would disguise where the link goes (#76).
 - Every response carries a Content Security Policy that allows only the application's own scripts, styles, images and forms, plus `nosniff`, frame denial, a strict referrer policy, a permissions policy and same-origin isolation headers (#71).
 - `SESSION_COOKIE_SECURE=1` also sends `Strict-Transport-Security` (#71).
 - State-changing requests are protected against cross-site request forgery (#19).
