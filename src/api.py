@@ -9,7 +9,7 @@ import user_validation as validation
 from auth import current_user_id
 from media import media_url
 from links import article_url
-from repositories import article_repository, like_repository, user_repository
+from repositories import article_repository, like_repository, tag_repository, user_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -26,6 +26,7 @@ def _article_json(article: dict, *, with_content: bool = False) -> dict:
         'url': article_url(article),
         'article_title': article['article_title'],
         'summary': article['summary'],
+        'tags': article['tags'],
         'excerpt': article['summary'] or markdown_render.excerpt(plain),
         'reading_time': markdown_render.reading_minutes(plain),
         'status': article['status'],
@@ -81,6 +82,18 @@ def _read_status(data: dict) -> tuple[str | None, dict[str, str]]:
         return None, {'status': article_validation.INVALID}
     return data['status'], {}
 
+def _read_tags(data: dict) -> tuple[list[str] | None, dict[str, str]]:
+    """The normalized tags of a request body, if it has them, and their error."""
+    if 'tags' not in data:
+        return None, {}
+    values = data['tags']
+    if not isinstance(values, list) or not all(isinstance(value, str) for value in values):
+        return None, {'tags': article_validation.INVALID}
+
+    tags = article_validation.normalize_tags(values)
+    error = article_validation.validate_tags(tags)
+    return tags, ({'tags': error} if error else {})
+
 def _stored(fields: dict[str, str]) -> dict[str, str | None]:
     return {
         field: (value or None) if field in article_validation.OPTIONAL_FIELDS else value
@@ -102,13 +115,14 @@ def create_article():
 
     fields, errors = _read_article_fields(data)
     status, status_errors = _read_status(data)
+    tags, tag_errors = _read_tags(data)
     status = status or article_validation.PUBLISHED
     # A value that is not text says more than "required", so it wins.
     errors = article_validation.validate(
         fields,
         title_required=True,
         content_required=status == article_validation.PUBLISHED,
-    ) | errors | status_errors
+    ) | errors | status_errors | tag_errors
     if errors:
         return _invalid_article(errors)
 
@@ -120,6 +134,8 @@ def create_article():
         current_user.user_id,
         status,
     )
+    if tags:
+        tag_repository.set_article_tags(article_id, tags)
     article = article_repository.get_by_id(article_id, current_user.user_id)
     # The author may delete it from another tab before this read.
     if article is None:
@@ -149,12 +165,14 @@ def update_article(article_id):
 
     fields, errors = _read_article_fields(data)
     status, status_errors = _read_status(data)
-    if not fields and not errors and status is None and not status_errors:
+    tags, tag_errors = _read_tags(data)
+    errors |= status_errors | tag_errors
+    if not fields and not errors and status is None and tags is None:
         return jsonify({'message': 'No fields to update'}), 400
 
     errors = article_validation.validate(
         fields, title_required=False, content_required=False
-    ) | errors | status_errors
+    ) | errors
     # A published article needs content, whether it is published now or stays published.
     publishing = (status or article['status']) == article_validation.PUBLISHED
     if publishing and not fields.get('content', article['article_content']).strip():
@@ -166,8 +184,10 @@ def update_article(article_id):
     if status is not None:
         changes['status'] = status
     # An admin may remove the article between the checks above and this save.
-    if not article_repository.update(article_id, changes):
+    if not article_repository.update(article_id, changes, edited=tags is not None):
         return _article_not_found()
+    if tags is not None:
+        tag_repository.set_article_tags(article_id, tags)
     article = article_repository.get_by_id(article_id, current_user.user_id)
     if article is None:
         return _article_not_found()
