@@ -81,11 +81,12 @@
                     <input class="tag-input__field"
                     id="tag-input"
                     type="text"
-                    maxlength="{{ max_tag_length }}"
                     autocomplete="off"
                     autocapitalize="none"
                     placeholder="Adicione até {{ max_tags }} tags"
                     data-max="{{ max_tags }}"
+                    data-min-length="{{ min_tag_length }}"
+                    data-max-length="{{ max_tag_length }}"
                     aria-describedby="tags-hint tags-error">
                 </div>
                 <span class="field__hint" id="tags-hint">Enter ou vírgula para adicionar. Ex.: python, banco de dados, carreira.</span>

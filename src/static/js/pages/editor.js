@@ -20,6 +20,8 @@ const tagBox = document.getElementById('tag-box');
 const tagList = document.getElementById('tag-list');
 const tagInput = document.getElementById('tag-input');
 const maxTags = Number(tagInput.dataset.max);
+const minTagLength = Number(tagInput.dataset.minLength);
+const maxTagLength = Number(tagInput.dataset.maxLength);
 let articleId = form.dataset.articleId || null;
 const inputs = { title: titleInput, summary: summaryInput, content: contentInput, tags: tagInput };
 
@@ -30,8 +32,8 @@ const ARTICLE_ERRORS = {
     content_required: 'Escreva o conteúdo do artigo.',
     content_too_long: `O artigo pode ter até ${contentInput.maxLength.toLocaleString('pt-BR')} caracteres.`,
     tags_too_many: `Use até ${maxTags} tags.`,
-    tag_too_short: 'Cada tag precisa de pelo menos 2 caracteres.',
-    tag_too_long: `Cada tag pode ter até ${tagInput.maxLength} caracteres.`,
+    tag_too_short: `Cada tag precisa de pelo menos ${minTagLength} caracteres.`,
+    tag_too_long: `Cada tag pode ter até ${maxTagLength} caracteres.`,
     invalid: 'Confira este campo.',
 };
 
@@ -170,21 +172,39 @@ function createChip(tag) {
     );
 }
 
-function addTag(raw) {
-    const tag = normalizeTag(raw);
-    tagInput.value = '';
-    if (!tag || currentTags().includes(tag)) return;
+function tagError(tag) {
+    // Characters as the server counts them, not UTF-16 units.
+    const length = [...tag].length;
+    if (currentTags().length >= maxTags) return 'tags_too_many';
+    if (length < minTagLength) return 'tag_too_short';
+    if (length > maxTagLength) return 'tag_too_long';
+    return null;
+}
 
-    if (currentTags().length >= maxTags) {
-        setFieldError(tagInput, ARTICLE_ERRORS.tags_too_many);
-        return;
+/**
+ * Turn the text of the tag field into chips, with commas between tags. Unless finished,
+ * the text after the last comma is still being typed and stays. A refused tag stays in
+ * the field, with what follows it, and its reason. Returns false when one was refused.
+ */
+function addTypedTags(finished) {
+    const parts = tagInput.value.split(',');
+    const complete = finished ? parts.length : parts.length - 1;
+    let index = 0;
+    let error = null;
+    for (; index < complete; index += 1) {
+        const tag = normalizeTag(parts[index]);
+        if (!tag || currentTags().includes(tag)) continue;
+        error = tagError(tag);
+        if (error) break;
+        tagList.append(createChip(tag));
+        dirty = true;
     }
-    if (tag.length < 2) {
-        setFieldError(tagInput, ARTICLE_ERRORS.tag_too_short);
-        return;
-    }
-    tagList.append(createChip(tag));
-    dirty = true;
+
+    const left = parts.slice(index).join(',').trimStart();
+    // Only when the text changed, so the caret stays where the member is fixing a tag.
+    if (left !== tagInput.value) tagInput.value = left;
+    setFieldError(tagInput, error ? ARTICLE_ERRORS[error] : '');
+    return !error;
 }
 
 function readFields() {
@@ -234,6 +254,11 @@ async function save(status, button) {
     if (saving) return null;
 
     Object.values(inputs).forEach((input) => setFieldError(input, ''));
+    // A tag left in the field counts, and one that is refused stops the save with its reason.
+    if (tagInput.value.trim() && !addTypedTags(true)) {
+        tagInput.focus();
+        return null;
+    }
     const fields = readFields();
     const localErrors = checkFields(fields, status === 'published');
     if (Object.keys(localErrors).length) {
@@ -323,16 +348,22 @@ contentInput.addEventListener('keydown', (event) => {
 tagInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ',') {
         event.preventDefault();
-        addTag(tagInput.value);
+        addTypedTags(true);
     } else if (event.key === 'Backspace' && !tagInput.value) {
         tagList.lastElementChild?.remove();
         dirty = true;
     }
 });
 
+// Commas also arrive in pasted text and from keyboards that do not report the key.
+tagInput.addEventListener('input', (event) => {
+    const arrived = event.inputType?.startsWith('insertFrom') || event.data?.includes(',');
+    if (arrived && tagInput.value.includes(',')) addTypedTags(false);
+});
+
 // A tag typed and left behind still counts.
 tagInput.addEventListener('blur', () => {
-    if (tagInput.value.trim()) addTag(tagInput.value);
+    if (tagInput.value.trim()) addTypedTags(true);
 });
 
 tagList.addEventListener('click', (event) => {
