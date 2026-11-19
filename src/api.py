@@ -10,7 +10,7 @@ import user_validation as validation
 from auth import current_user_id
 from media import media_url
 from links import article_url
-from repositories import article_repository, like_repository, user_repository
+from repositories import article_repository, follow_repository, like_repository, user_repository
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -336,6 +336,9 @@ def _profile_json(user: dict, *, include_email: bool = False) -> dict:
         'avatar_url': media_url(user['avatar_path']),
         'joined_at': user['created_at'],
         'articles': user['article_count'],
+        'followers': user['follower_count'],
+        'following': user['following_count'],
+        'followed': user['followed'],
     }
     if include_email:
         profile['email'] = user['email']
@@ -438,9 +441,27 @@ def remove_avatar():
     return jsonify({'avatar_url': None})
 
 
+@api_bp.route('/users/<string:username>/follow', methods=['PUT', 'DELETE'])
+@login_required
+def follow_member(username):
+    """Follow or unfollow a member. Repeating either gives the same answer."""
+    member = user_repository.get_by_username(validation.normalize_username(username))
+    if member is None:
+        return jsonify({'message': 'User not found'}), 404
+    if member['user_id'] == current_user.user_id:
+        return jsonify({'message': 'You cannot follow yourself'}), 400
+
+    followed = request.method == 'PUT'
+    if followed:
+        follow_repository.follow(current_user.user_id, member['user_id'])
+    else:
+        follow_repository.unfollow(current_user.user_id, member['user_id'])
+    return jsonify({'followed': followed, 'followers': follow_repository.count_followers(member['user_id'])})
+
+
 @api_bp.route('/users/<string:username>', methods=['GET'])
 def get_profile(username):
-    profile = user_repository.get_profile(validation.normalize_username(username))
+    profile = user_repository.get_profile(validation.normalize_username(username), current_user_id())
     if profile is None:
         return jsonify({'message': 'User not found'}), 404
     return jsonify(_profile_json(profile))
