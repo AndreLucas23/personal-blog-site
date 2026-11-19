@@ -71,7 +71,7 @@ def test_editor_offers_the_actions_of_the_article_state(reader_client, reader_id
     published_page = reader_client.get(f'/write/{published}').get_data(as_text=True)
 
     assert 'id="editor-draft"' in new_page and 'id="editor-unpublish"' not in new_page
-    assert 'id="editor-draft"' in draft_page and 'data-status="draft"' in draft_page
+    assert 'id="editor-draft"' in draft_page and 'id="editor-unpublish"' not in draft_page
     assert 'id="editor-unpublish"' in published_page and 'id="editor-draft"' not in published_page
 
 
