@@ -3,7 +3,8 @@ from db import db_cursor
 # The first placeholder is the viewer id, used to tell whether they liked each article.
 ARTICLE_DETAILS_QUERY = (
     'SELECT a.article_id, a.article_title, a.article_content, '
-    'a.publish_date, u.display_name AS author, '
+    'a.publish_date, u.display_name AS author, u.username AS author_username, '
+    'u.avatar_path AS author_avatar_path, '
     '(SELECT COUNT(*) FROM LIKES l WHERE l.article_id = a.article_id) AS likes, '
     'EXISTS(SELECT 1 FROM LIKES l '
     'WHERE l.article_id = a.article_id AND l.user_id = %s) AS liked '
@@ -15,9 +16,14 @@ def _with_like_flag(article: dict | None) -> dict | None:
         article['liked'] = bool(article['liked'])
     return article
 
-def get_all(viewer_id: int | None = None) -> list[dict]:
+def get_all(viewer_id: int | None = None, author_username: str | None = None) -> list[dict]:
+    query, params = ARTICLE_DETAILS_QUERY, [viewer_id]
+    if author_username is not None:
+        query += ' WHERE u.username = %s'
+        params.append(author_username)
+
     with db_cursor(dictionary=True) as cursor:
-        cursor.execute(ARTICLE_DETAILS_QUERY, (viewer_id,))
+        cursor.execute(query, tuple(params))
         return [_with_like_flag(article) for article in cursor.fetchall()]
 
 def get_by_id(article_id: int, viewer_id: int | None = None) -> dict | None:
