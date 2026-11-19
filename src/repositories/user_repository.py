@@ -1,6 +1,7 @@
 import mysql.connector
 
 from db import db_cursor
+from user_validation import PROFILE_FIELDS
 
 DUPLICATE_ENTRY_ERROR = 1062
 USERNAME_KEY = 'uq_users_username'
@@ -11,8 +12,6 @@ PROFILE_QUERY = (
     '(SELECT COUNT(*) FROM ARTICLES a WHERE a.author_id = u.user_id) AS article_count '
     'FROM USERS u'
 )
-# The only columns members change through their profile, in the order of the form.
-PROFILE_COLUMNS = ('display_name', 'username', 'headline', 'bio', 'location', 'website')
 
 
 class DuplicateEmailError(Exception):
@@ -49,7 +48,8 @@ def get_profile_by_id(user_id: int) -> dict | None:
         return cursor.fetchone()
 
 def update_profile(user_id: int, changes: dict[str, str | None]) -> None:
-    columns = [column for column in PROFILE_COLUMNS if column in changes]
+    # Only profile columns can be written, whatever the caller passes.
+    columns = [column for column in PROFILE_FIELDS if column in changes]
     if not columns:
         return
 
