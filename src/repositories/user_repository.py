@@ -30,6 +30,12 @@ def get_by_username(username: str) -> dict | None:
         cursor.execute(f'SELECT {ACCOUNT_COLUMNS} FROM USERS WHERE username = %s', (username,))
         return cursor.fetchone()
 
+def get_by_login(login: str) -> dict | None:
+    """Find a member by email or by username, as the login form accepts either one."""
+    if '@' in login:
+        return get_by_email(login)
+    return get_by_username(login)
+
 def create(
     display_name: str,
     username: str,

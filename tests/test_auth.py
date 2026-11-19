@@ -50,12 +50,37 @@ def test_login_with_wrong_password_keeps_the_email(client, reader_id):
 
     assert response.status_code == 401
     page = response.get_data(as_text=True)
-    assert 'E-mail ou senha inválidos.' in page
+    assert 'E-mail, nome de usuário ou senha inválidos.' in page
     assert f'value="{READER["email"]}"' in page
 
 
-def test_login_with_unknown_email_fails(client):
+def test_login_with_the_username_starts_a_session(client, reader_id):
+    response = login(client, READER['username'], READER['password'])
+
+    assert response.status_code == 302
+    assert client.get('/auth/login').status_code == 302
+
+
+def test_login_reads_the_username_without_the_at_or_the_case(client, reader_id):
+    response = login(client, ' @Reader ', READER['password'])
+
+    assert response.status_code == 302
+
+
+def test_login_with_the_email_in_any_letter_case(client, reader_id):
+    assert login(client, READER['email'].upper(), READER['password']).status_code == 302
+
+
+def test_login_with_wrong_password_keeps_the_username(client, reader_id):
+    response = login(client, '@Reader', 'wrong-password')
+
+    assert response.status_code == 401
+    assert 'value="reader"' in response.get_data(as_text=True)
+
+
+def test_login_with_unknown_email_or_username_fails(client):
     assert login(client, 'ghost@example.com', ADMIN['password']).status_code == 401
+    assert login(client, 'ghost', ADMIN['password']).status_code == 401
 
 
 def test_logout_ends_the_session(reader_client):

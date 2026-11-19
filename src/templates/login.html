@@ -23,19 +23,21 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <div class="field">
-                <label class="field__label" for="email">E-mail</label>
+                <label class="field__label" for="login">E-mail ou nome de usuário</label>
                 <div class="input-group">
-                    {{ icon('mail') }}
+                    {{ icon('user') }}
                     <input class="input"
-                    id="email"
-                    name="email"
-                    type="email"
-                    value="{{ email or '' }}"
-                    placeholder="voce@exemplo.com"
-                    autocomplete="email"
+                    id="login"
+                    name="login"
+                    type="text"
+                    value="{{ login or '' }}"
+                    placeholder="voce@exemplo.com ou seu_nome"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    spellcheck="false"
                     maxlength="255"
                     required
-                    {% if not email %}autofocus{% endif %}>
+                    {% if not login %}autofocus{% endif %}>
                 </div>
             </div>
 
@@ -50,7 +52,7 @@
                     placeholder="Sua senha"
                     autocomplete="current-password"
                     required
-                    {% if email %}autofocus{% endif %}>
+                    {% if login %}autofocus{% endif %}>
                     <button class="icon-btn input-group__action"
                     type="button"
                     aria-label="Mostrar senha"
