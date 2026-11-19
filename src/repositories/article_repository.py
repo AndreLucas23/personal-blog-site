@@ -3,7 +3,7 @@ from db import db_cursor
 # The first placeholder is the viewer id, used to tell whether they liked each article.
 ARTICLE_DETAILS_QUERY = (
     'SELECT a.article_id, a.article_title, a.article_content, '
-    'a.publish_date, u.username AS author, '
+    'a.publish_date, u.display_name AS author, '
     '(SELECT COUNT(*) FROM LIKES l WHERE l.article_id = a.article_id) AS likes, '
     'EXISTS(SELECT 1 FROM LIKES l '
     'WHERE l.article_id = a.article_id AND l.user_id = %s) AS liked '

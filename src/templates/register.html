@@ -23,20 +23,41 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <div class="field">
-                <label class="field__label" for="username">Nome de usuário</label>
+                <label class="field__label" for="display_name">Nome</label>
                 <div class="input-group">
                     {{ icon('user') }}
+                    <input class="input"
+                    id="display_name"
+                    name="display_name"
+                    type="text"
+                    value="{{ display_name or '' }}"
+                    placeholder="Como você quer ser chamado"
+                    autocomplete="name"
+                    maxlength="50"
+                    required
+                    autofocus>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="field__label" for="username">Nome de usuário</label>
+                <div class="input-group">
+                    {{ icon('at-sign') }}
                     <input class="input"
                     id="username"
                     name="username"
                     type="text"
                     value="{{ username or '' }}"
-                    placeholder="Como você quer ser chamado"
+                    placeholder="seu_nome"
                     autocomplete="username"
-                    maxlength="50"
-                    required
-                    autofocus>
+                    autocapitalize="none"
+                    spellcheck="false"
+                    minlength="3"
+                    maxlength="30"
+                    aria-describedby="username-hint"
+                    required>
                 </div>
+                <span class="field__hint" id="username-hint">O endereço do seu perfil. De 3 a 30 letras minúsculas, números ou _.</span>
             </div>
 
             <div class="field">

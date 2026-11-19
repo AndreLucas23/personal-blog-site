@@ -4,7 +4,8 @@ from helpers import ADMIN, READER, login
 from repositories import user_repository
 
 NEW_USER = {
-    'username': 'Leitora',
+    'display_name': 'Leitora',
+    'username': 'leitora',
     'email': 'leitora@example.com',
     'password': 'senha-segura-1',
 }
@@ -72,11 +73,12 @@ def test_logout_without_a_session_redirects_to_login(client):
 
 
 def test_registration_creates_a_regular_user_and_signs_in(client):
-    response = register(client, username='  Leitora  ')
+    response = register(client, display_name='  Leitora  ', username=' @Leitora ')
 
     assert response.status_code == 302
     user = user_repository.get_by_email(NEW_USER['email'])
-    assert user['username'] == 'Leitora'
+    assert user['display_name'] == 'Leitora'
+    assert user['username'] == 'leitora'
     assert user['is_admin'] == 0
     assert check_password_hash(user['password_hash'], NEW_USER['password'])
     assert client.get('/auth/register').status_code == 302
@@ -93,19 +95,37 @@ def test_registration_rejects_a_duplicated_email_in_any_letter_case(app, client)
     another_visitor = app.test_client()
 
     response = register(
-        another_visitor, username='Outra', email=NEW_USER['email'].upper()
+        another_visitor, display_name='Outra', username='outra',
+        email=NEW_USER['email'].upper(),
     )
 
     assert response.status_code == 409
     page = response.get_data(as_text=True)
     assert 'Este e-mail já está cadastrado.' in page
     assert 'value="Outra"' in page
+    assert 'value="outra"' in page
+
+
+def test_registration_rejects_a_taken_username(app, client):
+    register(client)
+    another_visitor = app.test_client()
+
+    response = register(another_visitor, username='Leitora', email='outra@example.com')
+
+    assert response.status_code == 409
+    assert 'Este nome de usuário já está em uso.' in response.get_data(as_text=True)
+    assert user_repository.get_by_email('outra@example.com') is None
 
 
 def test_registration_rejects_invalid_data_and_stores_nothing(client):
     invalid_forms = [
+        {'display_name': ''},
+        {'display_name': 'x' * 51},
         {'username': ''},
-        {'username': 'x' * 51},
+        {'username': 'ab'},
+        {'username': 'x' * 31},
+        {'username': 'leitora souza'},
+        {'username': 'admin'},
         {'email': 'not-an-email'},
         {'password': '1234567'},
         {'password': 'x' * 129},
@@ -122,3 +142,10 @@ def test_registration_error_message_is_in_portuguese(client):
 
     page = response.get_data(as_text=True)
     assert 'A senha deve ter pelo menos 8 caracteres.' in page
+
+
+def test_registration_explains_the_username_rules_in_portuguese(client):
+    response = register(client, username='leitora souza')
+
+    page = response.get_data(as_text=True)
+    assert 'Use só letras minúsculas sem acento, números e _ no nome de usuário.' in page

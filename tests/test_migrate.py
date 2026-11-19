@@ -1,3 +1,4 @@
+import mysql.connector
 import pytest
 
 import migrate
@@ -139,3 +140,51 @@ def test_files_that_are_not_sql_are_ignored(tmp_path):
     write_migration(tmp_path, 'README.md', 'Notes about the migrations.')
 
     assert list(migrate.find_migrations(tmp_path)) == [1]
+
+
+def test_existing_names_become_display_names_and_usernames(empty_database, tmp_path):
+    # A database from before usernames: only the first two migrations.
+    for path in sorted(migrate.MIGRATIONS_DIR.glob('*.sql'))[:2]:
+        write_migration(tmp_path, path.name, path.read_text(encoding='utf-8'))
+    migrate.apply_pending(tmp_path)
+    names = [
+        'André Lucas', 'Ana Souza', 'ana souza', 'x', 'Me', 'Ünal Çelik',
+        'Uma pessoa com um nome muito comprido mesmo',
+    ]
+    with db_cursor() as cursor:
+        for index, name in enumerate(names):
+            cursor.execute(
+                'INSERT INTO USERS (username, email, password_hash) VALUES (%s, %s, %s)',
+                (name, f'user{index}@example.com', 'hash'),
+            )
+
+    migrate.apply_pending()
+
+    with db_cursor() as cursor:
+        cursor.execute('SELECT user_id, display_name, username FROM USERS ORDER BY user_id')
+        rows = cursor.fetchall()
+    ids = [user_id for user_id, _, _ in rows]
+    assert [(name, username) for _, name, username in rows] == [
+        ('André Lucas', 'andre_lucas'),
+        ('Ana Souza', 'ana_souza'),
+        ('ana souza', f'user_{ids[2]}'),
+        ('x', f'user_{ids[3]}'),
+        ('Me', f'user_{ids[4]}'),
+        ('Ünal Çelik', 'unal_celik'),
+        ('Uma pessoa com um nome muito comprido mesmo', 'uma_pessoa_com_um_nome_muito_c'),
+    ]
+
+
+def test_usernames_are_unique_in_the_database():
+    with db_cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO USERS (display_name, username, email, password_hash) "
+            "VALUES ('Ana', 'ana', 'a@example.com', 'hash')"
+        )
+
+    with pytest.raises(mysql.connector.IntegrityError):
+        with db_cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO USERS (display_name, username, email, password_hash) "
+                "VALUES ('Outra Ana', 'ana', 'b@example.com', 'hash')"
+            )
