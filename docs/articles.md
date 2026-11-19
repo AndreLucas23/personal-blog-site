@@ -21,14 +21,14 @@ An article is a draft or published. A draft needs only its title, so members can
 - A draft is visible only to its author: it stays out of every list, search and profile count, and its page, its editor and `GET /api/articles/<id>` answer `404` to anyone else, admins included.
 - The editor saves a draft with Salvar rascunho and stays open, showing when it was saved; a new draft gets its own address, so a reload keeps editing it. Publicar publishes and opens the article.
 - The first publication sets the publication date. A published article can go back to drafts with Mover para rascunhos, and publishing it again keeps the first date.
-- Changing the title, the summary, the content or the tags records when the article was updated, while saving them unchanged or only moving between draft and published does not. The article page mentions the update when it happened on a later day than the publication.
+- Changing the title, the summary, the content, the tags or the cover records when the article was updated, while saving them unchanged or only moving between draft and published does not. The article page mentions the update when it happened on a later day than the publication.
 - Your profile has a Rascunhos tab with your drafts, the most recently edited first, and only published articles collect likes.
 
 ## Covers
 
 An article may have a cover: a JPEG, PNG or WebP image of up to 5 MB, cropped to 1200 by 630 pixels, the shape of link previews, and stored as WebP in the uploads volume like avatars. Cards and the article page show it above the title.
 
-The editor shows the chosen cover at once and sends it when the article is saved, like the words, so a new cover reaches readers only with Publicar or Salvar alterações. Publicar saves the draft and its new cover before it publishes, so readers get the article with the cover or not at all. If the cover is refused, the article is saved without it and the editor keeps the reason next to the cover. Replacing or removing a cover, or deleting the article, deletes the old file. Changing the cover does not count as an update of the text.
+The editor shows the chosen cover at once and sends it when the article is saved, like the words, so a new cover reaches readers only with Publicar or Salvar alterações. Publicar saves the draft and its new cover before it publishes, so readers get the article with the cover or not at all. If the cover is refused, the article is saved without it and the editor keeps the reason next to the cover. Replacing or removing a cover, or deleting the article, deletes the old file.
 
 ## Tags
 

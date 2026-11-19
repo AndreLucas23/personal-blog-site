@@ -109,16 +109,22 @@ def delete(article_id: int) -> tuple[bool, str | None]:
         return True, row[0]
 
 def set_cover(article_id: int, cover_path: str | None) -> tuple[bool, str | None]:
-    """Store the new cover. Whether the article exists, and its previous cover."""
+    """Store the new cover. Whether the article exists, and its previous cover.
+
+    A different cover marks the article as edited, like new words or tags.
+    """
     with db_cursor() as cursor:
         # The lock keeps two uploads at once from losing track of a file.
         cursor.execute('SELECT cover_path FROM ARTICLES WHERE article_id = %s FOR UPDATE', (article_id,))
         row = cursor.fetchone()
         if row is None:
             return False, None
-        cursor.execute(
-            'UPDATE ARTICLES SET cover_path = %s WHERE article_id = %s', (cover_path, article_id)
-        )
+        if row[0] != cover_path:
+            cursor.execute(
+                'UPDATE ARTICLES SET cover_path = %s, updated_at = CURRENT_TIMESTAMP '
+                'WHERE article_id = %s',
+                (cover_path, article_id),
+            )
         return True, row[0]
 
 def update(
