@@ -162,7 +162,10 @@ async function removeArticle(article) {
     }
 
     showToast('Artigo removido.', { type: 'success' });
-    loadArticles();
+    // The pages loaded so far stay; only the removed article leaves them.
+    articles = articles.filter((loaded) => loaded.article_id !== article.article_id);
+    if (searchInput.value.trim()) runSearch();
+    else renderAll();
 }
 
 searchInput.addEventListener('input', () => {
