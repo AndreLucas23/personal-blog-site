@@ -147,6 +147,8 @@ function normalizeTag(value) {
     return value.normalize('NFC').toLowerCase().trim().replace(/^#+/, '')
         .replace(/[\s_]+/g, '-')
         .replace(/[^\p{L}\p{N}\p{M}-]/gu, '')
+        // Marks belong to the letter before them.
+        .replace(/(^|-)\p{M}+/gu, '$1')
         .replace(/-{2,}/g, '-')
         .replace(/^-+|-+$/g, '');
 }
