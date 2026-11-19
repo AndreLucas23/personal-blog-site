@@ -99,3 +99,55 @@ def test_validate_new_user_accepts_valid_data():
     error = validation.validate_new_user('Ana', 'ana', 'ana@example.com', VALID_PASSWORD)
 
     assert error is None
+
+
+@pytest.mark.parametrize(
+    ('raw', 'normalized'),
+    [
+        ('', ''),
+        ('  ', ''),
+        ('example.com', 'https://example.com'),
+        (' http://example.com ', 'http://example.com'),
+        ('https://example.com/path?q=1', 'https://example.com/path?q=1'),
+    ],
+)
+def test_normalize_website(raw, normalized):
+    assert validation.normalize_website(raw) == normalized
+
+
+@pytest.mark.parametrize(
+    ('website', 'expected'),
+    [
+        ('', None),
+        ('https://example.com', None),
+        ('http://sub.example.com.br/a', None),
+        ('https://' + 'a' * 190 + '.com', validation.WEBSITE_TOO_LONG),
+        ('https://localhost', validation.WEBSITE_INVALID),
+        ('https://exa mple.com', validation.WEBSITE_INVALID),
+        ('ftp://example.com', validation.WEBSITE_INVALID),
+        ('https://javascript:alert(1)', validation.WEBSITE_INVALID),
+        ('https://[::1', validation.WEBSITE_INVALID),
+    ],
+)
+def test_validate_website(website, expected):
+    assert validation.validate_website(website) == expected
+
+
+def test_validate_profile_reports_every_invalid_field():
+    errors = validation.validate_profile({
+        'display_name': '',
+        'username': 'ok_name',
+        'headline': 'x' * 121,
+        'bio': 'fine',
+        'website': 'nope',
+    })
+
+    assert errors == {
+        'display_name': validation.NAME_REQUIRED,
+        'headline': validation.HEADLINE_TOO_LONG,
+        'website': validation.WEBSITE_INVALID,
+    }
+
+
+def test_validate_profile_accepts_valid_changes():
+    assert validation.validate_profile({'headline': 'x' * 120, 'location': ''}) == {}
