@@ -47,7 +47,7 @@ The website opens in a new tab with `rel="nofollow ugc noopener noreferrer"`, so
 
 Members follow each other without approval, as on Medium or X. Any member can follow any other member, but not themselves, and a follow goes away with either account. Profiles count the followers and the members followed.
 
-The Seguir button on a profile and in the byline of an article turns into Seguindo, and clicking it again unfollows. It shows the result at once and undoes it if the server refuses. Its name stays Seguir with the member's name, and `aria-pressed` tells screen readers whether you follow them. Visitors get a link to sign in, which leads back to the page.
+The Seguir button on a profile and in the byline of an article turns into Seguindo, and clicking it again unfollows. It shows the result at once and undoes it if the server refuses. Its name is the word it shows, Seguir or Seguindo, followed by the member's name, so screen readers and voice control get the same words as the screen. Visitors get a link to sign in, which leads back to the page.
 
 ## API
 

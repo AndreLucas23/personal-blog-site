@@ -97,8 +97,9 @@ def page(client, path: str) -> str:
 def test_a_profile_offers_to_follow_its_member(reader_client, admin_id):
     shown = page(reader_client, '/@owner')
 
-    assert 'data-follow="owner"' in shown and 'aria-pressed="false"' in shown
-    assert 'aria-label="Seguir Owner"' in shown
+    assert 'data-follow="owner"' in shown and 'data-followed="false"' in shown
+    # Voice control finds the button by the words it shows.
+    assert '<span class="follow-btn__text">Seguir</span><span class="u-visually-hidden"> Owner</span>' in shown
 
 
 def test_a_followed_member_shows_seguindo(reader_client, admin_id):
@@ -106,7 +107,8 @@ def test_a_followed_member_shows_seguindo(reader_client, admin_id):
 
     shown = page(reader_client, '/@owner')
 
-    assert 'aria-pressed="true"' in shown and 'Seguindo' in shown
+    assert 'data-followed="true"' in shown
+    assert '<span class="follow-btn__text">Seguindo</span><span class="u-visually-hidden"> Owner</span>' in shown
     assert '<strong id="profile-followers">1</strong>' in shown and '>seguidor<' in shown
 
 
@@ -119,7 +121,7 @@ def test_your_own_profile_has_no_follow_button(reader_client):
 def test_visitors_follow_by_signing_in_first(client, reader_id):
     shown = page(client, '/@reader')
 
-    assert 'href="/auth/login?next=/@reader" aria-label="Seguir Reader">Seguir</a>' in shown
+    assert 'href="/auth/login?next=/@reader">Seguir<span class="u-visually-hidden"> Reader</span></a>' in shown
 
 
 def test_profiles_count_followers_and_following(client, reader_client, admin_id):
@@ -141,6 +143,6 @@ def test_articles_offer_to_follow_their_author(client, reader_client, admin_clie
     admin_client.put(FOLLOW_URL.format('reader'))
 
     assert 'data-follow="reader"' in page(admin_client, path)
-    assert 'aria-pressed="true"' in page(admin_client, path)
+    assert 'data-followed="true"' in page(admin_client, path)
     assert 'data-follow' not in page(reader_client, path)
-    assert f'href="/auth/login?next={path}/titulo" aria-label="Seguir Reader">Seguir</a>' in page(client, path)
+    assert f'href="/auth/login?next={path}/titulo">Seguir<span class="u-visually-hidden"> Reader</span></a>' in page(client, path)

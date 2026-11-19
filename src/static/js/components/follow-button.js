@@ -2,7 +2,7 @@ import { API } from '../api.js';
 import { showToast } from '../ui/toast.js';
 
 function renderFollowState(button, followed) {
-    button.setAttribute('aria-pressed', String(followed));
+    button.dataset.followed = String(followed);
     button.classList.toggle('btn--primary', !followed);
     button.classList.toggle('btn--secondary', followed);
     button.querySelector('.follow-btn__text').textContent = followed ? 'Seguindo' : 'Seguir';
@@ -16,7 +16,7 @@ export function bindFollowButton(button, { onChange } = {}) {
         // Not disabled while it waits, which would take the focus away from keyboard users.
         if (busy) return;
         busy = true;
-        const wasFollowed = button.getAttribute('aria-pressed') === 'true';
+        const wasFollowed = button.dataset.followed === 'true';
         // Show the result at once and undo it if the server refuses.
         renderFollowState(button, !wasFollowed);
 
