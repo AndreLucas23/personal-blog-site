@@ -4,6 +4,8 @@ import secrets
 
 from flask import Flask, abort, current_app, jsonify, request, session
 
+from errors import is_api_request
+
 SESSION_KEY = '_csrf_token'
 FORM_FIELD = 'csrf_token'
 HEADER = 'X-CSRF-Token'
@@ -31,10 +33,14 @@ def _protect():
     if not current_app.config['CSRF_ENABLED'] or request.method in SAFE_METHODS:
         return None
 
+    # No view runs for a request that matched no route, so its 404 or 405 comes first.
+    if request.routing_exception is not None:
+        return None
+
     if _is_valid_token():
         return None
 
-    if request.blueprint == 'api':
+    if is_api_request():
         return jsonify({'message': API_MESSAGE}), 400
     abort(400, description=PAGE_MESSAGE)
 
