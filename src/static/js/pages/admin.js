@@ -1,6 +1,7 @@
 import { API } from '../api.js';
 import { foundLabel, newestFirst } from '../articles.js';
 import { createEmptyState } from '../components/article-card.js';
+import { createLoadMore } from '../components/load-more.js';
 import { confirmDialog } from '../ui/dialog.js';
 import { el, icon } from '../ui/dom.js';
 import { formatDate } from '../ui/format.js';
@@ -15,6 +16,15 @@ const searchType = document.getElementById('admin-search-type');
 
 let articles = [];
 let searchTimer = null;
+const more = createLoadMore(document.getElementById('admin-more'), {
+    fetchPage: (cursor) => API.fetchAll(cursor),
+    add(page) {
+        articles = articles.concat(page);
+        const rows = page.map(createRow);
+        list.append(...rows);
+        return rows[0]?.querySelector('.admin-row__title') ?? null;
+    },
+});
 // Every load and search takes a number. Only the latest one may draw the list.
 let currentRun = 0;
 
@@ -72,6 +82,7 @@ function showLoadError() {
 
 function renderAll() {
     statusEl.textContent = '';
+    more.setVisible(true);
     render(articles, {
         title: 'Nenhum artigo publicado',
         text: 'Os artigos dos membros aparecem aqui.',
@@ -82,9 +93,10 @@ async function loadArticles() {
     const run = ++currentRun;
 
     try {
-        const { articles: loaded } = await API.fetchAll();
+        const { articles: loaded, next_cursor: nextCursor } = await API.fetchAll();
         if (run !== currentRun) return;
         articles = loaded;
+        more.start(nextCursor);
         // A search typed while loading stays on screen.
         if (searchInput.value.trim()) runSearch();
         else renderAll();
@@ -106,6 +118,8 @@ async function runSearch() {
         renderAll();
         return;
     }
+    // Search results are the whole answer, so they have no pages to follow.
+    more.setVisible(false);
 
     if (type === 'id' && !/^\d+$/.test(query)) {
         statusEl.textContent = 'O ID tem apenas números.';

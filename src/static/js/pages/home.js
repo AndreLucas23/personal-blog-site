@@ -1,12 +1,17 @@
 import { ApiError, API } from '../api.js';
 import { foundLabel } from '../articles.js';
-import { showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
+import { appendArticles, showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
+import { createLoadMore } from '../components/load-more.js';
 
 const SEARCH_DELAY_MS = 250;
 
 const feed = document.getElementById('feed');
 const searchInput = document.getElementById('feed-search');
 const statusEl = document.getElementById('feed-status');
+const more = createLoadMore(document.getElementById('feed-more'), {
+    fetchPage: (cursor) => API.fetchAll(cursor),
+    add: (articles) => appendArticles(feed, articles),
+});
 
 let searchTimer = null;
 // Every load and search takes a number. Only the latest one may draw the feed.
@@ -15,15 +20,17 @@ let currentRun = 0;
 async function loadArticles() {
     const run = ++currentRun;
     statusEl.textContent = '';
+    more.setVisible(false);
     showSkeletons(feed);
 
     try {
-        const { articles } = await API.fetchAll();
+        const { articles, next_cursor: nextCursor } = await API.fetchAll();
         if (run !== currentRun) return;
         showArticles(feed, articles, {
             title: 'Nenhum artigo por aqui ainda',
             text: 'Quando alguém publicar, os artigos aparecem aqui.',
-        });
+        }, { keepOrder: true });
+        more.start(nextCursor);
     } catch (error) {
         console.error(error);
         if (run === currentRun) showLoadError(feed);
@@ -38,6 +45,8 @@ async function search(query) {
     }
 
     const run = ++currentRun;
+    // The results are the whole answer, so they have no pages to follow.
+    more.setVisible(false);
     const noResults = {
         iconName: 'search',
         title: 'Nenhum artigo encontrado',

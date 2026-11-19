@@ -1,7 +1,9 @@
 import { API } from '../api.js';
-import { showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
+import { appendArticles, showArticles, showLoadError, showSkeletons } from '../components/article-feed.js';
+import { createLoadMore } from '../components/load-more.js';
 
 const feed = document.getElementById('profile-feed');
+const publishedPanel = document.getElementById('published-panel');
 const draftsFeed = document.getElementById('drafts-feed');
 const publishedTab = document.getElementById('tab-published');
 const draftsTab = document.getElementById('tab-drafts');
@@ -9,14 +11,20 @@ const { username, own } = feed.dataset;
 
 let draftsLoaded = false;
 
+const more = createLoadMore(document.getElementById('profile-more'), {
+    fetchPage: (cursor) => API.fetchArticlesBy(username, cursor),
+    add: (articles) => appendArticles(feed, articles),
+});
+
 async function loadArticles() {
     showSkeletons(feed, 2);
 
     try {
-        const { articles } = await API.fetchArticlesBy(username);
+        const { articles, next_cursor: nextCursor } = await API.fetchArticlesBy(username);
         showArticles(feed, articles, own === 'true'
             ? { title: 'Você ainda não publicou', text: 'Seus artigos aparecem aqui.' }
-            : { title: 'Nenhum artigo publicado ainda' });
+            : { title: 'Nenhum artigo publicado ainda' }, { keepOrder: true });
+        more.start(nextCursor);
     } catch (error) {
         console.error(error);
         showLoadError(feed);
@@ -48,7 +56,7 @@ function showTab(tab) {
     draftsTab.setAttribute('aria-selected', String(drafts));
     publishedTab.tabIndex = drafts ? -1 : 0;
     draftsTab.tabIndex = drafts ? 0 : -1;
-    feed.hidden = drafts;
+    publishedPanel.hidden = drafts;
     draftsFeed.hidden = !drafts;
     if (drafts && !draftsLoaded) loadDrafts();
 }
