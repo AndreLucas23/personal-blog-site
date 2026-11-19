@@ -35,11 +35,14 @@ def article(article_id, slug=None):
 
     content_html, plain = markdown_render.render_with_plain_text(found['article_content'])
     published, updated = found['publish_date'], found['updated_at']
+    updated_after = bool(published and updated and updated > published)
     return render_template(
         'article.html',
         article=found,
+        updated_after=updated_after,
         # Edits on the day of publication are part of publishing; later ones are news.
-        updated_later=bool(published and updated and updated.date() > published.date()),
+        # The day here is UTC's, and the browser decides again in the reader's zone.
+        updated_later=updated_after and updated.date() > published.date(),
         canonical_url=canonical,
         description=found['summary'] or markdown_render.excerpt(plain),
         content_html=content_html,

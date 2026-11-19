@@ -58,6 +58,14 @@ export function formatDateTime(value) {
     return isValid(date) ? dateTimeFormat.format(date) : '';
 }
 
+/** Whether a date falls on a later day than another, in the reader's time zone. */
+export function isLaterDay(value, other) {
+    const day = (date) => date.getFullYear() * 10000 + date.getMonth() * 100 + date.getDate();
+    const date = toDate(value);
+    const otherDate = toDate(other);
+    return isValid(date) && isValid(otherDate) && day(date) > day(otherDate);
+}
+
 export function formatCount(value) {
     return countFormat.format(value);
 }
