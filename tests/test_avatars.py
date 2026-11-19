@@ -100,11 +100,21 @@ def test_files_the_site_cannot_use_are_rejected(reader_client, upload_dir, data,
     assert user_repository.get_by_username('reader')['avatar_path'] is None
 
 
-def test_request_larger_than_the_limit_answers_413(reader_client):
+def test_request_larger_than_the_limit_answers_413_with_the_image_code(reader_client):
     response = upload(reader_client, b'\0' * (uploads.MAX_REQUEST_BYTES + 1))
 
     assert response.status_code == 413
-    assert response.get_json() == {'message': 'Request too large'}
+    assert response.get_json() == {
+        'message': 'Invalid image',
+        'errors': {'avatar': uploads.IMAGE_TOO_LARGE},
+    }
+
+
+def test_oversized_page_form_shows_the_page_in_portuguese(client):
+    response = client.post('/auth/login', data={'login': 'x' * (uploads.MAX_REQUEST_BYTES + 1)})
+
+    assert response.status_code == 413
+    assert 'Envio grande demais' in response.get_data(as_text=True)
 
 
 def test_missing_file_is_reported(reader_client):

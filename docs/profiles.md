@@ -66,6 +66,6 @@ A profile looks like this:
 
 The codes are `name_required`, `name_too_long`, `username_required`, `username_too_short`, `username_too_long`, `username_invalid`, `username_reserved`, `username_taken`, `headline_too_long`, `bio_too_long`, `location_too_long`, `website_too_long`, `website_invalid` and `invalid` for a value that is not text. Fields other than the ones above are ignored.
 
-The avatar upload answers `200` with `{"avatar_url": "/media/<name>.webp"}`, `400` with the code `image_missing`, `image_invalid`, `image_format` or `image_too_large` in `errors.avatar`, and `413` when the request is larger than 6 MB.
+The avatar upload answers `200` with `{"avatar_url": "/media/<name>.webp"}`, `400` with the code `image_missing`, `image_invalid`, `image_format` or `image_too_large` in `errors.avatar`, and `413` with `image_too_large` when the whole request is larger than 6 MB.
 
 Profiles of unknown usernames answer `404` with `{"message": "User not found"}`. Like every request that changes something, `PATCH`, `PUT` and `DELETE` need the [CSRF token](authentication.md#csrf-protection).

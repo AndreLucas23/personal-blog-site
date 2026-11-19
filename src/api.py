@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
+from werkzeug.exceptions import RequestEntityTooLarge
 
 import uploads
 import user_validation as validation
@@ -204,7 +205,14 @@ def update_own_profile():
 @api_bp.route('/users/me/avatar', methods=['PUT'])
 @login_required
 def upload_avatar():
-    image = request.files.get('avatar')
+    try:
+        image = request.files.get('avatar')
+    except RequestEntityTooLarge:
+        # Same code as a file over the image limit, so clients handle one case.
+        return jsonify({
+            'message': 'Invalid image',
+            'errors': {'avatar': uploads.IMAGE_TOO_LARGE},
+        }), 413
     if image is None:
         return jsonify({'message': 'Invalid image', 'errors': {'avatar': uploads.IMAGE_MISSING}}), 400
 
